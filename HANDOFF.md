@@ -300,3 +300,10 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 - 스몽이 카피 수정·회귀 1건; 실제 Node 22.23.4 전체 34/34 PASS, qa:release exit 0. HTML 73,352 bytes, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`.
 - Chromium ARM64는 libglib2 등 19개 라이브러리 누락으로 실행 전 차단. **Windows Edge/Chrome 실기기 검증 미완**, 디자인 승인도 보류.
 - 상세 정본 `docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md`. 다음 우선 Windows 브라우저 E2E → 상품 사용권/지원/가격 → 승인 후 출시. PUBLIC·크몽 배포 없음.
+
+## 2026-10-25 KST — 최신 인계: 실제 Chromium SELF E2E PASS
+- 최신 SELL 아님: **SELF 후보 HTML** 73,352 bytes / SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`; 실제 Node 22 전체 34/34 PASS(선행).
+- **Linux ARM64 Chromium 156 실제 `file://` offline E2E PASS**: CSV 합성 4행 업로드·3열 매핑·검토2행·실제 CSV 다운로드 UTF-8 BOM·재매핑 결과 무효화·모바일 입력·외부 요청 0·브라우저 오류 0.
+- 10종 템플릿 JSON/MD **20건 실제 다운로드**, 파일명/템플릿 ID/검토 상태/개인정보 경고/체크리스트 검증 성공. CLI `scripts/qa_browser.mjs` 원격 소스 그대로 Node 실행해 **exit 0 / 7개 확인 항목 PASS**. npm `qa:browser:node` 추가, 기존 Python 자동화 유지.
+- 과거 Chromium OS 라이브러리 누락은 임시 isolated `/tmp` 환경에서 해결, 기존 서비스/다른 프로젝트 소스 미변경. **Windows Edge/Chrome 실 PC 검사만 미완**이며 Linux Chromium PASS를 Windows PASS로 표현하지 않음.
+- 증거 문서 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`. 다음 우선순위 Windows Edge 실제 파일 열기/다운로드, UI/브랜드 최종 승인, 크몽 상품 조건 및 명시적 판매 승인. 공개 배포·외부 쓰기·실결제 금지. 11/7 마감 상한 유지.
