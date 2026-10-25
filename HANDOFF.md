@@ -549,3 +549,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **남은 게이트:** 최신 `frontend` 모든 Native Node `npm run qa:release` 성공·실 디스크 HTML hash/CSP, 실제 Chromium `file://`, Windows Edge/Chrome 실PC, 브랜치 `main` 결정 보존 통합. 컨테이너 Private git clone DNS 제한.
 9. **권한:** `main`·`backend` 미변경, 병합·상품 게시·클라우드 배포·고객 데이터 전송·비용 발생 행위 없음.
 10. **기한:** 2026-11-07 개발 상한; 안전한 SELF 완제품 QA가 남았으므로 최종 출시 승인 전.
+
+## 2026-10-26 KST — 스총 최신 인수: 8종 맞춤 설계 가이드 필드 입력
+1. **직접 구현:** `site/app.mjs` 가이드 전용 8종에 한하여 `guide-field` 입력 UI 및 change 이벤트. 사용자 입력 120자·줄바꿈/제어문자 제거, 화면 HTML escape, Blueprint JSON 및 AI Build Markdown 수동 필드명 반영. 기존 가이드의 JSON/Markdown 다운로드 기능 및 실행형 2종 CSV 기능 그대로 보존. commit `9b4c59ea45516690949e7560211ace6c41252084`.
+2. **UX 개선:** 완료 안내도 실행형은 CSV 선택/수동 매핑, 가이드형은 직접 항목명 기입 후 설계서 작성으로 분리. 가이드 8종은 **실행형으로 전환된 것이 아님**: 단지 설계 내용을 구체화할 수 있음.
+3. **데이터 경계:** 가이드 필드명은 실제 CSV 업로드나 실계정의 권한/매핑 검증을 거치지 않음. 개인/고객 원문·토큰 입력 금지, 값은 브라우저 메모리에서만 사용, 선택한 다른 템플릿으로 이동 시 삭제.
+4. **실제 집중 검증:** GitHub 최신 5개 생산 소스 기반 V8 DOM 실행, 8개 가이드 UI/JSON/MD 및 공격성 문구 표시·템플릿 간 격리·실행형 가짜 이벤트 무시 **28/28 PASS**.
+5. **미실행:** `tests/offline-ui-smoke.test.mjs` 신규 Native 테스트 케이스 작성 `7688773c...`; `scripts/qa_browser.mjs` Playwright 8개 가이드 E2E assertion `4fc06d91...`. 최신 전체 Node/실 Chromium·Windows/실 디스크 HTML SHA 검사는 아직 NOT_RUN. 테스트 추가를 검증 완료라 기록하지 말 것.
+6. **문서:** `README_LOCAL.md` `8bdf3ad6...`, `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` `b0f8bb07...`에서 가이드 필드 편집·개인정보 입력 금지·실행 불가를 설명.
+7. **브랜치:** `frontend`에만 커밋. `main` `952bc586c132066d84e5a29e5b10254120b35f14`, `backend` `f0f309241f8ebd776b9ce6bfd1d872d406f5b444` 변경/병합 없음.
+8. **릴리스 다음 순서:** 승인된 최신 Native Node≥20 풀 체크아웃에서 `npm run qa:release` 실행→생성 디스크 HTML SHA/CSP/CSV/매출 검증→Chromium `file://` E2E→Windows Edge/Chrome 실기기. 네트워크·private Git clone 제한 시 V8만으로 출고 성공 주장 금지.
+9. **출시/사업:** 크몽 상품 등록·Cloudflare 공개·결제/유료 API·고객 데이터 처리 미실행. 실제 유료 판매는 사용자 별도 승인 필요.
+10. **기한:** 2026-11-07 목표, 사용자는 `ㄱ` 입력만으로 GitHub 최신 `frontend`·`STATUS.md`·`HANDOFF.md` 참조해 다음 작업 진행. 완료 후 HEAD 재조회.
