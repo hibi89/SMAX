@@ -10,7 +10,45 @@ export function searchTemplates(query,items,limit=4){const input=normalize(query
 
 export function suggestFieldMap(headers,template){const result={};for(const field of template.fields){const accepted=[field.label,...field.aliases,field.key].map(normalize).filter(Boolean);const candidates=headers.filter(h=>accepted.some(v=>normalize(h)===v));result[field.key]={label:field.label,selected:candidates.length===1?candidates[0]:null,candidates,status:candidates.length===1?"SUGGESTED":"NEEDS_REVIEW"}}return result}
 
-export function parseCsv(source){const text=String(source??"").replace(/^\uFEFF/,"");let rows=[],row=[],cell="",quoted=false;for(let i=0;i<text.length;i++){const ch=text[i];if(ch==='"'){if(quoted&&text[i+1]==='"'){cell+='"';i++}else if(!quoted&&!cell)quoted=true;else if(quoted)quoted=false;else cell+=ch}else if(ch===","&&!quoted){row.push(cell);cell=""}else if((ch==="\n"||ch==="\r")&&!quoted){if(ch==="\r"&&text[i+1]==="\n")i++;row.push(cell);if(row.some(x=>String(x).length))rows.push(row);row=[];cell=""}else cell+=ch}if(quoted)throw new Error("따옴표가 닫히지 않은 CSV입니다.");row.push(cell);if(row.some(x=>String(x).length))rows.push(row);if(!rows.length)return{headers:[],rows:[]};const headers=rows.shift().map(x=>x.trim());if(!headers.every(Boolean))throw new Error("빈 열 이름이 있습니다.");return{headers,rows}}
+export function parseCsv(source) {
+  // Match the executable CSV transform's structural rules before offering mappings.
+  const text = String(source ?? "").replace(/^\uFEFF/, "");
+  if (!text.length) return {headers:[], rows:[]};
+  const records = [];
+  let row = [], cell = "", quoted = false, afterQuote = false;
+  const pushCell = () => {row.push(cell); cell = ""; afterQuote = false;};
+  const pushRow = () => {pushCell(); records.push(row); row = [];};
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"' && text[i + 1] === '"') {cell += '"'; i++;}
+      else if (ch === '"') {quoted = false; afterQuote = true;}
+      else cell += ch;
+    } else if (ch === ',') {
+      pushCell();
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      pushRow();
+    } else if (ch === '"') {
+      if (afterQuote || cell.length) throw new Error("잘못된 CSV 따옴표 형식입니다.");
+      quoted = true;
+    } else {
+      if (afterQuote) throw new Error("닫힌 따옴표 뒤에 허용되지 않은 문자가 있습니다.");
+      cell += ch;
+    }
+  }
+  if (quoted) throw new Error("따옴표가 닫히지 않은 CSV입니다.");
+  if (!/[\r\n]$/.test(text) || row.length || cell.length || afterQuote) pushRow();
+  const headers = (records.shift() ?? []).map(x => x.trim());
+  if (!headers.length || headers.some(x => !x)) throw new Error("빈 열 이름이 있습니다.");
+  if (new Set(headers.map(x => x.toLocaleLowerCase("ko-KR"))).size !== headers.length) {
+    throw new Error("중복된 CSV 열 이름이 있습니다.");
+  }
+  for (let i = 0; i < records.length; i++) {
+    if (records[i].length !== headers.length) throw new Error(`${i + 2}번째 CSV 레코드의 열 개수가 헤더와 다릅니다.`);
+  }
+  return {headers, rows:records};
+}
 
 export function buildBlueprint(template,answers={},mapping={}){const missing=template.questions.filter(q=>!String(answers[q.key]??"").trim()).map(q=>q.prompt);const fields=template.fields.map(f=>({standardField:f.key,label:f.label,sourceColumn:mapping[f.key]||null,needsReview:!mapping[f.key]}));const state=missing.length||fields.some(f=>f.needsReview)?"NEEDS_REVIEW":"READY_FOR_HUMAN_REVIEW";return{format:"SMAX_AX_BLUEPRINT_V0_1",templateId:template.id,templateVersion:template.templateVersion,title:template.title,state,source:"SMAX local deterministic guidance, not a deployed automation",questions:template.questions.map(q=>({key:q.key,prompt:q.prompt,answer:String(answers[q.key]??"")})),fields,missing,workflow:template.steps,tools:template.tools,cautions:template.cautions,implementationBy:"customer using external AI and tools; no automatic external integrations"}}
 
