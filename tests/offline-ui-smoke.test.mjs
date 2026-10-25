@@ -681,3 +681,30 @@ test('duplicate warnings follow real exclusions and never label distinct order I
   assert.match(env.rootNode.innerHTML,/중복 0행/);
   assert.doesNotMatch(env.rootNode.innerHTML,/중복 의심은 확정 중복이 아닙니다/);
 });
+
+test('offline sales review does not count alternate money formats for one order twice',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  const source='판매일,판매처,판매액,주문번호\n'
+    +'2026-10-01,온라인,100,ORDER-A\n'
+    +'2026-10-01,온라인,100.00,ORDER-A\n'
+    +'2026-10-01,온라인,0100,ORDER-B\n'
+    +'2026-10-01,온라인,100.01,ORDER-C';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'amount-format.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/원본 4행/);
+  assert.match(env.rootNode.innerHTML,/잠정 반영 3행/);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 1행/);
+  assert.match(env.rootNode.innerHTML,/300\.01원/);
+  assert.match(env.rootNode.innerHTML,/중복 의심 거래가 잠정 합계에서 제외되었습니다/);
+  env.click('download-sales-review');
+  assert.match(env.blobs.at(-1).parts[0],/3,2026-10-01,온라인,100.00,DUPLICATE/);
+  env.click('download-sales-report');
+  assert.match(env.blobs.at(-1).parts[0],/2026-10-01,온라인,3,300.01,0.00,300.01/);
+});
