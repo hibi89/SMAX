@@ -6,7 +6,7 @@ import {resolve, join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const paths = ['templates.mjs','core.mjs','csv-transform.mjs','app.mjs'];
+const paths = ['templates.mjs','core.mjs','csv-transform.mjs','sales-report.mjs','app.mjs'];
 const scriptTag = '<script type="module" src="./app.mjs"></script>';
 const stylesheetTag = '<link rel="stylesheet" href="./styles.css">';
 
@@ -24,20 +24,22 @@ function hash(text) {
  * No inline template payload is accepted from customer CSV data.
  */
 export function bundleOfflineSelf({html, css, modules}) {
-  if (typeof html !== 'string' || typeof css !== 'string' || !Array.isArray(modules) || modules.length !== 4) {
+  if (typeof html !== 'string' || typeof css !== 'string' || !Array.isArray(modules) || modules.length !== 5) {
     throw Error('Invalid SELF source contract');
   }
   const expectedImports = new Set([
     'import {templates} from "./templates.mjs";',
     'import {searchTemplates,parseCsv,suggestFieldMap,buildBlueprint,buildHandoff} from "./core.mjs";',
-    'import {normalizeSpreadsheetCsv} from "./csv-transform.mjs";'
+    'import {normalizeSpreadsheetCsv} from "./csv-transform.mjs";',
+    'import {buildSalesReport} from "./sales-report.mjs";'
   ]);
   const scripts = modules.map((code,index) => {
     if (typeof code !== 'string') throw Error('Missing module source: '+index);
     const lines = code.split(/\r?\n/), output=[];
     for (const line of lines) {
       if (/^\s*import\s/.test(line)) {
-        if(index!==3 || !expectedImports.delete(line.trim())) throw Error('Unexpected import: '+line);
+        if(index===3 && line.trim()==="import { normalizeSpreadsheetCsv, CsvTransformError } from './csv-transform.mjs';") continue;
+        if(index!==4 || !expectedImports.delete(line.trim())) throw Error('Unexpected import: '+line);
         continue;
       }
       if (/^\s*export\s/.test(line)) {
