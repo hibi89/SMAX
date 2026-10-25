@@ -369,3 +369,59 @@ test('packaged app rejects invalid CP949 bytes and accepts UTF-8 across both loc
     assert.doesNotMatch(env.rootNode.innerHTML,/문자 인코딩 오류/);
   }
 });
+
+test('one-click synthetic examples execute both local tools and never mix with owner files',async()=>{
+  const env=offlineFixture();
+  for(const id of ['spreadsheet','sales']){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    assert.match(env.rootNode.innerHTML,/data-action="try-sample"/);
+    env.click('try-sample');
+    assert.match(env.rootNode.innerHTML,/합성 예제 체험 중/);
+    assert.match(env.rootNode.innerHTML,/실제 거래·매출 자료가 아닙니다/);
+    if(id==='spreadsheet'){
+      assert.match(env.rootNode.innerHTML,/원본 4행/);
+      assert.match(env.rootNode.innerHTML,/검토 필요 2행/);
+      assert.match(env.rootNode.innerHTML,/data-action="download-csv"/);
+    }else{
+      assert.match(env.rootNode.innerHTML,/원본 5행/);
+      assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
+      assert.match(env.rootNode.innerHTML,/제외\/검토 3행/);
+      assert.match(env.rootNode.innerHTML,/79\.90원/);
+      assert.match(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+      assert.match(env.rootNode.innerHTML,/data-action="download-sales-review"/);
+    }
+    const ownerCsv=id==='spreadsheet'
+      ? '거래날짜,품목,결제금액\n2026-10-25,실제입력,200'
+      : '판매일,판매처,판매액\n2026-10-25,실제매장,200';
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'owner.csv',size:Buffer.byteLength(ownerCsv,'utf8'),
+      text:async()=>ownerCsv
+    }]});
+    assert.match(env.rootNode.innerHTML,/owner\.csv/);
+    assert.doesNotMatch(env.rootNode.innerHTML,/합성 예제 체험 중/);
+    assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-(?:csv|sales-report|sales-review)"/);
+  }
+  env.click('select',{id:'faq'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="try-sample"/);
+});
+
+test('synthetic demo cancels an earlier pending real-file byte read',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  let release;
+  const pending=env.change({id:'csv-upload',dataset:{},files:[{
+    name:'slow-customer.csv',size:16,
+    arrayBuffer:()=>new Promise(resolve=>{release=resolve})
+  }]});
+  assert.equal(typeof release,'function');
+  env.click('try-sample');
+  assert.match(env.rootNode.innerHTML,/합성 예제 체험 중/);
+  release(Buffer.from('판매일,판매처,판매액\n2026-10-25,매장,999','utf8').buffer);
+  await pending;
+  assert.match(env.rootNode.innerHTML,/합성 예제 체험 중/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/slow-customer\.csv/);
+  assert.match(env.rootNode.innerHTML,/79\.90원/);
+});
