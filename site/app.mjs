@@ -24,7 +24,7 @@ function renderTemplates(){const results=state.query.trim()?searchTemplates(stat
 function detailPanel(t){if(!t)return '<aside class="side-panel"><div class="side-label">HOW TO BEGIN</div><h3>직접 만들고, 배우는 AX</h3><p>왼쪽에서 템플릿을 선택하면 필요한 데이터와 자동화 과정이 표시됩니다.</p><div class="mini-step"><b>01</b> 업무 선택</div><div class="mini-step"><b>02</b> 질문에 답변</div><div class="mini-step"><b>03</b> 설계서와 AI 구축 가이드</div><p class="tiny">현재 모든 유형은 개발 중인 설계 초안입니다.</p></aside>';return '<aside class="side-panel"><div class="side-label">TEMPLATE PREVIEW</div><h3>'+h(t.title)+'</h3><p>'+h(t.summary)+'</p><div class="side-label">필요 데이터</div><ul>'+t.fields.map(f=>'<li>'+h(f.label)+'</li>').join("")+'</ul><div class="side-label">실행 안내 단계</div>'+t.steps.map((s,i)=>'<div class="mini-step"><b>'+String(i+1).padStart(2,"0")+'</b> '+h(s)+'</div>').join("")+'<div class="side-actions"><button type="button" class="button-sm" data-action="tab" data-tab="chat">챗봇 패널에서 시작 →</button><button type="button" class="button-outline" data-action="clear">선택 해제</button></div><p class="tiny">이 가이드는 계획 초안이며 외부 도구가 자동 실행되지는 않습니다.</p></aside>'}
 function renderChat(){const t=getTemplate();const intro='<div class="bubble assistant">안녕하세요. 어떤 업무를 자동화하고 싶으세요? 편하게 적어주시면 관련 템플릿을 찾아드릴게요. (범용 AI 챗봇이 아닌 규칙형 안내입니다.)</div>';let lines=intro;let choices="";
 if(!t){if(state.searchTerm){lines+='<div class="bubble user">'+h(state.searchTerm)+'</div>';const ranked=searchTemplates(state.searchTerm,templates,3);if(ranked.length){lines+='<div class="bubble assistant">이 업무와 관련 있을 만한 템플릿을 찾았어요. 하나를 선택하면 필요한 항목을 확인하겠습니다.</div>';choices=ranked.map(r=>'<button class="choice" type="button" data-action="select" data-id="'+h(r.template.id)+'">'+h(r.template.title)+'</button>').join("")}else{lines+='<div class="bubble assistant">일치하는 템플릿이 아직 없습니다. 더 구체적으로 입력하거나 템플릿 패널에서 직접 찾아보세요. 신규 템플릿 제안 기능은 준비 중입니다.</div>'}}else{lines+='<div class="bubble assistant">먼저 어떤 작업인지 알려주세요. 예: 손님들이 같은 질문을 반복해요.</div>'}}
-else{lines+='<div class="bubble user">'+h(t.title)+' 템플릿으로 시작할게요.</div><div class="bubble assistant">'+h(t.summary)+'<br>필요한 조건을 하나씩 확인하겠습니다.</div>';for(const q of t.questions){if(state.answers[q.key]){lines+='<div class="bubble assistant">'+h(q.prompt)+'</div><div class="bubble user">'+h(state.answers[q.key])+'</div>'}}const next=t.questions.find(q=>!state.answers[q.key]);if(next){lines+='<div class="bubble assistant">'+h(next.prompt)+'</div>';choices=next.options.map(o=>'<button type="button" class="choice" data-action="answer" data-question="'+h(next.key)+'" data-answer="'+h(o)+'">'+h(o)+'</button>').join("")}else{lines+='<div class="bubble assistant">기본 질문에 답하셨습니다. 오른쪽에서 파일을 선택하고 열 매핑을 확인하세요. CSV 정리·매출 집계는 로컬에서 실행되며, 다른 템플릿의 실제 구축은 외부 AI·도구에서 직접 수행합니다.</div>'}}
+else{lines+='<div class="bubble user">'+h(t.title)+' 템플릿으로 시작할게요.</div><div class="bubble assistant">'+h(t.summary)+'<br>필요한 조건을 하나씩 확인하겠습니다.</div>';for(const q of t.questions){if(state.answers[q.key]){lines+='<div class="bubble assistant">'+h(q.prompt)+'</div><div class="bubble user">'+h(state.answers[q.key])+'</div>'}}const next=t.questions.find(q=>!state.answers[q.key]);if(next){lines+='<div class="bubble assistant">'+h(next.prompt)+'</div>';choices=next.options.map(o=>'<button type="button" class="choice" data-action="answer" data-question="'+h(next.key)+'" data-answer="'+h(o)+'">'+h(o)+'</button>').join("")}else{lines+='<div class="bubble assistant">기본 질문에 답하셨습니다. '+(Object.hasOwn(sampleCsvByTemplate,t.id)?'오른쪽에서 CSV를 선택하고 열 매핑을 확인한 뒤 로컬 기능을 실행하세요.':'오른쪽에서 필요한 항목명만 입력해 설계서를 구체화하세요. 이 템플릿은 자동 실행되지 않습니다.')+'</div>'}}
 return '<div class="chat-wrap"><div><div class="chat-panel"><div class="chat-header"><div><strong>SMAX 가이드</strong><small>'+(t?h(t.title):"자동화 아이디어 찾기")+'</small></div><button type="button" class="button-outline" data-action="reset-chat">다른 작업</button></div><div class="chat-messages">'+lines+(choices?'<div class="choice-list">'+choices+'</div>':"")+'</div><div class="chat-compose"><input id="chat-input" class="input" type="text" maxlength="280" autocomplete="off" placeholder="'+(t?"간단한 답변이나 추가 조건 입력":"어떤 업무를 바꾸고 싶나요?")+'" aria-label="SMAX 가이드 메시지"><button class="button-sm" data-action="chat-send" type="button">입력</button></div></div><p class="chat-caption">규칙에 없는 요청은 정확히 이해하지 못할 수 있습니다. 추천 결과를 직접 확인하세요.</p></div>'+editorPanel(t)+'</div>'}
 function salesResultPanel(){
   const keys=["date","channel","amount"],picked=keys.map(k=>state.mappings[k]);
@@ -76,7 +76,11 @@ function editorPanel(t){
       '<button type="button" class="button-outline" data-action="download-sample-input">연습용 원본 CSV 다운로드 ↓</button>'+
       '<p class="tiny">예제에만 자동 매핑을 적용합니다. 실제 거래·매출 데이터가 아니며 내 파일은 직접 열을 확인해야 합니다.</p>'+
       '<p class="tiny">'+h(state.fileMessage||"CSV만 지원하는 초기 버전 · XLSX 파일은 아직 지원하지 않음")+'</p>'+maps
-    : '<p class="tiny" role="status">이 템플릿은 설계 가이드 전용입니다. 실제 CSV 변환·업로드 기능은 제공하지 않습니다. 실행하려면 엑셀·CSV 통합 또는 매출 집계·보고서를 선택하세요.</p>';
+    : '<p class="tiny" role="status">이 템플릿은 설계 가이드 전용입니다. 실제 CSV 변환·업로드 기능은 제공하지 않습니다. 입력하는 항목명은 검증된 데이터 매핑이 아닌 설계 초안입니다.</p>'+
+      '<div class="guide-field-editor"><label>설계에 사용할 항목명 (직접 입력)</label>'+
+      t.fields.map(f=>'<div class="mapped-row"><label for="guide-field-'+h(f.key)+'">'+h(f.label)+'</label>'+
+        '<input type="text" class="input" id="guide-field-'+h(f.key)+'" data-action="guide-field" data-field="'+h(f.key)+'" maxlength="120" autocomplete="off" placeholder="'+h(f.label)+'에 대응하는 항목명" value="'+h(state.mappings[f.key]||'')+'"></div>').join('')+
+      '<p class="tiny">실제 개인정보·API 키·고객내용을 입력하지 마세요. 항목명만 기재하면 설계서와 AI 구축 가이드에 반영됩니다. 자동화 실행은 하지 않습니다.</p></div>';
   return '<aside class="editor-panel"><div class="side-label">MY AX BLUEPRINT</div><h3>'+h(t.title)+'</h3><p>답변 완료 '+Object.keys(state.answers).filter(k=>state.answers[k]).length+'/'+t.questions.length+' · 설계 상태: <span class="status-warning">'+(b.state==="NEEDS_REVIEW"?"검토 필요":"사람의 최종 검토 필요")+'</span></p>'+
     inputPanel+
     '<div class="review-notice">자동 매핑을 확정하거나 외부 데이터를 전송하지 않습니다. 생성되는 파일은 구축을 위한 초안입니다.</div><button type="button" class="button-sm" data-action="download-json">AX 설계서 JSON 내려받기 ↓</button><button type="button" class="button-outline" data-action="download-guide">AI 구축 가이드 내려받기 ↓</button><p class="tiny">다운로드는 브라우저 안에서 수행됩니다. 인증키·개인정보는 외부 AI에 무심코 전달하지 마세요.</p>'+csvResultPanel(t)+'</aside>';
@@ -157,6 +161,16 @@ function sendChat(){const input=$("#chat-input");const msg=input&&input.value.tr
 document.addEventListener("input",event=>{if(event.target.id==="template-search"){const pos=event.target.selectionStart;state.query=event.target.value.slice(0,120);render();const box=$("#template-search");if(box){box.focus();box.setSelectionRange(pos,pos)}}});
 document.addEventListener("keydown",event=>{if(event.target.id==="chat-input"&&event.key==="Enter"){event.preventDefault();sendChat()}});
 document.addEventListener("change",async event=>{
+  if(event.target.dataset.action==="guide-field"){
+    const t=getTemplate();
+    if(!t || Object.hasOwn(sampleCsvByTemplate,t.id))return;
+    const field=t.fields.find(f=>f.key===event.target.dataset.field);
+    if(!field)return;
+    const input=String(event.target.value??"").replace(/[\r\n\u0000-\u001f\u007f]/g," ").trim().slice(0,120);
+    state.mappings[field.key]=input;
+    render();
+    return;
+  }
   if(event.target.dataset.action==="map"){
     if(!sampleCsvByTemplate[getTemplate()?.id])return;
     state.mappings[event.target.dataset.field]=event.target.value;
