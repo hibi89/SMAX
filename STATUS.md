@@ -209,3 +209,11 @@
 - **검증 범위:** 변경 뒤 GitHub에서 다시 읽은 **실제 2개 코어 소스**로 V8 함수 평가하여 backend **5/5 PASS**, frontend **7/7 PASS**. 주문번호 A/B/B → 정리행 3 유지/중복 1, 매출 반영 2·제외 1·합계 200.00, 구형 3열 정규화 중복 유지, frontend 기존 4행/검토2 + 매출 5행/제외3/79.90 샘플 유지. 새 Node 테스트 코드를 커밋했지만 `node --test`나 최신 `npm run qa:release` 전체 실행 **NOT_RUN**. V8 검사용 TextEncoder 바이트 길이 폴리필 사용(2MiB 경계 시험 아님).
 - **잔여 위험:** 주문 ID 등 고유 식별 열이 **없는** 동일 3열 거래는 여전히 중복 의심으로 분류/매출 잠정 집계 제외될 수 있음. 실제 중복 판정은 자동 회계 확정이 아니므로 review CSV로 고객 재검토 필수. 브라우저/Windows 최신 QA, 디스크 빌드 SHA/CSP, 배포·판매 전부 **미검증/미실행**.
 - **보존·다음:** `main` 무수정. `backend`·`frontend` 기존 Git 이력 보존, 강제 병합/리셋·외부 API/고객자료·지출 없음. 다음 P0는 승인된 최신 소스 전체 checkout에서 `npm run qa:release` 실제 PASS 및 HTML SHA/CSP → Chromium `file://` → Windows Edge QA. 개발 마감 **2026-11-07** 변동 없음.
+
+## 2026-10-26 KST — 스총: 금액 문자열 변형에 의한 중복 판정 누락 수정
+- **재현/원인:** 동일 날짜·품목·금액 `100`/`100.00`/`0100`이 기존 원시 금액 문자열 기반 키에서 **서로 다른 거래로 판정**돼 잠정 매출 중복 반영 가능. 실제 원격 기존 `frontend` 변환기에서 중복 0건 재현.
+- **수정:** 금액 표기만 중복 식별용으로 소수점 두 자리 문자열 정규화(`100`=`0100`=`100.00`=`₩100원`; `0`=`-0.00`). 부동소수점/BigInt 변환 사용 안 함. 출력 금액 원문 포맷과 모든 원본 레코드 보존. 기존 추가 원본열/주문번호 구분 로직 유지. `backend` 코드 `c93e71eac0ca70fe860fb5803d4d613847a83cf9`, `frontend` 코드 `73eb691e70f52a7575b3b28389ecec282c600d25`.
+- **회귀 작성:** CSV: backend `2058b03`, frontend `50e23b8`; 매출: backend `cddef25`, frontend `a27aa4d`; frontend 오프라인 UI `63d24b3`. 테스트 도중 backend에 없는 `reviewCsv` 반환을 잘못 가정한 **테스트 자체 결함** 수정 `6e6d4d6`; backend 제품 API에 reviewCsv를 무리하게 추가하지 않음.
+- **실행 검증:** GitHub 최신 실제 2개 코어를 독립 V8 실행: backend 신규 테스트 함수+256개 결정적 속성 케이스 **4/4 PASS**, frontend 동일 테스트+기존 2개 합성 예제 **6/6 PASS**. 최신 실제 5개 웹앱 모듈/모의 DOM·Blob로 신규 오프라인 매출 UI 테스트 본문 **1/1 PASS**: 4원본, 유효3, 제외1, 순합계300.01, 검토 원본행3, 다운로드 CSV 일치. 이는 **전체 Node 테스트/빌드 SHA/CSP/실제 Chromium 또는 Windows 출고 QA가 아니다**. GitHub Actions 성공 증거 없음.
+- **문서:** backend `docs/CSV_TRANSFORM_CONTRACT_20261025.md` `54ceddda`; frontend `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` `9f40357`. `main` 코드 변경/병합, 고객 원본/개인정보·외부 API·배포·판매·금전 지출 없음.
+- **다음 P0:** 승인된 최신 전체 `frontend` checkout이 가능한 로컬 환경에서 `npm run qa:release` 실제 Node PASS → 생성 HTML hash/CSP → `npm run qa:browser:node` Chromium `file://` → `QA_SELF_WINDOWS.cmd /edge`. 컨테이너 GitHub Private DNS 차단으로 해당 출고 QA NOT_RUN. 마감 **2026-11-07** 유지.
