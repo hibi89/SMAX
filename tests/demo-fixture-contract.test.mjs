@@ -13,7 +13,10 @@ test('embedded offline demo inputs exactly match checked-in synthetic CSV fixtur
   for(const [id,fixture] of [['spreadsheet','SMAX_SELF_SAMPLE.csv'],['sales','SMAX_SALES_SAMPLE.csv']]){
     const entry=data[id];
     assert.match(entry.name,/^SMAX_DEMO_.*\.csv$/);
-    assert.equal(entry.source,readFileSync(new URL('../examples/'+fixture,import.meta.url),'utf8'),id+' drifted from the QA fixture');
+    // Git on Windows may check out an LF CSV fixture with CRLF (core.autocrlf).
+    // Ignore only the CSV line-ending convention; all field values and record order must match.
+    const normalizeEol=text=>text.replace(/\r\n/g,'\n');
+    assert.equal(normalizeEol(entry.source),normalizeEol(readFileSync(new URL('../examples/'+fixture,import.meta.url),'utf8')),id+' drifted from the QA fixture');
     assert.deepEqual(Object.keys(entry.mapping).sort(),id==='sales'?['amount','channel','date']:['amount','date','item']);
   }
   const csv=normalizeSpreadsheetCsv(data.spreadsheet.source,data.spreadsheet.mapping);
