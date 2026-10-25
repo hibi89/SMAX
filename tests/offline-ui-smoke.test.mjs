@@ -153,3 +153,30 @@ test('spreadsheet-like formula content is escaped in bundled preview and output'
   env.click('download-csv');
   assert.ok(env.blobs.at(-1).parts[0].includes("'\u200B=1+1"));
 });
+
+
+test('all ten guidance templates export a review-only blueprint and safe AI handoff',()=>{
+  const env=offlineFixture();
+  const ids=['spreadsheet','inventory','faq','sales','email','rag','quote','booking','web','reviews'];
+  for(const id of ids){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    env.click('download-json');
+    const json=env.blobs.at(-1).parts[0];
+    const output=JSON.parse(json);
+    assert.equal(output.format,'SMAX_AX_BLUEPRINT_V0_1');
+    assert.equal(output.templateId,id);
+    assert.equal(output.state,'NEEDS_REVIEW');
+    assert.match(output.source,/not a deployed automation/);
+    assert.equal(env.links.at(-1).download,'AX_BLUEPRINT_'+id+'.json');
+
+    env.click('download-guide');
+    const markdown=env.blobs.at(-1).parts[0];
+    assert.equal(env.links.at(-1).download,'AI_BUILD_PROMPT_'+id+'.md');
+    assert.match(markdown,/실제 자료는 사용자 승인 전/);
+    assert.match(markdown,/개인정보/);
+    assert.match(markdown,/외부/);
+    assert.match(markdown,/검증 체크리스트/);
+  }
+  assert.equal(env.links.filter(link=>link.clicked).length,20);
+});
