@@ -108,6 +108,22 @@ async function main() {
       assert(text.split(/\r?\n/).filter(Boolean).length === 5, 'Four input rows were not retained');
       assert((text.match(/NEEDS_REVIEW/g) ?? []).length === 2, 'Review count mismatch');
       checks.push('Real browser CSV download, UTF-8 BOM, 4 output rows');
+      const [reviewOnlyDownload] = await Promise.all([
+        page.waitForEvent('download',{timeout:10000}),
+        page.locator('[data-action="download-csv-review"]').click()
+      ]);
+      assert(reviewOnlyDownload.suggestedFilename()==='SMAX_STANDARDIZED_REVIEW.csv',
+        'Review-only CSV export filename was incorrect');
+      const reviewBytes=readFileSync(await reviewOnlyDownload.path());
+      assert(reviewBytes.subarray(0,3).equals(Buffer.from([239,187,191])),
+        'Review-only CSV UTF-8 BOM missing');
+      const reviewText=reviewBytes.toString('utf8');
+      assert(reviewText.split(/\r?\n/).filter(Boolean).length===3,
+        'Review-only CSV must contain two flagged records plus header');
+      assert(reviewText.includes('DUPLICATE')&&reviewText.includes('INVALID_DATE'),
+        'Review-only export did not retain the flagged reasons');
+      checks.push('Review-only CSV 2 records, UTF-8 BOM, original indices and reasons');
+
       await page.locator('#map-amount').selectOption({label:'품목'});
       assert(await page.locator('[data-action="download-csv"]').count() === 0, 'Stale download remains');
       assert(await page.locator('[data-action="run-csv"]').isDisabled(), 'Duplicate mapping allowed');
