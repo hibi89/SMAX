@@ -54,7 +54,7 @@ test('SELF CSV upload / manual map / preview / download and stale-state safety',
     assert.match(root.innerHTML,/CSV 파일만 지원/);
     assert.doesNotMatch(root.innerHTML,/data-action="download-csv"/);
 
-    const headerOnly='거래날짜,품목,결제금액\\n';
+    const headerOnly='거래날짜,품목,결제금액\n';
     await change({id:'csv-upload',dataset:{},files:[{name:'only-header.csv',size:headerOnly.length,text:async()=>headerOnly}]});
     assert.match(root.innerHTML,/해석 실패: 헤더만 있고 처리할 데이터가 없습니다/);
     assert.doesNotMatch(root.innerHTML,/data-action="download-csv"/);
