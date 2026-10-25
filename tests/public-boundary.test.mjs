@@ -24,11 +24,11 @@ test('Cloudflare static deployment is public-only by default', () => {
   const files=allPublicFiles(publicRoot);
   assert.ok(files.includes('index.html'));
   assert.ok(files.every(f => /\.(?:html|css|png|webp|jpe?g|svg)$/i.test(f)), 'no scripts, JSON, source maps or business docs in public assets');
-  assert.ok(!files.some(f => /(?:^|\/)(?:app|core|csv-transform|templates)\.mjs$/i.test(f)));
+  assert.ok(!files.some(f => /(?:^|\/)(?:app|core|csv-transform|sales-report|templates)\.mjs$/i.test(f)));
 });
 test('public page has no executable SELF core, file upload, third-party requests or payment links', () => {
   assert.doesNotMatch(html, /<script\b|<form\b|<input\b|<iframe\b|<object\b/i);
-  assert.doesNotMatch(html, /(?:\.mjs\b|\.js\b|\.map\b|csv-transform|normalizeSpreadsheetCsv|SMAX_AX_BLUEPRINT)/i);
+  assert.doesNotMatch(html, /(?:\.mjs\b|\.js\b|\.map\b|csv-transform|sales-report|normalizeSpreadsheetCsv|buildSalesReport|SMAX_AX_BLUEPRINT)/i);
   assert.doesNotMatch(html, /https?:\/\/|fetch\s*\(|XMLHttpRequest|sendBeacon|serviceWorker|<link[^>]+rel=["']preload/i);
   assert.match(html, /script-src 'none'/);
   assert.match(html, /connect-src 'none'/);
