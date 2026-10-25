@@ -463,3 +463,36 @@ test('synthetic demo cancels an earlier pending real-file byte read',async()=>{
   assert.doesNotMatch(env.rootNode.innerHTML,/slow-customer\.csv/);
   assert.match(env.rootNode.innerHTML,/79\.90원/);
 });
+
+test('only two executable SELF templates expose CSV upload; eight design guides remain download-only',async()=>{
+  const ids=['spreadsheet','inventory','faq','sales','email','rag','quote','booking','web','reviews'];
+  const runnable=new Set(['spreadsheet','sales']);
+  const env=offlineFixture();
+  for(const id of ids){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    if(runnable.has(id)){
+      assert.match(env.rootNode.innerHTML,/id="csv-upload"/);
+      assert.match(env.rootNode.innerHTML,/data-action="try-sample"/);
+      env.click('try-sample');
+      assert.match(env.rootNode.innerHTML,/합성 예제 체험 중/);
+      continue;
+    }
+    assert.doesNotMatch(env.rootNode.innerHTML,/id="csv-upload"/);
+    assert.doesNotMatch(env.rootNode.innerHTML,/data-action="try-sample"/);
+    assert.match(env.rootNode.innerHTML,/설계 가이드 전용입니다/);
+    let fileRead=false;
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'ignored.csv',size:40,arrayBuffer:async()=>{fileRead=true;throw Error('must not read');}
+    }]});
+    assert.equal(fileRead,false,'unsupported template must not read CSV data: '+id);
+    await env.change({dataset:{action:'map',field:'date'},value:'forged-column'});
+    env.click('download-json');
+    const blueprint=JSON.parse(env.blobs.at(-1).parts[0]);
+    assert.equal(blueprint.templateId,id);
+    assert.equal(blueprint.fields.some(field=>field.sourceColumn==='forged-column'),false);
+    assert.equal(env.links.at(-1).download,'AX_BLUEPRINT_'+id+'.json');
+    env.click('download-guide');
+    assert.equal(env.links.at(-1).download,'AI_BUILD_PROMPT_'+id+'.md');
+  }
+});
