@@ -62,6 +62,15 @@ async function main() {
       checks.push('Offline file and 10 templates open');
       await page.locator('[data-action="select"][data-id="spreadsheet"]').first().click();
       await page.locator('#tab-chat').click();
+      // First-use experience: no customer CSV required to see a real local result.
+      await page.locator('[data-action="try-sample"]').click();
+      const demoCsvPreview=await page.locator('.csv-result').innerText();
+      assert(demoCsvPreview.includes('원본 4행') && demoCsvPreview.includes('검토 필요 2행'),
+        'Built-in CSV demo did not produce its declared review result');
+      assert((await page.locator('.editor-panel').innerText()).includes('합성 예제 체험 중'),
+        'Built-in CSV demo was not visibly labeled synthetic');
+      assert(await page.locator('[data-action="download-csv"]').count()===1,
+        'Built-in CSV demo did not offer its result file');
       // Fail closed: invalid UTF-8 may silently corrupt Korean business CSV.
       await page.locator('#csv-upload').setInputFiles({
         name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
@@ -106,6 +115,13 @@ async function main() {
       try {
         await page.locator('[data-action="select"][data-id="sales"]').first().click();
         await page.locator('#tab-chat').click();
+        await page.locator('[data-action="try-sample"]').click();
+        const demoSalesPreview=await page.locator('.csv-result').innerText();
+        assert(demoSalesPreview.includes('원본 5행') && demoSalesPreview.includes('잠정 반영 2행') &&
+          demoSalesPreview.includes('제외/검토 3행') && demoSalesPreview.includes('79.90원'),
+          'Built-in sales demo did not produce its declared preliminary total');
+        assert((await page.locator('.editor-panel').innerText()).includes('합성 예제 체험 중'),
+          'Built-in sales demo was not visibly labeled synthetic');
         await page.locator('#csv-upload').setInputFiles({
           name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
           buffer:Buffer.from([0xbe,0xc8,0xb3,0xe7])
