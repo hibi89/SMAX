@@ -78,3 +78,11 @@ test('Windows-style paths keep the output under dist without POSIX separator ass
   assert.match(builderSource,/dirname\(out\) !== join\(root,'dist'\)/);
   assert.match(builderSource,/mkdirSync\(dirname\(out\)/);
 });
+
+
+test('SELF preview uses current Smongi naming without claiming design approval',()=>{
+  const html=bundleOfflineSelf(input());
+  assert.match(html,/스몽이의 화면 적용 방식은 검토 중/);
+  assert.doesNotMatch(html,/맥콩이 안내하는/);
+  assert.match(html,/시연 화면입니다/);
+});
