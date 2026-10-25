@@ -189,3 +189,13 @@
 - QA·설계 문서 `docs/PUBLIC_PRIVATE_RELEASE_BOUNDARY_20261025.md`, `README_LOCAL.md` 공개/SELF 경계 수정. GitHub 외부 공개/Cloudflare 계정 연결/크몽 상품 등록/현금 결제 **0회**.
 - 다음 안전 순서: 실제 `frontend` 전체 `npm test`와 Chromium/Windows 파일 업로드→매핑→실변환→다운로드 검증, 로컬 SELF 패키징 후 샘플 다운로드/사용 가이드, `main` 최신 로고 커밋을 존중한 비강제 통합 계획. 실제 Cloudflare 배포/크몽 등록은 별도 승인 필요.
 - 실제 브랜치/HEAD는 이번 STATUS 및 HANDOFF 문서 커밋이 끝나면 원격 재확인. 2026-11-07 마감 변경 없음.
+
+
+## 2026-10-25 KST — 스총 실행 4: SELF 오프라인 단일 HTML 패키징 빌드 추가
+- 최신 사용자 `ㄱ`에 따라 **실사용 전 준비 작업**: 기존 `site/` ESM 4개와 스타일/HTML을 Node 개발자용 빌드 명령 `npm run build:self`으로 **단일 `dist/SMAX_SELF_OFFLINE.html`**로 묶는 `scripts/build-self.mjs` 구현. 기존 파일은 덮어쓰지 않고 생성물 `dist/`는 `.gitignore` 처리. `package.json`에 script 등록. 고객에게 Node/Python 설치를 요구하지 않는 방식 목표.
+- 설계와 안전: 고정 모듈 순서, import/export 계약 변경 감지 시 실패, 네트워크 API 호출 및 `</script>`/`</style>` 위험 차단, DOMContentLoaded 후 초기화, 인라인 JS/CSS SHA-256 CSP + `connect-src 'none'`. **소스 열람/재배포를 원천 방지하지 못하므로 사용권 강제 구현했다고 주장 금지.**
+- 신규 `tests/offline-package.test.mjs` 4개 Node 테스트 작성(아직 실제 Node `npm test` 실행 검증 전); 합성 예제 `examples/SMAX_SELF_SAMPLE.csv`, 고객 안내 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`, 상세 계약 `docs/OFFLINE_SELF_PACKAGE_20261025.md`; `README_LOCAL.md` 업데이트.
+- 직접 검증: GitHub 원격 모듈 텍스트를 메모리 내 같은 순서로 연결한 V8 합성 UI 검사 **6/6 통과**(업로드→매핑→검토 2행→UTF-8 BOM CSV 출력→전환 초기화). 실제 `scripts/build-self.mjs` 소스를 V8에서 Node 의존성 모사 후 빌드 함수 실행, 모듈 삽입/CSP 교체/최종 구문 검증 **7/7 PASS**. 앞선 원격 ESM 순서·기초 렌더 **8/8 PASS**. 이들은 **Node 파일 출력이나 실브라우저 검증이 아닌 V8 모의 검사**.
+- 실패/제약: 이 컨테이너에서 비공개 GitHub 저장소 직접 Git clone은 DNS 장애(`Could not resolve host: github.com`)로 불가능. GitHub 커넥터로는 파일 읽기·커밋 검증 가능하나 컨테이너로 저장소 전체를 안전하게 장착하지 못해 **실 `npm test` 및 `npm run build:self`/실 Windows Edge·Chrome file:// QA는 미검증**. 추측으로 PASS 처리 금지.
+- 별도 유료/공개 사업·로컬 고객 파일 전송·실결제·크몽 등록·Cloudflare 배포 **모두 미실시**. `main`/`backend` 미변경. 최종 frontend 원격 HEAD는 문서 커밋 완료 후 재조회.
+- 다음: 전체 Node 단위·통합 테스트와 출력 HTML SHA·크기 재현성 확인 → Windows Chrome/Edge CSV E2E/Console/Network 확인 → 사용권/지원/환불·크몽 설명 검수 → 명시 승인 후 안전한 main 통합·정식 등록 여부 결정. 2026-11-07 최종 상한(가능하면 조기 완료) 유지.
