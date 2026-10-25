@@ -208,3 +208,14 @@
 - 실 브라우저 환경 확인: 시스템 Chromium을 별도 지정하여 최소한의 **비제품** HTML을 `file://`과 localhost에서 열었으나 양쪽 모두 `ERR_BLOCKED_BY_ADMINISTRATOR`. 본 환경 정책 차단이므로 SELF 제품 결함 증거가 아니며 **실 제품 브라우저 QA PASS가 아님**. 동일 시도 반복하지 않고 별도 허가된 Windows Edge/Chrome 환경에서 재검증 필요.
 - 기존 Node v22.16.0 로컬 백엔드 해시 일치 파일 `node --test tests/csv-transform.test.mjs` 10 PASS / 0 FAIL 이번 턴 다시 확인. 현재 `frontend` 전체 `npm test`, 실제 `npm run build:self` 산출물 생성, 실 `file://` SELF E2E, Windows GUI는 **미검증**. 크몽 판매/Cloudflare 배포/개인정보 외부 전송 0건.
 - 실행 문서 `docs/QA_BROWSER_RUNBOOK_20261025.md`, `README_LOCAL.md` 업데이트. `main`, `backend` 그대로 보존. 다음 안전 최우선: 승인된 실행환경에서 전체 Node 및 단일 HTML 빌드 테스트 → Windows Edge E2E 증거 → 제품 전달·크몽 등록 승인 게이트. 11월 7일은 상한이며 조기 완성 지향.
+
+
+## 2026-10-25 KST — 스총 실행 6: Windows 패키징 오류 교정·원클릭 QA 게이트·크몽 초안
+- **확인된 Windows 이식성 결함 수정:** `scripts/build-self.mjs`의 `join(root,'dist')+'/'` POSIX 구분자 비교는 Windows `C:\\...\\dist\\...` 경로에서 정상 빌드를 거절할 수 있음. OS별 `dirname(out) === join(root,'dist')` 검사 및 `mkdirSync(dirname(out))`로 변경. 빌더 수정 커밋 `ec17fec9d6bb6d2275e58c904c1e07dd73cfa39b`.
+- **테스트 명령 Windows 호환:** `package.json`에서 `node --test tests/*.test.mjs`(CMD.exe 와일드카드 확장 의존)를 `node --test`(Node 자동 탐색)로 변경. 실제 Node v22.16.0 로컬 백엔드 디렉터리에서 `node --test` 10/10 PASS. 관련 수정 `7f460449fe51a9beb65732a9e6b78a18892800c5`.
+- `tests/offline-package.test.mjs`에 `node:path.win32`의 Windows 경로 동작 회귀 1건 추가 (기존 4→5개 검사). 별도 로컬 Node에서 동일 `win32.join/dirname` 표현 정상 검증. 최신 전체 테스트 스위트의 Node 실행은 아직 미검증.
+- **개발자 원클릭 QA** `npm run qa:release` 추가 → 5개 지정 테스트 파일 존재확인 → `node --test` → `scripts/build-self.mjs` → HTML의 JS/CSS SHA-256 CSP 및 외부 스크립트 부재 → Cloudflare 공개 폴더/파일 안전경계 → 합성 CSV 4행/검토 2행 검사 → `dist/SELF_QA_REPORT.json` 기록. 고객 파일/외부 서비스/배포 0건. 성공 표시 `LOCAL_NODE_PASS_BROWSER_NOT_TESTED`; Windows·실 브라우저 및 판매 승인과 별개.
+- QA 게이트 실행 로직은 GitHub 원격 소스 기반 V8 가상 런타임에서 **정상/단위 테스트 실패/CSP 오류/필수 테스트 누락 4/4 예상 판정**. 이것은 실제 `npm run qa:release` 실행 통과가 아님. 실제 장착된 로컬 코드에서 Node 22 백엔드 코어 10/10 재실행 완료.
+- 문서: `README_LOCAL.md`에 명령/판정/주의 추가. `docs/KMONG_SELF_LISTING_DRAFT_20261025.md`에 크몽용 실제 제공범위·미검증 사실을 구분한 상품 문구 초안과 가격/지원/환불 승인 게이트 작성. 상품 등록·결제·Cloudflare 배포는 **미진행**.
+- 차단/다음 작업: 최신 Private frontend 소스를 전부 실제 Node 실행환경에 확보해 `npm run qa:release` 전체 테스트/HTML 생성/SHA 기록. 이후 Windows Edge/Chrome 실제 로컬 HTML file:// UI/다운로드 검증 및 적합성 확인. 실패하면 수정 후 재실행. 배포 승인 전 `main`/브랜드 안전 통합 검토. 개발 최종 상한은 **2026-11-07**, 가능한 조기 완료 지향.
+- 소스 변경은 `frontend` 브랜치 한정, `main`/`backend`는 미수정. 최종 원격 커밋 SHA는 HANDOFF 반영 이후 실제 확인.
