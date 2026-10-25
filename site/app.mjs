@@ -61,6 +61,23 @@ function csvResultPanel(t){
 }
 function editorPanel(t){if(!t)return '<aside class="editor-panel"><span class="side-label">YOUR WORKFLOW</span><h3>시작할 준비가 됐나요?</h3><p>원하는 업무를 입력하고 템플릿을 선택하면 개인별 업무 질문과 설계서 초안 만들기를 이어갈 수 있습니다.</p><p class="tiny">실제 계정 로그인, 이메일 발송 및 외부 서비스 연동은 이 데모에서 실행하지 않습니다.</p></aside>';const b=buildBlueprint(t,state.answers,state.mappings);const maps=state.headers.length?'<div><label>확인된 CSV 열 매핑</label>'+t.fields.map(f=>'<div class="mapped-row"><label for="map-'+h(f.key)+'">'+h(f.label)+'</label><select data-action="map" id="map-'+h(f.key)+'" data-field="'+h(f.key)+'"><option value="">직접 확인 후 선택</option>'+state.headers.map(v=>'<option '+(state.mappings[f.key]===v?"selected":"")+' value="'+h(v)+'">'+h(v)+'</option>').join("")+'</select></div>').join("")+'</div>':"<p class='tiny'>CSV 파일을 선택하면 실제 열 이름을 확인하고 직접 매핑할 수 있습니다. 파일 본문은 서버로 전송하지 않습니다.</p>";return '<aside class="editor-panel"><div class="side-label">MY AX BLUEPRINT</div><h3>'+h(t.title)+'</h3><p>답변 완료 '+Object.keys(state.answers).filter(k=>state.answers[k]).length+'/'+t.questions.length+' · 설계 상태: <span class="status-warning">'+(b.state==="NEEDS_REVIEW"?"검토 필요":"사람의 최종 검토 필요")+'</span></p><label class="upload-label" for="csv-upload">CSV 자료 선택 (로컬 처리)</label><input type="file" id="csv-upload" accept=".csv,text/csv" aria-label="CSV 파일 선택"><p class="tiny">'+h(state.fileMessage||"CSV만 지원하는 초기 버전 · XLSX 파일은 아직 지원하지 않음")+'</p>'+maps+'<div class="review-notice">자동 매핑을 확정하거나 외부 데이터를 전송하지 않습니다. 생성되는 파일은 구축을 위한 초안입니다.</div><button type="button" class="button-sm" data-action="download-json">AX 설계서 JSON 내려받기 ↓</button><button type="button" class="button-outline" data-action="download-guide">AI 구축 가이드 내려받기 ↓</button><p class="tiny">다운로드는 브라우저 안에서 수행됩니다. 인증키·개인정보는 외부 AI에 무심코 전달하지 마세요.</p>'+csvResultPanel(t)+'</aside>'}
 function render(){root.innerHTML=state.tab==="templates"?renderTemplates():renderChat();$("#tab-templates").classList.toggle("active",state.tab==="templates");$("#tab-chat").classList.toggle("active",state.tab==="chat");$("#tab-templates").setAttribute("aria-selected",String(state.tab==="templates"));$("#tab-chat").setAttribute("aria-selected",String(state.tab==="chat"))}
+// File.text() silently replaces invalid UTF-8 bytes; never let damaged business
+// data reach mapping or reporting. Legacy CSV must be saved as UTF-8.
+async function readUtf8Csv(file) {
+  const encodingError='문자 인코딩 오류: CSV UTF-8 형식으로 다시 저장한 후 선택하세요. (일반 CSV/CP949는 미지원)';
+  if (typeof file.arrayBuffer === 'function') {
+    const bytes=await file.arrayBuffer();
+    try {return new TextDecoder('utf-8',{fatal:true}).decode(bytes);}
+    catch (error) {
+      if (error instanceof TypeError) throw new Error(encodingError);
+      throw error;
+    }
+  }
+  // Compatibility with test doubles lacking arrayBuffer.
+  const text=await file.text();
+  if (text.includes('\uFFFD')) throw new Error(encodingError);
+  return text;
+}
 function download(filename,data,mime){const blob=new Blob([data],{type:mime});const url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),3000);toast("파일을 준비했습니다. 미확정 항목을 확인하세요.")}
 document.addEventListener("click",event=>{const el=event.target.closest("[data-action]");if(!el)return;const action=el.dataset.action;if(action==="tab"){state.tab=el.dataset.tab;render()}else if(action==="category"){state.category=el.dataset.name;render()}else if(action==="select"){selectTemplate(el.dataset.id)}else if(action==="clear"){state.selected=null;state.answers={};forgetCsv();render()}else if(action==="reset-chat"){state.selected=null;state.answers={};forgetCsv();state.searchTerm="";state.tab="chat";render()}else if(action==="answer"){if(getTemplate()?.id==="sales"&&el.dataset.question==="period"&&!updateSalesPeriodFromAnswer(el.dataset.answer))return;state.answers[el.dataset.question]=el.dataset.answer;render()}else if(action==="chat-send")sendChat();else if(action==="run-csv"){
   if(getTemplate()?.id!=="spreadsheet")return;
@@ -107,7 +124,7 @@ document.addEventListener("change",async event=>{
     if(!/\.csv$/i.test(file.name)){state.fileMessage="오류: 현재는 CSV 파일만 지원합니다.";render();return;}
     const generation=state.csvGeneration, selected=state.selected;
     try{
-      const source=await file.text();
+      const source=await readUtf8Csv(file);
       if(generation!==state.csvGeneration||selected!==state.selected)return;
       const csv=parseCsv(source);if(!csv.headers.length)throw Error("빈 파일입니다.");
       state.csvSource=source;state.csvName=file.name;
