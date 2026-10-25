@@ -38,6 +38,14 @@
 - 실제 고객 판매 전에는 추가로 `npm run qa:browser` 또는 Windows Edge `python scripts/qa_browser.py --channel msedge` 실검증 기록이 있어야 한다. 전산 정책이 브라우저 실행을 차단하면 `BLOCKED`로 처리하고 완료라고 표시하지 않는다.
 - `dist/`는 비공개 개발 산출물로 GitHub와 Cloudflare 공개 위치에 올리지 않는다. 자동 검사 결과는 판매 승인·라이선스·고객 지원 조건을 대신하지 않는다.
 
+## Windows에서 개발자 자체 검수 (더블클릭)
+
+- PRIVATE `frontend` 저장소의 **`QA_SELF_WINDOWS.cmd`**를 더블클릭한다. 사용자에게 판매하는 프로그램이 아닌 **개발자 전용 검수 실행기**다.
+- 내부적으로 `scripts/VERIFY_SELF_WINDOWS.ps1`이 Node 20+ / npm 유무를 확인하고 `npm run qa:release`를 실행한 뒤, `dist/SELF_QA_REPORT.json` 상태·HTML 파일의 SHA-256 및 실제 byte 크기를 대조한다.
+- 성공하면 `dist/SMAX_SELF_OFFLINE.html` 경로와 해시를 표시한다. **성공도 브라우저 E2E/판매 승인까지 보증하지 않는다.** 실제 Edge/Chrome 검수는 아래 별도 절차로 진행한다.
+- 실패하면 결과 화면에 `FAIL` 또는 `BLOCKED` 사유를 보여주며 제품을 배포하지 않는다. 실행 정책이 막는 경우 보안 정책을 무력화하지 말고 사용 가능한 승인된 개발 환경에서 검수한다.
+- GitHub Actions 자동 실행은 이번 PRIVATE 저장소에서 실행 단계 로그 없이 종료 코드 실패가 관측되어 **수동 workflow_dispatch 전용**으로 보류했다. 원인은 아직 특정되지 않았으며 원격 CI PASS라는 주장 금지. 예외 없이 로컬 실제 결과가 출고 기준이다.
+
 ## 실제 Chromium/Edge 오프라인 E2E — 개발자 전용 검수
 
 - 필수 선수조건: `npm test && npm run build:self`; 생성 산출물은 Private 로컬에서만 다룬다.
