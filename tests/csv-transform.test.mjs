@@ -117,3 +117,38 @@ test('unmapped order IDs distinguish transactions with identical mapped dates, i
   const threeColumn = convert('거래날짜,품목,결제금액\n2026/10/01,연필,100\n2026-10-01,연필,100');
   assert.equal(threeColumn.summary.duplicateRows, 1, 'the old 3-column normalized duplicate contract remains intact');
 });
+
+test('monetarily equivalent representations share a duplicate key without altering output amounts',()=>{
+  const input='거래날짜,품목,결제금액\n'
+    +'2026-10-01,연필,100\n'
+    +'2026-10-01,연필,100.00\n'
+    +'2026-10-01,연필,0100\n'
+    +'2026-10-01,연필,"₩100원"\n'
+    +'2026-10-01,연필,100.01\n'
+    +'2026-10-01,연필,0\n'
+    +'2026-10-01,연필,-0.00';
+  const r=convert(input);
+  assert.equal(r.summary.outputRows,7);
+  assert.equal(r.summary.duplicateRows,4);
+  assert.deepEqual(r.rows.map(row=>row[4]),[
+    'READY_FOR_HUMAN_REVIEW','NEEDS_REVIEW','NEEDS_REVIEW','NEEDS_REVIEW',
+    'READY_FOR_HUMAN_REVIEW','READY_FOR_HUMAN_REVIEW','NEEDS_REVIEW'
+  ]);
+  assert.deepEqual(r.rows.map(row=>row[2]),[
+    '100','100.00','0100','100','100.01','0','-0.00'
+  ],'currency display representation is never rewritten just for duplicate checks');
+  assert.match(r.reviewCsv,/DUPLICATE/);
+});
+
+test('different order IDs preserve separate valid transactions even for equivalent money',()=>{
+  const input='거래날짜,품목,결제금액,주문번호\n'
+    +'2026-10-01,연필,100,ORDER-A\n'
+    +'2026-10-01,연필,100.00,ORDER-B\n'
+    +'2026-10-01,연필,0100,ORDER-A';
+  const r=convert(input);
+  assert.equal(r.summary.inputRows,3);
+  assert.equal(r.summary.duplicateRows,1);
+  assert.equal(r.summary.reviewRows,1);
+  assert.equal(r.rows[2][5],'DUPLICATE');
+  assert.equal(r.rows[1][4],'READY_FOR_HUMAN_REVIEW');
+});
