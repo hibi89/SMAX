@@ -182,3 +182,9 @@
 - `site/csv-transform.mjs`에서 `y < 1` 날짜 거부 및 앞단 형식 문자 `U+200B~200D/U+2060/U+FEFF/U+00AD` 안전 인용 처리 추가. 레코드 자동 삭제/병합/네트워크 동작 없음.
 - `tests/csv-transform.test.mjs` 회귀 2건 추가(backend 자체 12 tests). `tests/csv-hardening.test.mjs` 독립 검수 2건 추가. 해시 동일 실제 로컬 Node `node --test tests/*.test.mjs` 14/14 PASS.
 - Core Git blob `2b004fb9474743a95294b42baf7f875602644a54`, hardening tests `9756435b6cdb0b3b968bd86339e83b7e63743948`. 해당 변경을 frontend에도 동일 Blob으로 미러링. 전체 앱/npm test/실 Windows QA/크몽 판매까지 검증한 것은 아님.
+
+## 2026-10-25 KST — CSV seed 기반 합성 데이터 속성검사 추가
+- `tests/csv-property.test.mjs` 신규: 고정 seed(0x12AB34CD)로 생성한 CSV 256건 각각에 대해 원본 레코드 수 보존·출력 행수·검토행 합계·BOM·동일 입력 반복 결과 일치를 검사. 고객 실자료/외부 API 없음.
+- 별도 변형 1,600건 fuzz 처리도 로컬 Node v22.16.0에서 행 손실 없이 완료. 단 이는 매번 자동 CI에 포함된 것은 아니며 새 고정 seed 256건만 상시 회귀 대상.
+- 이번 실제 Node 테스트 `node --test tests/*.test.mjs` **15 PASS/0 FAIL**, 로컬 코어 blob `2b004fb9474743a95294b42baf7f875602644a54`, 새 테스트 blob `2adecd598ae29da22c9d2f34ae8ec1c1d32e134c` = GitHub 원격 동일.
+- frontend의 제품 전체 테스트와 HTML 실제 빌드/Windows 브라우저 E2E는 여전히 미검증.
