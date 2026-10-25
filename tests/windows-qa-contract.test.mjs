@@ -36,3 +36,23 @@ test('Windows command entrypoint runs Node by default and Edge only on explicit 
   assert.match(launcher,/exit \/b %QA_EXIT%/);
   assert.doesNotMatch(launcher,/\b(?:curl|wrangler)\s|powershell\s+-Command\s+IEX|npm(?:\.cmd)? run deploy/i);
 });
+
+test('Edge offline CSV download comparison respects Windows EOL without masking bad content',()=>{
+  const browserScript=readFileSync(new URL('../scripts/qa_browser.mjs',import.meta.url),'utf8');
+  const definition=browserScript.match(/function assertTrainingCsvDownload\(bytes, fixtureBytes, label\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(definition,'Edge must use a dedicated BOM-preserving fixture check');
+  const check=new Function('Buffer','TextDecoder','assert',
+    definition+'; return assertTrainingCsvDownload;')(Buffer,TextDecoder,
+    (condition,message)=>{if(!condition)throw Error(message);});
+  const bom=Buffer.from([239,187,191]);
+  const lf=Buffer.from('열A,열B\n가,100\n나,200\n','utf8');
+  const crlf=Buffer.from('열A,열B\r\n가,100\r\n나,200\r\n','utf8');
+  assert.doesNotThrow(()=>check(Buffer.concat([bom,lf]),crlf,'spreadsheet'));
+  assert.doesNotThrow(()=>check(Buffer.concat([bom,crlf]),lf,'sales'));
+  assert.throws(()=>check(lf,crlf,'spreadsheet'),/BOM missing/);
+  assert.throws(()=>check(Buffer.concat([bom,Buffer.from('열A,열B\n가,999\n나,200\n')]),lf,'sales'),/differs/);
+  assert.throws(()=>check(Buffer.concat([bom,Buffer.from('열A,열B\n가,100\n')]),lf,'sales'),/differs/);
+  assert.throws(()=>check(Buffer.concat([bom,Buffer.from([0xff])]),lf,'sales'),/The encoded data was not valid/);
+  assert.match(browserScript,/assertTrainingCsvDownload\(\s*readFileSync\(await trainingSales\.path\(\)\)/);
+  assert.match(browserScript,/assertTrainingCsvDownload\(\s*readFileSync\(await trainingCsv\.path\(\)\)/);
+});
