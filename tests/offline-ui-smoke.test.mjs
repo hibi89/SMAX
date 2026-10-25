@@ -711,3 +711,52 @@ test('offline sales review does not count alternate money formats for one order 
   env.click('download-sales-report');
   assert.match(env.blobs.at(-1).parts[0],/2026-10-01,온라인,3,300.01,0.00,300.01/);
 });
+
+test('sales review preview shows at most five excluded source records, then clears on replacement',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  env.click('try-sample');
+  assert.match(env.rootNode.innerHTML,/제외·검토 대상 처음 3건/);
+  const preview=env.rootNode.innerHTML.match(/<table class="csv-table" aria-label="잠정 매출 제외 거래 검토">([\s\S]*?)<\/table>/)?.[1];
+  assert.ok(preview,'excluded source-row preview must be visible without a download');
+  for(const [number,reason] of [[3,'DUPLICATE'],[5,'INVALID_DATE'],[6,'FORMULA_PROTECTED']]){
+    assert.match(preview,new RegExp('<td>'+number+'</td><td>'+reason+'</td>'));
+  }
+  assert.equal((preview.match(/<tr><td>/g)||[]).length,3);
+
+  const repeated=['판매일,판매처,판매액,주문번호'];
+  for(let i=0;i<8;i++)repeated.push('2026-10-01,온라인,100,ORDER-A');
+  const source=repeated.join('\n');
+  async function load(csv){
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'local.csv',size:Buffer.byteLength(csv,'utf8'),text:async()=>csv
+    }]});
+    for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+      await env.change({dataset:{action:'map',field},value});
+    }
+    env.click('run-sales');
+  }
+  await load(source);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 7행/);
+  assert.match(env.rootNode.innerHTML,/제외·검토 대상 처음 5건/);
+  const limited=env.rootNode.innerHTML.match(/<table class="csv-table" aria-label="잠정 매출 제외 거래 검토">([\s\S]*?)<\/table>/)?.[1];
+  assert.ok(limited);
+  assert.equal((limited.match(/<tr><td>/g)||[]).length,5);
+  assert.match(limited,/<td>7<\/td><td>DUPLICATE<\/td>/);
+  assert.doesNotMatch(limited,/<td>8<\/td><td>/);
+  env.click('download-sales-review');
+  const downloaded=env.blobs.at(-1).parts[0];
+  assert.equal((downloaded.match(/DUPLICATE/g)||[]).length,7,
+    'review CSV must retain ALL excluded transactions despite preview limit');
+
+  const clean='판매일,판매처,판매액,주문번호\n'
+   +'2026-10-01,온라인,100,ORDER-A\n'
+   +'2026-10-01,온라인,100,ORDER-B';
+  await load(clean);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 0행/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/aria-label="잠정 매출 제외 거래 검토"/);
+  await env.change({dataset:{action:'map',field:'amount'},value:'판매처'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/제외·검토 대상 처음/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+});
