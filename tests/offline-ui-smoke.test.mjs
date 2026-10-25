@@ -44,7 +44,7 @@ function offlineFixture() {
   };
   const timeouts=[];
   runInNewContext(script,{
-    document,TextEncoder,Blob:TestBlob,URL,
+    document,window:{},TextEncoder,Blob:TestBlob,URL,
     setTimeout(callback){timeouts.push(callback);return timeouts.length},
     clearTimeout(){}
   },{filename:'SMAX_SELF_OFFLINE.html',timeout:5000});
