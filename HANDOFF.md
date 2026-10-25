@@ -517,3 +517,11 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **다음 우선 과제:** 최신 전체 `frontend` Node 20+ 환경 `npm run qa:release`로 새 Node 테스트 포함하여 통과 기록→실 HTML SHA/bytes/CSP, `npm run qa:browser:node` file://, Windows `QA_SELF_WINDOWS.cmd /edge`.
 9. **금지·권한:** 고객 실데이터/결제계정·유료 API·클라우드 공개·크몽 상품게시·main merge 미승인 상태. 원본 보존, 실행/비용 0.
 10. **기준/마감:** 2026-10-25 KST, GitHub remote V8 검증 8+5 조건, 실제 Native release NOT_RUN, 고객출시 아님. 2026-11-07 일정 상한, docs 반영 후 `frontend` 최신 SHA 조회.
+
+## 2026-10-26 KST — 스총 최신 인계: CSV 사용 가능 템플릿 범위 정확화
+1. **제품 구현:** `frontend/site/app.mjs`에서 `spreadsheet`/ `sales` 2종만 CSV 입력·수동 매핑·합성 예제 로컬 실행; `inventory,faq,email,rag,quote,booking,web,reviews` 8종은 JSON/Markdown 설계 가이드 다운로드만 표시하며 CSV 입력 UI 숨김. 알 수 없는 비정상 input·map 이벤트도 무시. commit `52974df90fa9a2ba9fe15149442c812b6e2beb08`.
+2. **고객 대상 의미:** 10종 = **2종 실사용 로컬 변환 + 8종 설계/교육 가이드**, 10개 자동화가 실행된다는 판매 문구 금지. 합성 예제는 실제 사업 자료가 아니며 파일명/설계서 경고로 이미 구분.
+3. **검증:** 실제 GitHub 5모듈의 V8 DOM 격리 이벤트 흐름 **28/28 PASS**. `tests/offline-ui-smoke.test.mjs` 10종 경계 회귀와 `scripts/qa_browser.mjs` 실브라우저 단정 소스 GitHub 추가. 최신 Native 전체 Node/Chromium/Windows 테스트 **NOT_RUN**.
+4. **문서/커밋:** Node 회귀 `07d0d72dc41d1964ee51d612ea26e44e111c4f65`, 브라우저 QA `244a487cb90ae063a68accd234be576492ec3ef1`; 오래된 README의 1/9 기술을 2/8로 수정한 `ae55f1dcf6d669695299ef6e6454b5b1a4e80589`, 고객 퀵스타트 `079f8246f7cb140f24bb073acc87896ba5749a52`.
+5. **통합/비밀/비용:** `main`은 사업 의사결정·스몽이 이름/디자인 보류 정본, `backend` 불변. 제품 원본 `frontend`만 변경. 공개 Cloudflare/크몽 상품게시/유료 API/고객 데이터/자격증명 사용 금지, 과금/배포/merge 없음.
+6. **다음 절차:** Private `frontend` 전체 Node≥20 체크아웃에서 `npm run qa:release` 실제 exit0→디스크 HTML 새 SHA/bytes/CSP, 같은 HTML `npm run qa:browser:node`→Windows Edge→사용자 출시 승인→안전 통합/배포. 현재 로컬 환경은 Private Github DNS 문제로 전체 checkout 불가. 이전 빌드 hash 최신으로 주장하지 않기. 2026-11-07 개발 마감.
