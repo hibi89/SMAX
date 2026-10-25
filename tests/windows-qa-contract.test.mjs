@@ -58,3 +58,12 @@ test('Edge offline CSV download comparison respects Windows EOL without masking 
   assert.match(browserScript,/getComputedStyle\(el\)\.display/,
     'Real Edge E2E must verify the offline stylesheet was not blocked by CSP');
 });
+
+test('Node release QA blocks unnormalized inline CSS and script before any browser approval',()=>{
+  const release=readFileSync(new URL('../scripts/qa-release.mjs',import.meta.url),'utf8');
+  assert.match(release,/requireCheck\(!js\.includes\('\\r'\)/);
+  assert.match(release,/requireCheck\(!css\.includes\('\\r'\)/);
+  assert.match(release,/b64sha256\(js\)/);
+  assert.match(release,/b64sha256\(css\)/);
+  assert.match(release,/LOCAL_NODE_PASS_BROWSER_NOT_TESTED/);
+});
