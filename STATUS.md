@@ -188,3 +188,11 @@
 - 별도 변형 1,600건 fuzz 처리도 로컬 Node v22.16.0에서 행 손실 없이 완료. 단 이는 매번 자동 CI에 포함된 것은 아니며 새 고정 seed 256건만 상시 회귀 대상.
 - 이번 실제 Node 테스트 `node --test tests/*.test.mjs` **15 PASS/0 FAIL**, 로컬 코어 blob `2b004fb9474743a95294b42baf7f875602644a54`, 새 테스트 blob `2adecd598ae29da22c9d2f34ae8ec1c1d32e134c` = GitHub 원격 동일.
 - frontend의 제품 전체 테스트와 HTML 실제 빌드/Windows 브라우저 E2E는 여전히 미검증.
+
+## 2026-10-25 KST — 스총 후속 작업 / 매출 일·월 집계 로컬 코어
+- **실제 작업:** 기존 `site/csv-transform.mjs`의 검증/검토 판정을 이용한 `site/sales-report.mjs` 추가. 사용자가 판매일·판매채널·판매금액 열을 지정하고 집계 주기(`daily` 또는 `monthly`)를 선택. 원본 CSV 모든 행 유지; 이상/중복/결측/수식/과대금액은 **제외 이유가 담긴 별도 검토 CSV**로 내보내고 총계의 입력/반영/제외 건수 기록. 외부 송수신 0, 사람 검토 전 잠정 보고만 허용.
+- **설계 비교:** 원본 헤더 자동 추론 집계(A)는 잘못된 열/금액 합산 위험. 검증된 기존 정규화+명시 매핑+review 분리(B)를 선택. 금액은 `BigInt` 고정 소수점(소수 두 자리)로 합산. 양수와 음수조정은 별도로 표기하며 음수를 임의 반품 처리하지 않음. 정수부 12자리를 넘는 금액은 검토 대상으로 분리.
+- **실측 검증:** 실제 Node.js **v22.16.0**에서 원격과 동일 blob인 `site/csv-transform.mjs` `2b004fb9474743a95294b42baf7f875602644a54`, 신규 `site/sales-report.mjs` `01050c8d3a3dd6a1f548d37484112aa7bd99b924`, `tests/sales-report.test.mjs` `4732565887cd2e3f007bb7b03a6e271e4520d159` 로 `node --test tests/sales-report.test.mjs` **7 PASS / 0 FAIL** (일별/월별·고정소수점·중복/오류행 제외·12자리 상한·잘못된 열 매핑·인용 부호·재현성).
+- **원격 코드:** `backend` 브랜치의 새 코어 `4c497d4f1a1c189692c83294f63124787c3d489b`; 회귀 테스트 `c2ffd622a8f2ec6b36c303076cd3f72ea8c586fa`; 계약 문서 `docs/SALES_REPORT_ENGINE_CONTRACT_20261025.md` 커밋 `8b8e1d6fb36f180951edc2a77f1561f9c59c7f1b`. 기존 CSV 변환/10종 검색·기존 frontend 기능 변경 없음.
+- **제한/미검증:** 전체 backend 테스트/프런트 제품 전체 회귀는 이번 작업에서 NOT_RUN. `frontend`의 매출 집계 버튼/다운로드 연결 및 오프라인 HTML 패키징·Windows Edge/Chrome E2E는 미구현/미검증; **두 번째 고객용 완성 도구 출시 아님**. 세금/회계 신고·실사용 정확성 근거 아님.
+- **다음 작업:** 판매 템플릿 UI에 일·월 주기/3열 수동 매핑/잠정 합계·제외행 두 CSV 내려받기, 변경 시 이전 결과 무효화 연결 → 번들러/테스트 업데이트 → 전체 Node/Chromium·가능한 Windows QA. `main`/공개 Cloudflare 배포·크몽 판매·실고객 데이터 접근 금지, 2026-11-07 마감 상한 유지.
