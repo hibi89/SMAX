@@ -266,3 +266,13 @@
 - 최신 `frontend` 실빌드 HTML 73,352 bytes / SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`를 Linux ARM64 실제 Chromium 156으로 `file://` 오프라인 상태에서 실행하여 CSV 4행/검토 2행, 결과 다운로드 UTF-8 BOM, 잘못된 매핑 차단, 모바일 입력 기능, HTTP 요청 0/JS 오류 0 확인.
 - JSON/AI 가이드 10종 각 2개, 총 **20개 파일의 실제 브라우저 다운로드 PASS**. 자동 다운로드 세션 제한을 회피하려 템플릿별 격리 브라우저 컨텍스트를 사용. `scripts/qa_browser.mjs`에 이를 재실행 가능한 독립 Node+Playwright QA로 작성하고, **원격과 동일 Git blob** 기준 실제 Node `node scripts/qa_browser.mjs` **exit 0 / 7 E2E checks PASS**. `npm run qa:browser:node` 명령 추가. 기존 Python QA 유지.
 - 이전 Chromium 환경 차단은 `/tmp`에만 Debian 공유 라이브러리·Fontconfig를 추출하여 해결(연결 프로젝트 소스·서비스 설정 변경 없음). **Windows 실기기 Edge/Chrome E2E는 미검증**. 상세 증거 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`. 개발자 전용 Node 모듈, 환경변수, 검사 보고서 등이 실수로 푸시되지 않도록 `.gitignore` 확대. Cloudflare 공개/크몽 등록/실판매 미진행. 다음 최우선 Windows 실제 PC 검증 및 UI/브랜드 승인 준비.
+
+## 2026-10-25 KST — 스총 실행 14 / 브라우저 E2E의 릴리스 파일 무결성 게이트 추가
+- **목표:** Linux Chromium 브라우저 E2E는 이미 PASS. Windows QA 전 브라우저 검증기가 오래된/변조된 HTML을 실제 릴리스 출고 결과로 오인할 위험을 제거. 변경은 Private `frontend`의 개발자 QA만; `main`/`backend`와 공개 사이트 변경 없음.
+- **2안 비교:** (A) 브라우저 QA 실행 후 HTML SHA만 보고 — 테스트 간 불일치 탐지/차단 불가. (B) Playwright 시작 전에 `dist/SELF_QA_REPORT.json`의 Node PASS·빌드/보안 체크·SHA-256·byte 일치 확인 — 추가 비용/외부 호출 0, 유지관리 단순. **B 적용**; 본 검사는 서명 또는 제품 라이선스 보호 기능이 아님.
+- **실제 코드:** `scripts/self-qa-integrity.mjs` 신규 `verifySelfQaArtifact`; `scripts/qa_browser.mjs`가 브라우저 실행 전 검증하고 PASS 보고서에 `releaseQaArtifactMatch: PASS` 표시. `--report` 옵션 지원. `tests/self-qa-integrity.test.mjs` 회귀 6건 및 `scripts/qa-release.mjs` 필수 테스트 목록 추가.
+- **테스트:** Node v22.16.0에서 신규 **6/6 PASS / 0 FAIL** (`node --test tests/self-qa-integrity.test.mjs`). 정상/변조/잘못된 byte/FAIL QA/필수 검사 누락/보고서 누락·손상 케이스. 로컬 파일 `git hash-object`와 원격 GitHub blob 일치: helper `4fde214c3d6d66171323e04206733a8aefbdd097`, tests `9ce0106bdf484e547e16b59feb0e14c69a014140`. 브라우저 스크립트 blob `4fb9932d290838c079cbffd70f16fa09cc036a94`, release gate blob `6f7b5f945b207cccf236aae05986411e2e7c52b4` 원격 조회 확인.
+- **검증 경계:** 변경 후 전체 `frontend npm test`, `npm run qa:release`, `npm run qa:browser:node` 및 Windows 실제 PC E2E는 **이번 실행에서 NOT_RUN**. 기존 34/34 Node 및 Linux Chromium 7항 PASS는 변경 전 별도 증거; 신규 브라우저 변경의 전체 회귀 PASS 주장 금지.
+- **오류·복원:** 이번 신규 테스트 실패 0건. 전체 소스의 컨테이너 git clone은 github.com DNS 차단으로 재구성/전체 테스트가 불가. GitHub 기록으로 변경 전으로 되돌릴 수 있고 강제 push 불필요. GitHub Actions 선행 실패 재실행 금지. 고객 CSV/토큰/외부 API/Cloudflare/크몽 조작 없음.
+- **다음 1순위:** 승인된 실제 Windows PC의 Private `frontend` 최신본에서 `npm run qa:release` → `npm run qa:browser:node -- --channel msedge` 실행, 실제 SHA 연계/CSV UTF-8 BOM/기능·외부 요청 0을 확인. 가능하면 로컬 Node 전체 회귀를 병행. 실패하면 증거로 정확히 보완. 그 뒤 유료 코어 분리/출고 설명·브랜드 승인을 검토. **2026-11-07 상한** 유지.
+- **출시 상태:** NOT_RELEASED. 디자인 최종 승인/Windows 실기기/크몽 상품등록·판매/Cloudflare 공개는 미완·별도 승인 게이트.
