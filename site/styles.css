@@ -23,3 +23,7 @@
 .brand-x{display:inline-block;position:relative;color:inherit}
 .brand-x::after{content:"";position:absolute;z-index:1;width:.18em;height:.18em;left:49%;top:52%;transform:translate(-50%,-50%);background:#18538e;border-radius:.015em;pointer-events:none}
 .brand-subname{color:#43a6ff}
+
+/* SELF sales report period selector; no network stylesheets required. */
+.sales-period-select{display:block;width:100%;margin:8px 0 12px;padding:10px 12px;border:1px solid var(--stroke);border-radius:8px;background:var(--bg2);color:var(--text);font:inherit}
+.sales-period-select:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
