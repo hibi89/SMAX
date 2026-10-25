@@ -19,3 +19,10 @@
 - 실제 오프라인 단일 HTML `dist/SMAX_SELF_OFFLINE.html`: **73,341 bytes**, SHA-256 `093d1c8bff820369b664007fbecdd252a387b6cf354398247c754fb59b680563`; report와 byte/hash 일치, 별도 재빌드도 byte-identical.
 - 1차 증거 정본: `docs/QA_FULL_NODE_AND_OFFLINE_BUILD_20261025.md` (commit `95f72393dd0be0eee77c539e69bc868ea2ed4257`). **실 Windows Edge/Chrome file:// 동작 및 CSV 다운로드는 여전히 미검증**. Node 33 PASS를 판매 QA PASS와 혼동 금지.
 - 다음 `ㄱ`: Windows 실기기 Edge/Chrome 검수와 증거 확보, 최신 main 브랜드 변경 안전 병합 검토, 크몽 상품 조건/최종 사용자 승인. Cloudflare 공개·상용 판매 미실행.
+
+## 최신 추가 검증 — 2026-10-25 KST
+- 최신 사용자 결정은 **스몽이**(고양이 귀 로봇) 명칭만 확정, 웹 디자인은 잠정 시안. `main/docs/SMONGI_PRIMARY_MASCOT_DECISION_20261025.md`와 `main/docs/DESIGN_APPROVAL_DEFERRED_WEB_FIRST_20261025.md`를 우선 읽을 것.
+- `frontend/site/index.html`의 과거 '맥콩' 안내 문구를 실제 캐릭터명 **스몽이**와 디자인 보류 상태를 반영해 수정. `tests/offline-package.test.mjs`에 1건 회귀 추가.
+- 최신 Private HEAD 동일 소스 기반 Node 22.23.4 **34/34 PASS**, `npm run qa:release` 정상 종료. HTML `73,352 bytes`, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. 이전 33 PASS·73,341 bytes는 구버전 기준.
+- 실제 Chromium v1248 Linux ARM64 실행 시 `libglib-2.0.so.0` 등 공유 라이브러리 19개 미설치로 **브라우저 시작 전에 차단**. 제품의 브라우저 통과 여부나 Windows 사용성을 판정한 것이 아님. 다른 프로젝트 시스템 패키지 변경은 하지 않음.
+- 최신 정본 보고 `docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md`. 다음 `ㄱ`은 Windows Edge/Chrome E2E 검증과 크몽 판매 전 사용성 점검. 공개 배포/실판매/계정 연결 보류, 11월 7일 마감 상한 유지.
