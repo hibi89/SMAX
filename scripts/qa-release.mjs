@@ -28,7 +28,7 @@ function run(label) {
 try {
   // Test discovery is platform-independent, unlike "tests/*.test.mjs" via Windows cmd.
   for (const test of [
-    'core.test.mjs', 'csv-transform.test.mjs', 'csv-hardening.test.mjs', 'csv-property.test.mjs', 'csv-ui.test.mjs',
+    'core.test.mjs', 'csv-preflight-parity.test.mjs', 'csv-transform.test.mjs', 'csv-hardening.test.mjs', 'csv-property.test.mjs', 'csv-ui.test.mjs',
     'public-boundary.test.mjs', 'offline-package.test.mjs', 'offline-ui-smoke.test.mjs', 'sales-report.test.mjs', 'self-qa-integrity.test.mjs', 'windows-qa-contract.test.mjs'
   ]) {
     requireCheck(existsSync(join(root, 'tests', test)), 'expected test missing: ' + test);
