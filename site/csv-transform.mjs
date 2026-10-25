@@ -120,7 +120,10 @@ export function normalizeSpreadsheetCsv(source, mapping) {
     if (dateRaw && !date) { flags.push('INVALID_DATE'); counts.invalidDateRows++; }
     if (amountRaw && amount === null) { flags.push('INVALID_AMOUNT'); counts.invalidAmountRows++; }
     const rawValues = [date ?? dateRaw, itemRaw, amount ?? amountRaw];
-    const duplicateKey = JSON.stringify(rawValues);
+    // Preserve normalized comparisons for mapped fields, but include all other source columns.
+    // Equal amounts on the same day can be distinct orders with different invoice IDs.
+    const otherColumns = record.filter((_, index) => !columns.includes(index));
+    const duplicateKey = JSON.stringify([rawValues, otherColumns]);
     if (seen.has(duplicateKey)) { flags.push('DUPLICATE'); counts.duplicateRows++; }
     seen.add(duplicateKey);
     const safeValues = rawValues.map(excelSafe);
