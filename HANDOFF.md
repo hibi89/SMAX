@@ -525,3 +525,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 4. **문서/커밋:** Node 회귀 `07d0d72dc41d1964ee51d612ea26e44e111c4f65`, 브라우저 QA `244a487cb90ae063a68accd234be576492ec3ef1`; 오래된 README의 1/9 기술을 2/8로 수정한 `ae55f1dcf6d669695299ef6e6454b5b1a4e80589`, 고객 퀵스타트 `079f8246f7cb140f24bb073acc87896ba5749a52`.
 5. **통합/비밀/비용:** `main`은 사업 의사결정·스몽이 이름/디자인 보류 정본, `backend` 불변. 제품 원본 `frontend`만 변경. 공개 Cloudflare/크몽 상품게시/유료 API/고객 데이터/자격증명 사용 금지, 과금/배포/merge 없음.
 6. **다음 절차:** Private `frontend` 전체 Node≥20 체크아웃에서 `npm run qa:release` 실제 exit0→디스크 HTML 새 SHA/bytes/CSP, 같은 HTML `npm run qa:browser:node`→Windows Edge→사용자 출시 승인→안전 통합/배포. 현재 로컬 환경은 Private Github DNS 문제로 전체 checkout 불가. 이전 빌드 hash 최신으로 주장하지 않기. 2026-11-07 개발 마감.
+
+## 2026-10-26 KST — 스총 최신 인계: 직접 연습할 샘플 CSV를 SELF 내부에서 다운로드
+1. **제품:** `frontend/site/app.mjs`에 실행형 `spreadsheet`·`sales` 2종에 한해 `연습용 원본 CSV 다운로드` 버튼 신설. `SMAX_DEMO_SPREADSHEET.csv`/`SMAX_DEMO_SALES.csv`는 내장 원문 앞 BOM(U+FEFF)을 붙인 진짜 다운로드 파일. 8종 가이드형은 버튼/명령 접근 불가. commit `c4b607717cb1cce3391ba55a69c8329620f873a0`.
+2. **실효용:** 사용자는 본인 사업자료 없이 원클릭 결과 체험뿐 아니라 훈련 CSV 원본을 받았다가 다시 올려 수동 3열 매핑→검토 표→보고서 다운로드까지 연습 가능.
+3. **품질 기준:** 저장소의 `examples/SMAX_SELF_SAMPLE.csv`/ `SMAX_SALES_SAMPLE.csv`와 정확히 동일한 UTF-8 원본(단 다운로드시 BOM 부착). 업로드/매핑 상태는 다운로드 자체로 바뀌면 안 됨. 파일명 `SMAX_DEMO_`로만 식별.
+4. **테스트:** 기존 Native Node VM smoke test 소스에 2개 훈련 자료 파일명/BOM/원문/다운로드 무상태/8종 비노출 및 가짜 클릭 무효 테스트 신규 작성(commit `06d64768...`); 실제 Playwright 브라우저 스크립트에 파일 2개의 다운로드 이벤트/바이트 일치 검증 신규 작성(commit `7ce47197...`). 제품 실제 GitHub 모듈을 V8 DOM/Blob으로 실행한 집중 7/7 PASS, **Native 전체 release/실 Playwright는 NOT_RUN**.
+5. **문서:** `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` 사용 안내 `합성 원본으로 파일 업로드 연습하기` 추가(commit `54d692f0...`).
+6. **CI/환경:** 컨테이너 GitHub DNS 불가, Private 전체 체크아웃 없음. GitHub Actions 기존 과거 실패(단계 로그 없음) 1회만 존재, 신규 Actions 비용/권한 승인 없이 수동 재실행하지 말 것.
+7. **브랜치 정책:** `frontend`만 변경. `main` 사업/마스코트 의사결정 보존, `backend` 그대로. 공개 Cloudflare, 크몽 상품 게시, 메인 병합, 고객정보·결제·API 지출 금지.
+8. **다음 작업:** 최신 `frontend` 실제 전체 Node 테스트+릴리스 HTML 빌드→디스크 파일 SHA/CSP→동일 HTML의 Chromium/Edge `file://` E2E→실 Windows QA. 최신 테스트 소스 작성과 통과 증거를 혼동하지 않기.
+9. **승인:** 실사용성 검수·지원/라이선스/반품·사업 문서 통합 후 사용자가 별도 판매 승인 결정. 10종 중 자동실행은 현재 2종.
+10. **목표:** 2026-11-07 개발 상한. 비용 0원 원칙, 작업별 내용 `STATUS.md`와 GitHub 커밋으로 인계.
