@@ -230,3 +230,16 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본·백업·인증·수정 금지:** 기존 `site/`, `public-site/`, `main`, `backend` 보존; Git 이력에서 복원 가능. 핵심 상품 JS를 공개 `public-site/` 또는 Cloudflare에 올리지 않는다. 실제 개인정보·자격증명·영업비밀·실 고객 데이터 사용 없음. 인라인 HTML은 실행 코드 복제 가능; 유료 라이선스 강제 차단 아님. 사용권/크몽 환불은 확정 전.
 9. **다음 우선순위·절차·완료 기준·승인:** (1) `frontend` 전체 Node 테스트 실행, 빌드 HTML 파일 생성/재현 SHA·크기 확인 (2) 실제 Windows Chrome/Edge `file://` 로드/CSV 표준화·다운로드/네트워크/Console 확인 (3) 맥콩·NAON2·공식 로고의 최신 main 변경을 병합 전 안전 대조 (4) 출시 품질과 크몽 상품등록·판매정책 승인 요청. 브랜치 강제변경, 공개배포, 외부 계정·금전 지출 전 승인.
 10. **최신화 일시·기준:** 2026-10-25 KST. 소스는 GitHub connector에서 직접 읽은 `frontend`를 기준으로 V8 통합·빌더 모의 검사; 원격 작업·문서 커밋 완료 후 실제 HEAD를 확인한다. 문서 갱신만으로 개발 완료/실 서비스 출시 주장 금지.
+
+
+## 2026-10-25 KST — 스총 실행 5 / 브라우저 검수 경로와 제한 (최신 10항)
+1. **목표·확정 요건:** 사장님 SELF 1차 출시 게이트 실제 Windows Edge/Chrome 사용성·CSV 결과 검증. 고객은 로컬 HTML 실행 목표이며 이 스크립트는 개발자 전용. 2026-11-07은 마감 상한, 가능하면 조기 완료.
+2. **변경 파일·결정:** `scripts/qa_browser.py` 신규, `package.json`에 `qa:browser`, `README_LOCAL.md` 검수법, `docs/QA_BROWSER_RUNBOOK_20261025.md` 구체적 판정·증거. Py Playwright는 프로젝트 런타임 필수 의존성이 아니며 개발자 QA 환경만 설치. 대상은 `dist/SMAX_SELF_OFFLINE.html`과 합성 `examples/SMAX_SELF_SAMPLE.csv`.
+3. **실제 테스트 결과/명령:** `python -m py_compile scripts/qa_browser.py` PASS; `git hash-object`와 GitHub blob 일치 `eab5a40c5445113bbf874d36ae9a8cce7a32a445`. HTML 미존재 입력은 exit 2; 임시 합성 HTML 입력에 Playwright Chromium 다운로드 부재는 명시적 `BLOCKED`/exit 3. Python 테스트 도구 동작 일부 확인이며 **실 제품 E2E PASS 아님**. 기존 백엔드 Node 테스트 10/10 PASS 재확인. `npm test` 전체·`npm run build:self` 실제 실행은 여전히 미검증.
+4. **작업 상태/블로커:** 브라우저 검수 도구 **작성 및 구문 확인** 완료. 이 실행환경 내 시스템 Chromium은 `file://`과 로컬 HTTP 모두 `net::ERR_BLOCKED_BY_ADMINISTRATOR` → 정책 차단. 이는 제품 불량 판정과 구분. 실제 Windows/Chromium E2E와 판매 승인 계속 미완료.
+5. **실패 및 재시도 대안:** 기본 Playwright 설치 브라우저 실행파일 미설치; 시스템 Chromium 실행은 가능했지만 모든 탐색 관리자 차단(최소 비제품 HTML에서도 재현). 동일 환경에서 무의미한 우회 재시도 금지. 승인된 Windows 로컬 환경에서 `python scripts/qa_browser.py --channel msedge` 또는 Chromium 실행해 JSON 결과 수집. 필요 시 사용자 PC의 수동 브라우저 QA로 대체.
+6. **저장소/경로/원격 SHA:** Private `hibi89/SMAX`, 개발 `frontend`. 신규 QA `fae77ccc189bcd0cc85a34b47a9821793b0b0944`; Python 상태 분류 수정 `20fce508ecf4f59cb42f016b07a582fd962ffc6f`; `package.json` `271e8adfc09848d9f93fccfe2d6a21a365b9517e`; runbook `f8075396876f61ecdf17904ea81381eff7b840b9`; STATUS `ebb0f4ef6bed9ca50b4e05a9cdc4a2247102f967`. 최종 frontend HEAD는 이 HANDOFF 커밋 후 실제 재조회.
+7. **실행환경/Production:** Python Playwright 설치 여부는 개발자 QA 선택. Cloudflare/Vercel 실프로덕션 없음, 크몽 미게시/미판매. SELF HTML은 Private 로컬 산출 예정; 고객에게 브라우저 Python/Node 설치 요구 안 함. Node 20+ `npm test && npm run build:self` 먼저 실행할 것.
+8. **소스/보안/원본:** GitHub 원본 Private 유지; `main`/ `backend` 미수정, 기존 로고·템플릿·상품 소스 손상 없음. 고객 파일·자격증명/외부 API/거래 전송 없음. `public-site/`만 공개 경로, `site/`/ `dist/` 공개 금지.
+9. **다음 우선 및 완료 기준:** (A) 신뢰 가능한 환경에 Private frontend 체크아웃 후 **전체 Node 회귀 test 결과** 획득 (B) 오프라인 HTML 생성한 정확한 크기·SHA 기록 (C) Windows Edge/Chrome 실기기 file:// E2E, 다운로드 검토 결과 4행·검토 2행 및 console/network 0 확인 (D) 사용자 승인 후 브랜치 안전통합·크몽 등록. 불가능한 항목은 `BLOCKED` 표시하고 지원·사용권 문서 먼저 진척.
+10. **기준일/재현성:** 2026-10-25 KST, 이번 작업은 브라우저 QA 자동화·도구 구문 및 환경 제한을 명확히 기록한 것. 실제 고객용 프로그램 출시/판매 또는 크몽 심사 완료와 혼동 금지.
