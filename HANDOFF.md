@@ -505,3 +505,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **다음 작업:** 최신 프라이빗 `frontend` 전체 checkout이 가능한 Native Node≥20 개발 환경에서 `npm run qa:release` 실제 전체 테스트/새 HTML SHA와 CSP 검증. 이후 실제 Playwright Chromium 및 Windows Edge 파일 프로토콜 테스트. 첫 체험 버튼 외 실제 UX 사용성 점검.
 9. **병합 승인:** `main/frontend`은 내용이 다른 동일 경로 5개와 main 전용 사업 문서 7개가 있어 제품 QA 후 수동 내용 조정. 지금 사용자 허가 없이 `main` merge/rebase/force 금지. 실판매/공개배포도 별도 승인.
 10. **출시 게이트/마감:** 2026-10-25 KST. 제품 기능 자체의 V8 격리 실흐름 확인과 QA 전체 출고 승인은 구별. 2026-11-07 개발 마감 목표 유지, 출시 인증·매출 없음.
+
+## 2026-10-25 KST — 스총 인계: 합성 예제 문서 다운로드 표식·QA 원본 동기화
+1. **실제 변경:** `frontend/site/app.mjs`의 demoMode 중 JSON/가이드 다운로드에 `SMAX_DEMO_` 접두어·JSON `syntheticDemo:true`/`demoNotice`·Markdown 최상단 합성 예제 경고 추가, 정상 사용자 파일 선택 시 접두어·표식 전부 해제. 커밋 `252e5019020915e71b54abcb613dd08c7fda8b13`.
+2. **회귀:** `tests/offline-ui-smoke.test.mjs`에서 CSV·매출 양쪽 전후 JSON·Markdown 다운로드 (데모와 진짜 데이터 분리) 검증 작성, 커밋 `715e8bcd83b62344a2f48d15a50579f692f6b0ad`. 원격 실제 앱 5모듈 가짜 DOM 업로드/다운로드 V8 8/8 PASS.
+3. **샘플 일관성:** `tests/demo-fixture-contract.test.mjs` 신설해 내장 예제가 저장소의 합성 CSV 파일들과 바이트·원문 문자열/매핑/4행2검토·5행2반영3제외79.90 계약 일치하도록, `scripts/qa-release.mjs` 필수 목록 추가. 원격 실제 CSV 앱/엔진과 fixture V8 5/5 PASS. 신규 전체 Native Node 실행은 NOT_RUN.
+4. **사용자 안내:** `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`에 DEMO 설계서/AI 가이드 경고 및 파일명 표시 추가. 체험 파일은 실제 판매/정산/회계/업무 구축 근거가 아님.
+5. **코드와 검증 진도:** 현재 구현만 V8 격리 검증. Native `npm run qa:release` 및 신규 HTML 해시/CSP, 실제 Chromium/Windows Edge 파일 프로토콜 검사는 최신 HEAD에서 미수행. 이전 84,678 bytes SHA는 과거 앱 기준이라 무효화된 참고치.
+6. **환경 문제·전환:** Node v22.16.0 컨테이너 정상이나 `github.com` DNS 불가, 전체 private checkout 없음. 연결 GitHub 소스 호출 다량 병렬 제한. 과거 GitHub Actions 실패 로그 부재, 같은 Actions 재시도·예상 과금으로 해결하지 않음. 제품 실사용 결과 확대와 안전성에 초점을 두되 실 QA와 구별.
+7. **브랜치:** Private `hibi89/SMAX` `frontend`만 수정. `main`의 스몽이 최소 디자인 결정과 실사업 검증 문서는 보존; `backend` 보존. `main/frontend` 양쪽 변경 동일 경로 5개 검토 후에만 수동 병합.
+8. **다음 우선 과제:** 최신 전체 `frontend` Node 20+ 환경 `npm run qa:release`로 새 Node 테스트 포함하여 통과 기록→실 HTML SHA/bytes/CSP, `npm run qa:browser:node` file://, Windows `QA_SELF_WINDOWS.cmd /edge`.
+9. **금지·권한:** 고객 실데이터/결제계정·유료 API·클라우드 공개·크몽 상품게시·main merge 미승인 상태. 원본 보존, 실행/비용 0.
+10. **기준/마감:** 2026-10-25 KST, GitHub remote V8 검증 8+5 조건, 실제 Native release NOT_RUN, 고객출시 아님. 2026-11-07 일정 상한, docs 반영 후 `frontend` 최신 SHA 조회.
