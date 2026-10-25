@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {buildSalesReport} from '../site/sales-report.mjs';
 const mapping={date:'판매일',channel:'판매처',amount:'판매액'};
 const rows='판매일,판매처,판매액\n2026-10-01,온라인,100\n2026/10/01,온라인,1.25\n2026-10-01,매장,-20.10\n2026-10-02,매장,500\n';
@@ -68,4 +69,21 @@ test('no input mutation and no implicit deduplication of different amounts',()=>
  assert.equal(r.summary.includedRows,2);
  assert.equal(r.summary.netAmount,'3.00');
  assert.deepEqual(m,mapping);
+});
+
+
+test('checked-in sales fixture stays aligned with release and browser expectations',()=>{
+  const source=readFileSync(new URL('../examples/SMAX_SALES_SAMPLE.csv',import.meta.url),'utf8');
+  const summary=buildSalesReport(source,mapping,{period:'daily'});
+  assert.equal(summary.summary.sourceRows,5);
+  assert.equal(summary.summary.includedRows,2);
+  assert.equal(summary.summary.excludedRows,3);
+  assert.equal(summary.summary.netAmount,'79.90');
+  assert.deepEqual(summary.excluded.map(row=>row.reason),[
+    'DUPLICATE','INVALID_DATE','FORMULA_PROTECTED'
+  ]);
+  assert.equal(summary.reportCsv.startsWith('\uFEFF기간,'),true);
+  assert.equal(summary.reviewCsv.startsWith('\uFEFF원본레코드,'),true);
+  const monthly=buildSalesReport(source,mapping,{period:'monthly'});
+  assert.equal(monthly.summary.netAmount,'79.90');
 });
