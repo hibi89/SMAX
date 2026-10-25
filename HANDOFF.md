@@ -260,3 +260,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **다음 릴리스 게이트:** 동일 최신 `frontend` full checkout → `npm run qa:release` Node exit0·오프라인 HTML SHA/CSP → `npm run qa:browser:node` Chromium `file://` → Windows `QA_SELF_WINDOWS.cmd /edge`. 사용자 별도 승인 전 main 통합·공개/크몽 등록 금지.
 9. **프로젝트:** Private `hibi89/SMAX`; SELF 2종 로컬 CSV 실행 + 가이드 전용 8종. RAG Studio/SMAX/SOVIA 장기 통합 기획은 main 문서 별도, 이번 판매 범위 불변. 개발 목표 **2026-11-07**.
 10. **재개:** 다른 채팅 `[SMAX² 스총] GitHub hibi89/SMAX 최신 레포지토리 확인하고 총괄 작업 이어가셈` 또는 `ㄱ` → 실제 브랜치 HEAD 및 각 `STATUS.md`/`HANDOFF.md` 재조회 후 안전한 다음 P0 진행. 문서 마지막 커밋 뒤 HEAD 반드시 재확인.
+
+## 2026-10-26 KST — 스총 인계: 금액 유효 자릿수 오류 수정 (10항)
+1. **요약:** 자체 점검으로 실제 매출 누락 버그 발견. CSV `0000000000001`은 1원이지만 판매액 정수부의 전체 자릿수 제한 때문에 `AMOUNT_EXCEEDS_REPORT_LIMIT`로 제외. `1`은 포함되어 논리 불일치. 사용자의 Windows PC 시험 지시 없이 재현.
+2. **제품 수정:** `site/sales-report.mjs` `parseCents`가 원문 정수부의 선행 0을 제거한 뒤 유효 길이 12자리 이내인지 검사. 기존 BigInt 센트 정확도와 - 부호/소수 최대 2자리, 진짜 1조 원 이상 제외 유지. backend commit `5be429c2f4e06771d2b3a7681292351d5565fc86`, frontend `f123a74f0b3d4b995304be505eb7843377618286`, 코드 blob `05578b300b2d7c2f0b653a485ac9c2c859ea055e` 동일.
+3. **집계 계약:** 원본 금액 `0000000000001` 표기 그대로 출력·검토 파일 원본 행 보존. 중복 판정은 별도 `duplicateAmountKey`가 선행 0/화폐표기를 동등 비교하므로 동일 주문 `1`+패딩 `0000000000001` 중 하나만 잠정 반영. 서로 다른 주문번호는 각각 반영.
+4. **테스트:** 양 브랜치 `tests/sales-report.test.mjs`에 6원본 유효3/제외3, `netAmount='0.20'`, upper max `999999999999.99` 포함, 실제 초과 제외 신규 테스트. backend `9672ea31932fe8454bd17d45bb66fa2efd9b92ce`, frontend `912fa18e9ca410f76514d7bc4e0bbf0081bb3b5c`.
+5. **UI 테스트:** `frontend/tests/offline-ui-smoke.test.mjs`에 실제 로컬 앱 UI와 download blob의 금액/원본 번호/제외 사유 검사 추가 `0cdedf576cbb3e52c68d4467eb28ce56c02c2707`. frontend 고객 안내 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`에 원본 금액·실제 금액 상한 의미 설명 `01d7acece8b38087fb6c5bda5064559528981574`.
+6. **실제 검증 범위:** 최신 backend/frontend 각 실제 production modules + checked-in 테스트 4함수 직접 독립 V8 실행 4/4 PASS 각각, frontend 합성 5모듈 fake DOM UI 테스트 본문 1/1 PASS. Native Node 전체, 신규 disk SHA/CSP, 실제 Chromium/Edge `file://` PASS와 동일시 금지.
+7. **브랜치 상태:** Private `hibi89/SMAX`, 최신 frontend/backend 브랜치 HEAD 재조회 후 인수. `main` 원본 그대로, 배포·merge/force push 없음. 제품/테스트 두 브랜치 변경 확인, 모듈 blob 동일.
+8. **현재 제품 경계:** SMAX² SELF 오프라인 CSV 실제 실행 2종 + 가이드 전용 8종. 잠정 매출은 세무/회계 확정 아님; 검토/제외 원본 번호와 이유는 화면 최대5건, 검토 CSV 전체 보존. 사용자 원본 파일, 결제, 업로드, 외부 에이전트 실행 없음.
+9. **미완료 릴리스 검증:** 변경 후 Native Node `npm run qa:release`, SHA/CSP, Windows Edge E2E, 수동 Windows UX **NOT_RUN**, saleApproval **NOT_GRANTED**. 이전 사용자 Windows 86/86 PASS는 코드 변경 이전 버전에만 적용. 사용자가 반복 실PC 수동 작업을 원치 않으므로 개발자 자체 코드/격리 QA를 먼저 진행.
+10. **다음 `ㄱ`:** 최신 GitHub 각 브랜치 HEAD·`STATUS.md`/`HANDOFF.md` 읽고 결함 수정/회귀 우선. 실기기 검증 없이 배포 PASS 주장 금지. 외부 발송/돈/유료 API/합병 승인 없음. 마감 **2026-11-07** 유지.
