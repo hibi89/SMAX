@@ -591,3 +591,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본·보안:** 고객 CSV 미접촉, 테스트 합성 문자열과 Private 코드만 사용. 데이터/인증정보/토큰/Git 비공개 소스의 외부 전송 없음. `main`/외부 프로젝트 무수정. 원본 행 보존·검토 결과는 회계 승인 아님.
 9. **다음 작업·완료 기준·승인:** 동일 최신 `frontend` checkout에서 전체 Node 테스트 0 FAIL와 `dist/SMAX_SELF_OFFLINE.html` 실제 SHA/CSP 검사 → 동일 아티팩트 Chromium `file://` E2E → Windows Edge 파일/다운로드/HTTP0 검증. 그다음 5개 양쪽 수정 경로+main 전용 변경을 수동 검토하고 **사용자 별도 승인** 후에만 통합. 공개 사이트/크몽 게시/가격·라이선스/결제/고객자료·비용은 별도 승인.
 10. **시간·기준 SHA:** 2026-10-26 KST 최신 기능 점검. 실제 검증은 변경 뒤 재조회한 CSV 및 매출 함수 원문만. 본 HANDOFF 최종 커밋 뒤 `main`, `backend`, `frontend`의 HEAD를 다시 조회해서 보고. **2026-11-07 14일 개발 마감 상한** 유지.
+
+## 2026-10-26 KST — 스총 최신 인계: 중복 판정의 고객 안내 UI (10항)
+1. **목표·기술·고객 가치:** SMAX² SELF 2개 실행형 오프라인 CSV 상품에서 `DUPLICATE`가 자동 확정 회계 중복이 아닌 “검토 의심”이라는 점을 결과 화면에 설명하여 잠정 매출 과소해석 방지. 8종 가이드는 계속 실행 불가. JavaScript 클라이언트 렌더러만 수정.
+2. **선택/반영 설계:** 기존 코드와 검토 파일 생성은 유지. `site/app.mjs` 매출 결과 `result.excluded.some(row=>row.reason.split("|").includes("DUPLICATE"))` 때만 대조 안내, 표준화 `summary.duplicateRows>0`일 때만 안내. 중복 0건이나 매핑 변경 후 stale 화면에는 안내 없음; 원본/합계 임의 가감 없음.
+3. **테스트·증거:** 최신 GitHub 생산 5모듈을 V8 모의 DOM/Blob으로 통합 실행한 집중 7/7 PASS. **새 `tests/offline-ui-smoke.test.mjs`의 정확한 테스트 함수 원문**까지 그 모듈들과 V8 실행 PASS (선별된 함수 1건; 전체 Node suite 아님). 검토 CSV 원본 4행/사유 일치, 4열 주문 A/B/B 잠정 반영2·제외1·합계200.00, 매핑 변경 시 결과 소거, 0건 안내 부재 확인.
+4. **상태:** 해당 화면 문구·선별 검증 완료; 전체 출고 QA·실기기 Windows·main 수동 통합/판매 승인 대기. 다른 제품/가격/업무 자동화 범위 확장하지 않음.
+5. **오류·제약·대안:** Node22/Chromium은 있으나 컨테이너 GitHub Private checkout DNS 실패. GitHub 이 HEAD에는 Actions 성공/status 없음. 네트워크 차단 환경에서 V8 테스트를 Native 릴리스 테스트로 오인하지 말 것. 승인된 소스 체크아웃 가능한 PC에서 Node 전체 검증. 이미 실패한 접근 재시도 반복 금지.
+6. **GitHub 복구:** Private `hibi89/SMAX` `frontend` 변경 `site/app.mjs` 커밋 `1db08dc8d3b23e415bd97bf3ba7ada5095d05a35`, `tests/offline-ui-smoke.test.mjs` `8b652572e8b639fb36b2d658246e4b102ec6f2ff`, `STATUS.md` `156ac64897c2c480158bd873d34226c476ff9e55`; 이 항목 `HANDOFF.md`은 뒤따르는 커밋. `main`, `backend` 무변경. Git 이력 통한 원본 복구 가능/force push 없음.
+7. **Production·환경:** Production URL 없음, Vercel 미적용, Cloudflare 공개·유료 판매/상품 등록 없음. 오프라인 HTML 기반 SELF이며 소스 `site/`를 `public-site/`에 혼합 게시 금지.
+8. **보안·데이터:** 전부 합성 주문번호·매출/검토 문자열만 테스트. 원본 고객·토큰·영업정보 업로드/저장/외부 송신 없음. 유료 API/별도 클라우드 툴/금전 지출 없음.
+9. **다음 단계·승인/완료 기준:** 동일 최신 `frontend` 전체 Git checkout에서 `npm run qa:release` 실제 exit0·신규 생성 HTML SHA/CSP → `npm run qa:browser:node` Chromium `file://` → Windows Edge 실제 PC `QA_SELF_WINDOWS.cmd /edge`. 이후 사용자가 **별도로 승인한 경우에만** main의 RAG 전략/사업 문서와 기존 겹치는 경로들을 보존하여 통합·출시/외부 배포 논의.
+10. **기준:** 2026-10-26 KST; 최종 SHA는 HANDOFF 기록 커밋 직후 GitHub 브랜치 목록 재조회. **2026-11-07** 목표일 유지. 사용자 `ㄱ`에서 최신 `frontend`·`STATUS.md`·`HANDOFF.md`를 우선 읽고 다음 P0 진행.
