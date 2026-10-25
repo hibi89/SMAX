@@ -166,3 +166,15 @@
 - 정확한 새 채팅 문구 **`너는 스총이다 레포지토리보고 작업이어가셈`**. 최신 재개 문서 `CHAT_BOOTSTRAP.md` 및 목표/역사/범위/기술/현재 증거/다음 실제 작업 `docs/STECHONG_CANONICAL_CONTEXT_20261025.md`; 구형 부트스트랩 백업 `docs/history/CHAT_BOOTSTRAP_PRE_STECHONG_20261025.md`.
 - 2026-11-07까지 사장님 존 SELF에 집중. 실제 CSV 변환 1종 검증 → 공개/유료 분리 → QA/패키징. 대외 출시/실판매는 아직 없음.
 - 이번 커밋은 **역할·부트스트랩·인수인계만** 갱신. 실 제품 추가개발·Node/Windows 실테스트/외부 배포는 진행하지 않음.
+
+
+## 2026-10-25 KST — 스총 실행 2: 사장님 SELF 로컬 CSV 변환 UI 연결 (frontend)
+- 브랜치 `frontend`. `backend`의 검증된 `site/csv-transform.mjs` / `tests/csv-transform.test.mjs`를 **Git blob 동일**하게 복사하여 프론트 통합. 기존 `site/app.mjs`, `site/styles.css`만 최소 변경; `tests/csv-ui.test.mjs` Node ESM 회귀 테스트 신규 작성.
+- 화면 흐름: 사장님 `엑셀·CSV 통합` 템플릿 선택 → 챗봇 패널 → **로컬 CSV 파일** 선택 → 날짜/상품/금액의 원본 열 3개 직접 지정 → `변환·미리보기` 클릭 → 처음 최대 5행과 검토/중복 개수 확인 → `SMAX_STANDARDIZED.csv` 다운로드. CSV 결과는 **변환 성공 시에만** 다운로드 버튼이 나타남. 다른 9종은 설계 가이드 초안 지위 유지.
+- 안전/복구: 2MB 제한, CSV 확장자 검사, 이스케이프된 데이터 미리보기, 매핑 변경 시 과거 결과 폐기, 파일 교체/템플릿 전환/초기화 시 CSV 원문·결과 메모리 해제. 비동기 파일 읽기 중 사용자 전환 시 `csvGeneration` 검증으로 오래된 파일 결과 반영 방지. 사용자가 원본 파일을 덮어쓰지 않음, 서버 호출 없음.
+- 실제 시험: V8에서 **실 GitHub `site/app.mjs`/`site/core.mjs`/`site/templates.mjs`/`site/csv-transform.mjs` 소스를 읽어 스텁 DOM 이벤트로 실행한 17 시나리오 모두 PASS(실제 변환, 오류 2행, CSV 다운로드, stale state, 파일 확장자, HTML escaping). 본 검증은 **가상 DOM**이며 실 Chromium/Safari/Android/Windows E2E가 아님.
+- 영구 회귀 `tests/csv-ui.test.mjs` 작성; `npm test` 실제 Node 실행은 **미검증**(현재 GitHub connector로 소스 검수 및 V8 모의 DOM 검사만 수행). 기존 코어 테스트의 과거 10 PASS는 `backend` 별도 실행 기록이며 이번 통합 테스트 결과와 합산해 Node 전체 PASS라 표시 금지.
+- Code SHA: `site/app.mjs` 최종 업로드 `b746d5de0691e950c42e9b714f4455ec219d3d84`, CSS `2148bc8020571d0ba960a119b54edb16be837bb6`, UI 테스트 최종 `14aa8e0a3d9b17bf0c64683d6653867fa13908b4`. 최종 frontend HEAD는 문서 반영 후 실제 재조회.
+- `main`에 별도 로고 관련 최신 커밋이 있어서 (`91549b01323c6d8f6a1d277c5bde2302c003f949` 관측), `main`을 덮어쓰거나 merge하지 않음. 병합 전 로고 CSS/HTML 최신 변경과 신규 CSV UI CSS를 충돌 없이 조정 필요.
+- 진행/차단: **코드 통합과 V8 UI 시뮬레이션 완료**; 실제 브라우저·Windows·`npm test`, 사용성, 공개/유료 코드 분리, 패키징·크몽 판매 품질은 **미검증/미완**. Cloudflare 공개/크몽 상품 게시/유료 서비스/개인정보 수신 없음.
+- 다음 작업 우선: 안전한 정적 웹 쇼룸과 유료 SELF 코어/로컬 전달물 분리의 2안 비교 및 구현 계획 → **Node 전체 테스트/실 브라우저 QA** → Windows 로컬 패키징 및 크몽 상품 설명·등록 심사 준비. 2026-11-07은 **최종 상한이지 목표 소요시간이 아니며**, 일찍 검증 통과하면 즉시 완료 판단.
