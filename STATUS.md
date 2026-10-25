@@ -199,3 +199,12 @@
 - 실패/제약: 이 컨테이너에서 비공개 GitHub 저장소 직접 Git clone은 DNS 장애(`Could not resolve host: github.com`)로 불가능. GitHub 커넥터로는 파일 읽기·커밋 검증 가능하나 컨테이너로 저장소 전체를 안전하게 장착하지 못해 **실 `npm test` 및 `npm run build:self`/실 Windows Edge·Chrome file:// QA는 미검증**. 추측으로 PASS 처리 금지.
 - 별도 유료/공개 사업·로컬 고객 파일 전송·실결제·크몽 등록·Cloudflare 배포 **모두 미실시**. `main`/`backend` 미변경. 최종 frontend 원격 HEAD는 문서 커밋 완료 후 재조회.
 - 다음: 전체 Node 단위·통합 테스트와 출력 HTML SHA·크기 재현성 확인 → Windows Chrome/Edge CSV E2E/Console/Network 확인 → 사용권/지원/환불·크몽 설명 검수 → 명시 승인 후 안전한 main 통합·정식 등록 여부 결정. 2026-11-07 최종 상한(가능하면 조기 완료) 유지.
+
+
+## 2026-10-25 KST — 스총 실행 5: 브라우저 통합 QA 자동화 추가·환경 차단 분류
+- Private `frontend` 최신 HEAD에서 시작해 `scripts/qa_browser.py` Chromium/Edge 오프라인 E2E 스크립트 작성·커밋. `package.json` 명령 `qa:browser` 추가. 표준 합성 `examples/SMAX_SELF_SAMPLE.csv` 입력으로 파일 로드/3열 매핑/오류·중복 검토 2행/결과 4행 CSV·BOM 다운로드/잘못된 매핑 차단/375px/외부 요청·JS 오류 0을 검사하도록 구성.
+- QA 스크립트 구문: **로컬 Python `python -m py_compile` PASS**, 원격 `scripts/qa_browser.py` Git blob SHA `eab5a40c5445113bbf874d36ae9a8cce7a32a445`와 로컬 `git hash-object` 일치 확인.
+- 예외 상태 계약: `0=PASS`, `1=FAIL`, `2=INPUT_MISSING`, `3=BLOCKED`(브라우저 executable 또는 관리자 보안정책). 로컬 프로그램 미준비에서 exit 2, 가상 최소 HTML+CSV 조건에서는 Chromium Playwright bundled 실행파일 없음 → JSON `BLOCKED`, exit 3 실제 확인.
+- 실 브라우저 환경 확인: 시스템 Chromium을 별도 지정하여 최소한의 **비제품** HTML을 `file://`과 localhost에서 열었으나 양쪽 모두 `ERR_BLOCKED_BY_ADMINISTRATOR`. 본 환경 정책 차단이므로 SELF 제품 결함 증거가 아니며 **실 제품 브라우저 QA PASS가 아님**. 동일 시도 반복하지 않고 별도 허가된 Windows Edge/Chrome 환경에서 재검증 필요.
+- 기존 Node v22.16.0 로컬 백엔드 해시 일치 파일 `node --test tests/csv-transform.test.mjs` 10 PASS / 0 FAIL 이번 턴 다시 확인. 현재 `frontend` 전체 `npm test`, 실제 `npm run build:self` 산출물 생성, 실 `file://` SELF E2E, Windows GUI는 **미검증**. 크몽 판매/Cloudflare 배포/개인정보 외부 전송 0건.
+- 실행 문서 `docs/QA_BROWSER_RUNBOOK_20261025.md`, `README_LOCAL.md` 업데이트. `main`, `backend` 그대로 보존. 다음 안전 최우선: 승인된 실행환경에서 전체 Node 및 단일 HTML 빌드 테스트 → Windows Edge E2E 증거 → 제품 전달·크몽 등록 승인 게이트. 11월 7일은 상한이며 조기 완성 지향.
