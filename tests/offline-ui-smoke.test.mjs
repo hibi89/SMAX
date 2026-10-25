@@ -760,3 +760,37 @@ test('sales review preview shows at most five excluded source records, then clea
   assert.doesNotMatch(env.rootNode.innerHTML,/제외·검토 대상 처음/);
   assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
 });
+
+test('offline sales panel includes zero-padded small amounts without weakening amount cap',async()=>{
+ const env=offlineFixture();
+ env.click('select',{id:'sales'});
+ env.click('tab',{tab:'chat'});
+ const source='판매일,판매처,판매액,주문번호\n'
+  +'2026-10-01,온라인,0000000000001,ORDER-A\n'
+  +'2026-10-01,온라인,1.00,ORDER-A\n'
+  +'2026-10-01,온라인,0000000000001.20,ORDER-B\n'
+  +'2026-10-01,매장,-0000000000002.00,ORDER-C\n'
+  +'2026-10-01,온라인,1000000000000,ORDER-D\n'
+  +'2026-10-01,온라인,0001000000000000,ORDER-E';
+ await env.change({id:'csv-upload',dataset:{},files:[{
+   name:'leading-zeros.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+ }]});
+ for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+   await env.change({dataset:{action:'map',field},value});
+ }
+ env.click('run-sales');
+ assert.match(env.rootNode.innerHTML,/원본 6행/);
+ assert.match(env.rootNode.innerHTML,/잠정 반영 3행/);
+ assert.match(env.rootNode.innerHTML,/제외\/검토 3행/);
+ assert.match(env.rootNode.innerHTML,/0\.20원/);
+ assert.match(env.rootNode.innerHTML,/<td>3<\/td><td>DUPLICATE<\/td>/);
+ assert.match(env.rootNode.innerHTML,/<td>6<\/td><td>AMOUNT_EXCEEDS_REPORT_LIMIT<\/td>/);
+ assert.match(env.rootNode.innerHTML,/<td>7<\/td><td>AMOUNT_EXCEEDS_REPORT_LIMIT<\/td>/);
+ env.click('download-sales-review');
+ const review=env.blobs.at(-1).parts[0];
+ assert.doesNotMatch(review,/0000000000001.20/);
+ assert.match(review,/0001000000000000,AMOUNT_EXCEEDS_REPORT_LIMIT/);
+ env.click('download-sales-report');
+ assert.match(env.blobs.at(-1).parts[0],/2026-10-01,온라인,2,2.20,0.00,2.20/);
+ assert.match(env.blobs.at(-1).parts[0],/2026-10-01,매장,1,0.00,2.00,-2.00/);
+});
