@@ -63,7 +63,7 @@ function csvResultPanel(t){
 }
 function editorPanel(t){
   if(!t)return '<aside class="editor-panel"><span class="side-label">YOUR WORKFLOW</span><h3>시작할 준비가 됐나요?</h3><p>원하는 업무를 입력하고 템플릿을 선택하면 개인별 업무 질문과 설계서 초안 만들기를 이어갈 수 있습니다.</p><p class="tiny">실제 계정 로그인, 이메일 발송 및 외부 서비스 연동은 이 데모에서 실행하지 않습니다.</p></aside>';
-  const b=buildBlueprint(t,state.answers,state.mappings);
+  const b=buildBlueprint(t,state.answers,state.mappings,{guideOnly:!Object.hasOwn(sampleCsvByTemplate,t.id)});
   const executable=Object.hasOwn(sampleCsvByTemplate,t.id);
   const maps=executable
     ? (state.headers.length
@@ -150,7 +150,7 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
   download(state.demoMode?"SMAX_DEMO_SALES_REVIEW_ROWS.csv":"SMAX_SALES_REVIEW_ROWS.csv",state.salesPreview.reviewCsv,"text/csv;charset=utf-8");
 }else if(action==="download-json"||action==="download-guide"){
   const t=getTemplate();if(!t)return;
-  const b=buildBlueprint(t,state.answers,state.mappings);
+  const b=buildBlueprint(t,state.answers,state.mappings,{guideOnly:!Object.hasOwn(sampleCsvByTemplate,t.id)});
   const demoNotice="합성 예제 결과입니다. 실제 고객 데이터나 업무 설계서로 사용하지 마세요.";
   if(state.demoMode){b.syntheticDemo=true;b.demoNotice=demoNotice;}
   const prefix=state.demoMode?"SMAX_DEMO_":"";
