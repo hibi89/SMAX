@@ -82,6 +82,38 @@ test('SELF CSV upload / manual map / preview / download and stale-state safety',
     assert.match(root.innerHTML,/3개 열 감지/);
     assert.doesNotMatch(root.innerHTML,/문자 인코딩 오류/);
 
+    // A slow byte read from an older file must not overwrite a newer upload.
+    let releaseStaleBytes;
+    const pendingStaleBytes=change({id:'csv-upload',dataset:{},files:[{
+      name:'stale-raw-bytes.csv',size:cp949.byteLength,
+      arrayBuffer:()=>new Promise(resolve=>{releaseStaleBytes=resolve})
+    }]});
+    const newerCsv='거래날짜,품목,결제금액\n2026-10-02,새상품,250';
+    const newerBytes=Uint8Array.from(Buffer.from(newerCsv,'utf8'));
+    await change({id:'csv-upload',dataset:{},files:[{
+      name:'newer-utf8.csv',size:newerBytes.byteLength,
+      arrayBuffer:async()=>newerBytes.buffer
+    }]});
+    releaseStaleBytes(cp949.buffer);
+    await pendingStaleBytes;
+    assert.match(root.innerHTML,/newer-utf8\.csv/);
+    assert.match(root.innerHTML,/3개 열 감지/);
+    assert.doesNotMatch(root.innerHTML,/해석 실패: 문자 인코딩 오류/);
+    // Same protection when a different older read finishes after a successful replacement.
+    let releaseOldSuccess;
+    const pendingOldSuccess=change({id:'csv-upload',dataset:{},files:[{
+      name:'old-but-valid.csv',size:utf8Bytes.byteLength,
+      arrayBuffer:()=>new Promise(resolve=>{releaseOldSuccess=resolve})
+    }]});
+    await change({id:'csv-upload',dataset:{},files:[{
+      name:'latest-wins.csv',size:newerBytes.byteLength,
+      arrayBuffer:async()=>newerBytes.buffer
+    }]});
+    releaseOldSuccess(utf8Bytes.buffer);
+    await pendingOldSuccess;
+    assert.match(root.innerHTML,/latest-wins\.csv/);
+    assert.doesNotMatch(root.innerHTML,/old-but-valid\.csv/);
+
     let release;
     const pending=change({id:'csv-upload',dataset:{},files:[{name:'later.csv',size:csv.length,text:()=>new Promise(resolve=>{release=resolve})}]});
     click('select',{id:'faq'});
