@@ -415,3 +415,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본/백업/보안:** 앞 원격 커밋 `1e0f7ba632f83b264a7123e7add7c11b3c06a343` 복구 기준, 전체 Git 이력 보존. `public-site/` 소개용만; `site/` 로컬 유료 엔진 Public 게시 금지. 개인정보/기업 실자료/토큰/결제 계정·API 전송·실비 지출 0.
 9. **다음 1작업·완료 기준:** Private `frontend` 전체 Node suite+release QA 실제 exit0 및 새 HTML SHA256·bytes/CSP·두 합성 fixture PASS 확인, 동일 해시 실제 Playwright `file://` 검수 10항과 Windows Edge. 이후 디자인/사용성/상품 이용권·환불 조건 점검 및 사용자 출시 별도 승인. 현재 사용자 로컬 작업을 요구하지 않음; 기한 2026-11-07 자동 연장 불가.
 10. **갱신·증거 범위:** 2026-10-25 KST, 연결 GitHub 최신 브랜치와 파일 재조회, V8 11/11 조건 검사 및 실제 remote commit 증빙. 문서 자체 기록은 Native Node/브라우저/서비스 정상의 증거가 아님.
+
+## 2026-10-25 KST — 스총 인계: 헤더-only 입력과 이중 CSV 파서 패리티 (10항)
+1. **목적·기술:** Private SMAX² SELF 로컬 JavaScript 제품, 10종 설계 가이드와 CSV 표준화/매출 잠정 보고 2종. 2026-11-07까지 실사용 QA 우선, 클라우드/SaaS 확장 미포함.
+2. **수정/근거:** `site/core.mjs`의 CSV 업로드 파서가 원본 데이터가 없는 헤더 단독 파일을 사전에 받아들여 고객에게 매핑을 먼저 제시하는 불일치 수정. 헤더만 남으면 즉시 한국어 오류로 거부. 기존 실행 코어 변경 없음. `tests/core.test.mjs` 추가 1건, `tests/csv-ui.test.mjs` 기존 테스트에 실제 업로드 회귀 추가, `tests/csv-preflight-parity.test.mjs` 신규 2건 및 `scripts/qa-release.mjs` 필수 목록 추가.
+3. **검증:** Remote 실제 코어 2개를 함수로 평가한 V8 구조 패리티 14 정적 + 256 seed 합성 **270/270**. Remote 5개 제품 모듈을 조합한 실제 업로드 이벤트 V8 검사 **3/3** (헤더-only/잘못된 따옴표/정상 입력). **Native Node 전체 tests NOT_RUN, 실제 Chrome/Edge browser E2E NOT_RUN, SHA/CSP 새 번들 검증 NOT_RUN.** 회귀 소스가 저장됐다는 사실은 Node PASS가 아님.
+4. **완료·차단:** 프런트 코드·회귀 명세·릴리스 필수 목록 GitHub 반영 완료. 제품 최종 출고, 고객판매/공개배포 미착수. Native 전제품 릴리스 및 Windows 실검증 계속 차단/대기.
+5. **오류·시도·전환:** Linux 컨테이너 `git ls-remote https://github.com/hibi89/SMAX.git HEAD` 결과 DNS 실패 `Could not resolve host: github.com`; 기존 CI run `40182096760` job `121135102487`는 GitHub 단계 조회 `[]`, job log 404 `BlobNotFound`. 원인 미확정이라 재실행하지 않음. 차단 방식을 반복하거나 실패를 제품 오류로 단정하지 않음. 커넥터로 원격 소스 함수 실행·변형 회귀 검증으로 전환.
+6. **원본·브랜치·커밋:** `hibi89/SMAX` Private, `frontend`만 변경. 직전 HEAD `9eca23820b9396f6ac697b90d34ca5ee18b4f256`, 코드 `38d3e7dee1cc85bb753ca7c5920d64a8219b7220`, parity 신규 `8375887c8e2c51f6f54d09327678bbdf3f44101a`, QA 필수 `97414aa6db53702eb8fe363d24ff365dcb946ca6`. 검증한 원격 HEAD `97414aa6db53702eb8fe363d24ff365dcb946ca6`, 최종 인수인계 후 HEAD 다시 조회. `main`/`backend` 미변경.
+7. **배포/명령:** Vercel 미적용, Cloudflare Production URL 없음, 크몽 판매·실상품 URL 없음. 전체 `frontend` 개발자 QA 명령 `npm run qa:release` → 생성 `dist/SMAX_SELF_OFFLINE.html` SHA/리포트 확인 → `npm run qa:browser:node`; Windows Edge는 `QA_SELF_WINDOWS.cmd /edge`. 구매자 단일 HTML 무설치 목표는 검증 전.
+8. **보존·보안:** Private 이력/기존 코어/원본 자료 보존, 합성 CSV만 사용. `public-site/` 한정 공개 후보, `site/` 실행 로직 공개 금지. 고객자료·비밀번호·결제·외부 LLM·구독비/배포/계정변경 없음.
+9. **다음 1순위:** **최신 전체 checkout이 가능한 Node 개발 환경에서 전제품 QA 실행** 후 보고서 `allNodeTests` 및 합성 2종 PASS 확인. 동일 SHA 실제 Chromium file:// 10항과 Windows Edge 실기기 검증, 사용자 승인 후만 상품 등록/배포. 시간 제약 2026-11-07, 자동 연장 금지.
+10. **작성 시각·판정:** 2026-10-25 KST, 원격 GitHub 읽기/쓰기와 V8 함수·DOM 이벤트 격리 검사에 근거. Linux·Chromium/Windows 실제 완제품 검증 미확인. 나중 작업자가 변경된 parser parity Node suite까지 재실행해야 함.
