@@ -530,3 +530,49 @@ test('offline synthetic CSV source downloads provide BOM UTF-8 training files wi
   env.click('download-sample-input');
   assert.equal(env.links.length,count,'forged sample download in guide-only workflow');
 });
+
+test('spreadsheet review-only CSV export contains flagged records, never drops full output',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  env.click('try-sample');
+  assert.match(env.rootNode.innerHTML,/data-action="download-csv-review"/);
+  env.click('download-csv-review');
+  assert.equal(env.links.at(-1).download,'SMAX_DEMO_STANDARDIZED_REVIEW.csv');
+  const review=env.blobs.at(-1).parts[0];
+  assert.equal(review.trimEnd().split('\r\n').length,3);
+  assert.match(review,/^\uFEFF거래일,/);
+  assert.match(review,/DUPLICATE/);
+  assert.match(review,/INVALID_DATE/);
+  env.click('download-csv');
+  assert.equal(env.links.at(-1).download,'SMAX_DEMO_STANDARDIZED.csv');
+  assert.equal(env.blobs.at(-1).parts[0].trimEnd().split('\r\n').length,5);
+
+  const source='거래날짜,품목,결제금액\n2026-10-26,연필,100\n2026-10-26,연필,100';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'owner.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  for(const [field,value] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-csv');
+  env.click('download-csv-review');
+  assert.equal(env.links.at(-1).download,'SMAX_STANDARDIZED_REVIEW.csv');
+  assert.equal(env.blobs.at(-1).parts[0].trimEnd().split('\r\n').length,2);
+  await env.change({dataset:{action:'map',field:'amount'},value:'품목'});
+  const before=env.links.length;
+  env.click('download-csv-review');
+  assert.equal(env.links.length,before,'stale review-only CSV blocked after invalid remapping');
+
+  const clean='거래날짜,품목,결제금액\n2026-10-26,연필,100';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'clean.csv',size:Buffer.byteLength(clean,'utf8'),text:async()=>clean
+  }]});
+  for(const [field,value] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-csv');
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-csv-review"/);
+  env.click('download-csv-review');
+  assert.equal(env.links.length,before,'no review-only export for zero flagged records');
+});
