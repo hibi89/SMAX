@@ -22,15 +22,21 @@
 3. http://localhost:8788/ 를 브라우저에서 열기. ES modules 로드 때문에 file:// 직접 실행 권장하지 않음.
 4. 실제 회사 정보 대신 테스트 데이터 사용. CSV는 2MB 이하, XLSX 미지원. `엑셀·CSV 통합` → `챗봇 패널` → CSV 파일 업로드 → 원본 열 3개(거래일/상품명/금액) **직접 선택** → `변환·미리보기` → 검토사유 확인 → 결과 다운로드. 기존 원본 파일을 덮어쓰지 않음. 매핑/파일 변경 또는 다른 템플릿 선택 시 이전 변환 결과 초기화.
 
+## 공개 소개 페이지 / 유료 로컬 제품 분리 (2026-10-25)
+- `public-site/index.html`: **고객에게 공개 가능한 내용만 담은 정적 쇼룸 후보**. 10종 소개, 실제 출시 전 표시. 별도 테스트·승인 전 공개하지 않음.
+- `site/`: **PRIVATE SELF 제품 개발 파일**. CSV 실제 변환/설계서 실행 코드를 포함하므로 공개 정적 호스팅에 직접 올리지 않는다.
+- `wrangler.jsonc`의 `assets.directory`는 안전한 `./public-site`만 지정. `tests/public-boundary.test.mjs`는 공개 자산·판매 문구를 회귀 검사. 이 설정을 `./site`로 되돌려 배포하지 말 것.
+- `npm test`는 저장소 복사본의 **모든** 테스트를 실행하는 QA 명령. 이번 GitHub 커넥터 실행에서는 새로운 public-boundary 및 csv-ui 테스트의 실제 Node 실행이 아직 확인되지 않았다.
+- 공개/유료 분리 전략과 승인 게이트: `docs/PUBLIC_PRIVATE_RELEASE_BOUNDARY_20261025.md`.
+
 ## Cloudflare 정적 배포 준비
-- 이 저장소는 **Private**이다. 실제 Cloudflare 계정의 GitHub 저장소 접근 권한과 Cloudflare 생성/배포 승인이 필요.
-- `wrangler.jsonc`는 Workers Static Assets 구성이며 빌드 없이 `./site`를 제공한다.
-- Cloudflare 대시보드 Workers & Pages → Create → GitHub 저장소 연결 → 루트 `wrangler.jsonc` 읽기 → 배포.
-- 배포 시 생기는 `<worker>.<account>.workers.dev` URL은 프로젝트 이름·주소를 유지하는 동안 콘텐츠를 업데이트해도 같은 주소로 접근 가능. 공개 도메인 연결은 별도 결정.
-- 실제 크몽 상품 링크가 등록되기 전 홈페이지에는 구매 버튼 대신 준비 중 표시가 유지된다.
+- Private GitHub를 Cloudflare 계정에 연결하면 빌드 제공자에게 저장소 접근 권한이 부여되므로 **사용자 사전 승인** 후에만 수행한다.
+- 공개될 정적 자산은 `./public-site`만이며, `site/`는 로컬 SELF 기능 코드로서 공개하지 않는다.
+- 실제 Cloudflare 계정·Worker 프로젝트·URL은 아직 없고 상용 게시/도메인/크몽 상품 연결은 승인받지 않았다.
+- Workers Static Assets의 정적 설정 후보는 `wrangler.jsonc`; 빌드·연동·게시 전 `npm test`, 실제 응답 헤더/브라우저/안전한 전달 경로 검증.
+- 현재 크몽 상품 등록·심사 및 결제 없음. 구매 가능하다는 표현 금지.
 
 ## 개인정보와 마케팅
-- 브라우저에서 읽은 CSV는 브라우저 메모리에서만 처리. 외부 서버로 전송하는 fetch/XMLHttpRequest 코드가 없고 CSP connect-src 'none'이다.
-- API 0원은 **SMAX 자체 필수 AI API 호출**에 대한 설명이며, 고객이 선택한 외부 AI·도구 비용은 별도.
-- 무료 요청 기능은 실제 수신·저장 구현 전 '준비 중'으로 표시.
-- 홈페이지 내용은 기획/검증 상태에 맞게 유지. 템플릿 10종이 모두 실제 자동화 실행까지 검증되었다고 홍보하면 안 됨.
+- 파일 변환 실행은 고객 PC 로컬을 전제로 하며 웹 공개 쇼룸은 실제 파일을 받지 않는다.
+- 유료 모델/API 연결은 사용자가 사전 승인하지 않은 한 추가하지 않는다.
+- 공개 페이지는 소개/검증된 일부 기능 사실만 표시한다. 10종을 모두 실제 자동화 완성형이라고 주장하지 않는다.
