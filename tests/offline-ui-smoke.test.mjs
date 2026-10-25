@@ -113,3 +113,43 @@ test('offline output cannot survive remapping or unrelated template selection',a
   assert.doesNotMatch(env.rootNode.innerHTML,/로컬 CSV 실제 변환/);
   assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-csv"/);
 });
+
+
+test('late async upload cannot resurrect a CSV after switching to another workflow',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  const source='거래날짜,품목,결제금액\n2026-10-25,연필,100';
+  let release;
+  const pending=env.change({id:'csv-upload',dataset:{},files:[{
+    name:'slow.csv',size:Buffer.byteLength(source,'utf8'),
+    text:()=>new Promise(resolve=>{release=resolve})
+  }]});
+  assert.equal(typeof release,'function');
+  env.click('select',{id:'faq'});
+  release(source);
+  await pending;
+  assert.doesNotMatch(env.rootNode.innerHTML,/로컬 CSV 실제 변환/);
+  env.click('select',{id:'spreadsheet'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/3개 열 감지/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-csv"/);
+});
+
+test('spreadsheet-like formula content is escaped in bundled preview and output',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  const source='거래날짜,품목,결제금액\n2026-10-25,"\u200B=1+1",100';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'synthetic.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  for(const [field,value] of Object.entries({
+    date:'거래날짜',item:'품목',amount:'결제금액'
+  })){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-csv');
+  assert.match(env.rootNode.innerHTML,/FORMULA_PROTECTED/);
+  env.click('download-csv');
+  assert.ok(env.blobs.at(-1).parts[0].includes("'\u200B=1+1"));
+});
