@@ -69,7 +69,7 @@ async function readUtf8Csv(file) {
     const bytes=await file.arrayBuffer();
     try {return new TextDecoder('utf-8',{fatal:true}).decode(bytes);}
     catch (error) {
-      if (error instanceof TypeError) throw new Error(encodingError);
+      if (error instanceof TypeError || error?.name === 'TypeError') throw new Error(encodingError);
       throw error;
     }
   }
