@@ -71,6 +71,11 @@ async function main() {
       assert((await page.title()).startsWith('SMAX'), 'Title missing');
       assert(await page.locator('[data-action="select"][data-id]').count() === 10, 'Expected 10 templates');
       checks.push('Offline file and 10 templates open');
+      // A valid CSP hash on paper is insufficient: ensure Edge actually applies CSS.
+      // Without bundled CSS, .topbar falls back to UA display:block instead of flex.
+      const topbarDisplay=await page.locator('.topbar').evaluate(el=>getComputedStyle(el).display);
+      assert(topbarDisplay==='flex', 'Offline CSS not applied: inspect CSP style-src hash and Windows line endings');
+      checks.push('Strict-CSP offline CSS applied in real browser');
       await page.locator('[data-action="select"][data-id="spreadsheet"]').first().click();
       await page.locator('#tab-chat').click();
       // First-use experience: no customer CSV required to see a real local result.
