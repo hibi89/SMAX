@@ -117,7 +117,15 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
 }else if(action==="download-sales-review"){
   if(getTemplate()?.id!=="sales"||!state.salesPreview)return;
   download(state.demoMode?"SMAX_DEMO_SALES_REVIEW_ROWS.csv":"SMAX_SALES_REVIEW_ROWS.csv",state.salesPreview.reviewCsv,"text/csv;charset=utf-8");
-}else if(action==="download-json"||action==="download-guide"){const t=getTemplate();if(!t)return;const b=buildBlueprint(t,state.answers,state.mappings);if(action==="download-json")download("AX_BLUEPRINT_"+t.id+".json",JSON.stringify(b,null,2),"application/json;charset=utf-8");else download("AI_BUILD_PROMPT_"+t.id+".md",buildHandoff(t,b),"text/markdown;charset=utf-8")}});
+}else if(action==="download-json"||action==="download-guide"){
+  const t=getTemplate();if(!t)return;
+  const b=buildBlueprint(t,state.answers,state.mappings);
+  const demoNotice="합성 예제 결과입니다. 실제 고객 데이터나 업무 설계서로 사용하지 마세요.";
+  if(state.demoMode){b.syntheticDemo=true;b.demoNotice=demoNotice;}
+  const prefix=state.demoMode?"SMAX_DEMO_":"";
+  if(action==="download-json")download(prefix+"AX_BLUEPRINT_"+t.id+".json",JSON.stringify(b,null,2),"application/json;charset=utf-8");
+  else download(prefix+"AI_BUILD_PROMPT_"+t.id+".md",(state.demoMode?"# "+demoNotice+"\n\n":"")+buildHandoff(t,b),"text/markdown;charset=utf-8");
+}});
 function sendChat(){const input=$("#chat-input");const msg=input&&input.value.trim();if(!msg)return;if(!state.selected){state.searchTerm=msg.slice(0,280)}else{const t=getTemplate(),next=t.questions.find(q=>!state.answers[q.key]);if(next){if(t.id==="sales"&&next.key==="period"&&!updateSalesPeriodFromAnswer(msg)){toast("매출 집계는 일별 또는 월별만 지원합니다.");return;}state.answers[next.key]=msg.slice(0,280);}else{toast("기본 질문은 완료됐습니다. 다른 업무는 '다른 작업'을 선택하세요.");return}}render()}
 document.addEventListener("input",event=>{if(event.target.id==="template-search"){const pos=event.target.selectionStart;state.query=event.target.value.slice(0,120);render();const box=$("#template-search");if(box){box.focus();box.setSelectionRange(pos,pos)}}});
 document.addEventListener("keydown",event=>{if(event.target.id==="chat-input"&&event.key==="Enter"){event.preventDefault();sendChat()}});
