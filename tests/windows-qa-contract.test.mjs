@@ -55,4 +55,6 @@ test('Edge offline CSV download comparison respects Windows EOL without masking 
   assert.throws(()=>check(Buffer.concat([bom,Buffer.from([0xff])]),lf,'sales'),/The encoded data was not valid/);
   assert.match(browserScript,/assertTrainingCsvDownload\(\s*readFileSync\(await trainingSales\.path\(\)\)/);
   assert.match(browserScript,/assertTrainingCsvDownload\(\s*readFileSync\(await trainingCsv\.path\(\)\)/);
+  assert.match(browserScript,/getComputedStyle\(el\)\.display/,
+    'Real Edge E2E must verify the offline stylesheet was not blocked by CSP');
 });
