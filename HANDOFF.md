@@ -487,3 +487,9 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **사용 명령/판정:** 최신 refs를 갖춘 승인 개발환경에서 `node scripts/qa-branch-reconcile.mjs --main origin/main --frontend origin/frontend`: `REVIEW_REQUIRED` exit2=내용 대조 필수, `NO_SHARED_CHANGE_REVIEW` exit0=여전히 승인 전, `BLOCKED` exit3=ref/SHA 확인 실패. 이 검사기는 Git 저장소를 변경하지 않음.
 9. **다음 한 단계:** `frontend` 실제 checkout Node 전체 `npm run qa:release`와 실 디스크 SHA/실 Playwright file:// 검증, Windows Edge 실PC. QA 후 검토 브랜치에서 양쪽 최신 정보를 통합(사용자 승인 전 실제 병합 없음). 상품 등록/Cloudflare 공개와 크몽 판매는 별도 승인.
 10. **기준·목표:** 2026-10-25 KST, Native Git fixture 3/3만 성공, 실고객/수익/상용 출시 ZERO, 2026-11-07 마감 유지. 원격 최종 HEAD는 문서 커밋 후 다시 조회.
+
+## 2026-10-25 KST — 스총 최종 갱신: Node VM UTF-8 디코더 영역 오류
+- 최신 제품 변경: `frontend/site/app.mjs` 커밋 `bb25b0e7d79fa1b7129440f185bf62fea844225f`, `TextDecoder`가 외부 realm `TypeError`를 던질 때도 한글 인코딩 안내로 정규화(`error?.name === 'TypeError'`). 제품 로직의 나머지는 유지.
+- 실제 Node 22.16.0 격리 VM 기능 검증 `3 PASS / 0 FAIL`(invalid bytes/valid Hangul/unrelated I/O error). 이것은 GitHub 전체 제품 Native suite 아님. `tests/offline-ui-smoke.test.mjs`의 기존 UTF-8 바이트 회귀와 직접 연관.
+- **해시 무효화 필수:** 이전 보고서 `docs/QA_IN_MEMORY_REAL_SHA_20261025.md`의 84,678-byte/57b9abda SHA는 변경 **전** 코드 기준 참고치. 새 HTML 디스크 출력/Native suite/Chromium·Windows QA를 반드시 새 SHA로 다시 검증. 이전 해시를 최신으로 주장 금지.
+- 다음 `ㄱ` 최우선: 최신 `frontend` Node 전체 QA/Browser, 이후 승인된 수동 `main` 통합 검토. `main` `952bc586...`/`backend` `f0f30924...` 변경하지 않음. 배포/판매/비용/고객데이터 조작 승인 없음. 11/7 개발 상한.
