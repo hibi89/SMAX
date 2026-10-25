@@ -460,3 +460,11 @@
 - **검증 범위:** 변경 뒤 GitHub에서 다시 읽은 **실제 2개 코어 소스**로 V8 함수 평가하여 backend **5/5 PASS**, frontend **7/7 PASS**. 주문번호 A/B/B → 정리행 3 유지/중복 1, 매출 반영 2·제외 1·합계 200.00, 구형 3열 정규화 중복 유지, frontend 기존 4행/검토2 + 매출 5행/제외3/79.90 샘플 유지. 새 Node 테스트 코드를 커밋했지만 `node --test`나 최신 `npm run qa:release` 전체 실행 **NOT_RUN**. V8 검사용 TextEncoder 바이트 길이 폴리필 사용(2MiB 경계 시험 아님).
 - **잔여 위험:** 주문 ID 등 고유 식별 열이 **없는** 동일 3열 거래는 여전히 중복 의심으로 분류/매출 잠정 집계 제외될 수 있음. 실제 중복 판정은 자동 회계 확정이 아니므로 review CSV로 고객 재검토 필수. 브라우저/Windows 최신 QA, 디스크 빌드 SHA/CSP, 배포·판매 전부 **미검증/미실행**.
 - **보존·다음:** `main` 무수정. `backend`·`frontend` 기존 Git 이력 보존, 강제 병합/리셋·외부 API/고객자료·지출 없음. 다음 P0는 승인된 최신 소스 전체 checkout에서 `npm run qa:release` 실제 PASS 및 HTML SHA/CSP → Chromium `file://` → Windows Edge QA. 개발 마감 **2026-11-07** 변동 없음.
+
+## 2026-10-26 KST — 스총: 중복 제외의 화면 설명·고객 대조 안내
+- **문제/실제 영향:** 직전 주문 ID 기반 중복 판정 코어 수정 후에도, 오프라인 SELF 매출 결과 화면에서 중복 제외 사유와 고객 재대조 절차를 명시하지 않았다. 주문번호가 없는 3열 CSV는 서로 다른 동일 금액 거래도 중복 의심될 수 있는데, 사용자가 잠정 매출을 확정치로 오해할 위험.
+- **개선:** `site/app.mjs`의 매출 결과에 `result.excluded` 사유에 정확히 `DUPLICATE`가 있을 때만 “중복 의심 거래가 잠정 합계에서 제외되었습니다” 및 주문번호·원본레코드·검토 파일 대조 안내 표시. CSV 표준화 화면에서는 `summary.duplicateRows>0`일 때만 확정 중복이 아니라는 경고 표시. 반영할 거래를 임의 변경하지 않으며 원본 CSV, 기존 변환/매출 로직은 그대로.
+- **커밋:** `frontend/site/app.mjs` `1db08dc8d3b23e415bd97bf3ba7ada5095d05a35`; `frontend/tests/offline-ui-smoke.test.mjs` `8b652572e8b639fb36b2d658246e4b102ec6f2ff`. 소스 수정은 `frontend`에만; `backend` 및 `main` 코드 불변.
+- **이번 턴 실행 범위:** 원격 GitHub 최신 5개 생산 모듈을 V8 모의 DOM·Blob으로 통합 실행해 7/7 집중 확인(합성 매출·표준화 경고, 실제 4열 주문 ID A/B/B → 반영2·제외1·200.00, 원본 4번 검토 CSV, 매핑 변경 시 경고/다운로드 무효화, 중복0건 경고 부재). 이어서 **이번에 커밋한 정확한 신규 테스트 함수 원문을 최신 5모듈 대상으로 V8에서 실행 PASS**; 전체 테스트 소스는 `import.meta` 위치만 대체하여 V8 구문 검증 PASS. 이는 **Native Node `node --test` / `npm run qa:release`, 빌드 HTML SHA·CSP, 실제 Chromium/Windows 출고검증이 아니다**.
+- **CI·환경:** 해당 최신 commit들에 실제 성공 GitHub workflow/status 근거 없음. 컨테이너는 Node22/Chromium 존재하나 `github.com`, `api.github.com`, `raw.githubusercontent.com` 모두 DNS 조회 실패—private 전체 checkout 불가능. Actions 무한 재실행/비공개 소스 외부 전송/비용 지출 없음.
+- **차단/다음:** 실제 최신 Node≥20 전체 소스가 있는 승인된 작업 PC에서 `npm run qa:release` 성공·HTML/CSP 확인 → `npm run qa:browser:node` Chromium `file://` → Windows `QA_SELF_WINDOWS.cmd /edge`. 실패 또는 차단이면 출고 불가. 사업/가격·판매/Cloudflare 공개·main 강제병합 미실행. **2026-11-07 개발 기한 유지**.
