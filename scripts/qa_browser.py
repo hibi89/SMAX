@@ -46,10 +46,16 @@ def main() -> int:
     requests: list[str] = []
     checks: list[str] = []
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            channel=None if args.channel == "chromium" else "msedge",
-            headless=not args.headed,
-        )
+        try:
+            browser = p.chromium.launch(
+                channel=None if args.channel == "chromium" else "msedge",
+                headless=not args.headed,
+            )
+        except Exception as exc:
+            print(json.dumps({"status": "BLOCKED", "stage": "browser_launch",
+                              "error": str(exc), "reason": "browser executable or policy"},
+                             ensure_ascii=False), file=sys.stderr)
+            return 3
         try:
             context = browser.new_context(accept_downloads=True, viewport={"width": 1280, "height": 900})
             context.set_offline(True)
@@ -116,14 +122,15 @@ def main() -> int:
             }, ensure_ascii=False))
             return 0
         except Exception as exc:
+            environment_blocked = "ERR_BLOCKED_BY_ADMINISTRATOR" in str(exc)
             print(json.dumps({
-                "status": "FAIL",
+                "status": "BLOCKED" if environment_blocked else "FAIL",
                 "checks_completed": checks,
                 "error": str(exc),
                 "browser_errors": errors,
                 "outbound_http_requests": requests,
             }, ensure_ascii=False), file=sys.stderr)
-            return 1
+            return 3 if environment_blocked else 1
         finally:
             browser.close()
 
