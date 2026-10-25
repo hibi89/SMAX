@@ -70,6 +70,24 @@ test('malformed columns and duplicate headers fail closed', () => {
   assert.throws(() => convert('거래날짜,품목,결제금액\n2026-01-01,볼"펜,100'), /따옴표/);
 });
 
+test('review-only CSV exports flagged rows while preserving complete standardized output', () => {
+  const input='거래날짜,품목,결제금액\n2026-10-01,연필,100\n2026-10-01,연필,100\n2026-02-30,공책,200\n2026-10-02,펜,30';
+  const result=convert(input);
+  assert.equal(result.summary.outputRows,4);
+  assert.equal(result.summary.reviewRows,2);
+  assert.equal(result.csv.trimEnd().split('\r\n').length,5);
+  assert.equal(result.reviewCsv.trimEnd().split('\r\n').length,3);
+  assert.ok(result.reviewCsv.startsWith('\uFEFF'+SPREADSHEET_OUTPUT_COLUMNS.join(',')));
+  assert.match(result.reviewCsv,/DUPLICATE/);
+  assert.match(result.reviewCsv,/INVALID_DATE/);
+  assert.match(result.reviewCsv,/,3,NEEDS_REVIEW,/);
+  assert.match(result.reviewCsv,/,4,NEEDS_REVIEW,/);
+  assert.doesNotMatch(result.reviewCsv,/연필,100,2,READY_FOR_HUMAN_REVIEW/);
+  const clean=convert('거래날짜,품목,결제금액\n2026-10-01,연필,100');
+  assert.equal(clean.summary.reviewRows,0);
+  assert.equal(clean.reviewCsv.trimEnd().split('\r\n').length,1,'no issues produces header-only review CSV');
+});
+
 test('no records and oversize files are rejected', () => {
   assert.throws(() => convert('거래날짜,품목,결제금액\n'), /데이터가 없습니다/);
   assert.throws(() => convert('거래날짜,품목,결제금액\n' + 'x'.repeat(2 * 1024 * 1024)), /2MB/);
