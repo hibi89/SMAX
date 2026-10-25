@@ -627,3 +627,57 @@ test('eight guide-only templates accept local field-name annotations in blueprin
   assert.match(env.rootNode.innerHTML,/id="csv-upload"/);
   assert.doesNotMatch(env.rootNode.innerHTML,/data-action="guide-field"/);
 });
+
+test('duplicate warnings follow real exclusions and never label distinct order IDs as duplicates', async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  env.click('try-sample');
+  assert.match(env.rootNode.innerHTML,/중복 의심 거래가 잠정 합계에서 제외되었습니다/);
+  assert.match(env.rootNode.innerHTML,/원본레코드 번호를 실제 거래와 반드시 대조하세요/);
+
+  const base='판매일,판매처,판매액,주문번호\n'
+    +'2026-10-01,온라인,100,ORDER-A\n'
+    +'2026-10-01,온라인,100,ORDER-B';
+  async function loadSales(source){
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'owner.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+    }]});
+    for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+      await env.change({dataset:{action:'map',field},value});
+    }
+    env.click('run-sales');
+  }
+
+  await loadSales(base);
+  assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 0행/);
+  assert.match(env.rootNode.innerHTML,/200\.00원/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/중복 의심 거래가 잠정 합계에서 제외되었습니다/);
+
+  await loadSales(base+'\n2026-10-01,온라인,100,ORDER-B');
+  assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 1행/);
+  assert.match(env.rootNode.innerHTML,/중복 의심 거래가 잠정 합계에서 제외되었습니다/);
+  env.click('download-sales-review');
+  assert.match(env.blobs.at(-1).parts[0],/4,2026-10-01,온라인,100,DUPLICATE/);
+
+  await env.change({dataset:{action:'map',field:'amount'},value:'판매처'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/중복 의심 거래가 잠정 합계에서 제외되었습니다/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  env.click('try-sample');
+  assert.match(env.rootNode.innerHTML,/중복 의심은 확정 중복이 아닙니다/);
+  const clean='거래날짜,품목,결제금액\n2026-10-26,연필,100';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'clean.csv',size:Buffer.byteLength(clean,'utf8'),text:async()=>clean
+  }]});
+  for(const [field,value] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-csv');
+  assert.match(env.rootNode.innerHTML,/중복 0행/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/중복 의심은 확정 중복이 아닙니다/);
+});
