@@ -383,6 +383,8 @@ test('one-click synthetic examples execute both local tools and never mix with o
       assert.match(env.rootNode.innerHTML,/원본 4행/);
       assert.match(env.rootNode.innerHTML,/검토 필요 2행/);
       assert.match(env.rootNode.innerHTML,/data-action="download-csv"/);
+      env.click('download-csv');
+      assert.equal(env.links.at(-1).download,'SMAX_DEMO_STANDARDIZED.csv');
     }else{
       assert.match(env.rootNode.innerHTML,/원본 5행/);
       assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
@@ -390,6 +392,10 @@ test('one-click synthetic examples execute both local tools and never mix with o
       assert.match(env.rootNode.innerHTML,/79\.90원/);
       assert.match(env.rootNode.innerHTML,/data-action="download-sales-report"/);
       assert.match(env.rootNode.innerHTML,/data-action="download-sales-review"/);
+      env.click('download-sales-report');
+      assert.equal(env.links.at(-1).download,'SMAX_DEMO_SALES_REPORT.csv');
+      env.click('download-sales-review');
+      assert.equal(env.links.at(-1).download,'SMAX_DEMO_SALES_REVIEW_ROWS.csv');
     }
     const ownerCsv=id==='spreadsheet'
       ? '거래날짜,품목,결제금액\n2026-10-25,실제입력,200'
