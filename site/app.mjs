@@ -60,7 +60,25 @@ function csvResultPanel(t){
       '<p class="tiny">파일 선택과 원본 열 매핑을 마친 후 실행할 수 있습니다. CSV 최대 2MB, XLSX 직접 입력 미지원.</p>')+
     '</section>';
 }
-function editorPanel(t){if(!t)return '<aside class="editor-panel"><span class="side-label">YOUR WORKFLOW</span><h3>시작할 준비가 됐나요?</h3><p>원하는 업무를 입력하고 템플릿을 선택하면 개인별 업무 질문과 설계서 초안 만들기를 이어갈 수 있습니다.</p><p class="tiny">실제 계정 로그인, 이메일 발송 및 외부 서비스 연동은 이 데모에서 실행하지 않습니다.</p></aside>';const b=buildBlueprint(t,state.answers,state.mappings);const maps=state.headers.length?'<div><label>확인된 CSV 열 매핑</label>'+t.fields.map(f=>'<div class="mapped-row"><label for="map-'+h(f.key)+'">'+h(f.label)+'</label><select data-action="map" id="map-'+h(f.key)+'" data-field="'+h(f.key)+'"><option value="">직접 확인 후 선택</option>'+state.headers.map(v=>'<option '+(state.mappings[f.key]===v?"selected":"")+' value="'+h(v)+'">'+h(v)+'</option>').join("")+'</select></div>').join("")+'</div>':"<p class='tiny'>CSV 파일을 선택하면 실제 열 이름을 확인하고 직접 매핑할 수 있습니다. 파일 본문은 서버로 전송하지 않습니다.</p>";return '<aside class="editor-panel"><div class="side-label">MY AX BLUEPRINT</div><h3>'+h(t.title)+'</h3><p>답변 완료 '+Object.keys(state.answers).filter(k=>state.answers[k]).length+'/'+t.questions.length+' · 설계 상태: <span class="status-warning">'+(b.state==="NEEDS_REVIEW"?"검토 필요":"사람의 최종 검토 필요")+'</span></p><label class="upload-label" for="csv-upload">CSV 자료 선택 (로컬 처리)</label><input type="file" id="csv-upload" accept=".csv,text/csv" aria-label="CSV 파일 선택">'+(sampleCsvByTemplate[t.id]?'<button type="button" class="button-outline" data-action="try-sample">합성 예제 바로 체험</button><p class="tiny">예제에만 자동 매핑을 적용합니다. 실제 거래·매출 데이터가 아니며 내 파일은 직접 열을 확인해야 합니다.</p>':"")+'<p class="tiny">'+h(state.fileMessage||"CSV만 지원하는 초기 버전 · XLSX 파일은 아직 지원하지 않음")+'</p>'+maps+'<div class="review-notice">자동 매핑을 확정하거나 외부 데이터를 전송하지 않습니다. 생성되는 파일은 구축을 위한 초안입니다.</div><button type="button" class="button-sm" data-action="download-json">AX 설계서 JSON 내려받기 ↓</button><button type="button" class="button-outline" data-action="download-guide">AI 구축 가이드 내려받기 ↓</button><p class="tiny">다운로드는 브라우저 안에서 수행됩니다. 인증키·개인정보는 외부 AI에 무심코 전달하지 마세요.</p>'+csvResultPanel(t)+'</aside>'}
+function editorPanel(t){
+  if(!t)return '<aside class="editor-panel"><span class="side-label">YOUR WORKFLOW</span><h3>시작할 준비가 됐나요?</h3><p>원하는 업무를 입력하고 템플릿을 선택하면 개인별 업무 질문과 설계서 초안 만들기를 이어갈 수 있습니다.</p><p class="tiny">실제 계정 로그인, 이메일 발송 및 외부 서비스 연동은 이 데모에서 실행하지 않습니다.</p></aside>';
+  const b=buildBlueprint(t,state.answers,state.mappings);
+  const executable=Object.hasOwn(sampleCsvByTemplate,t.id);
+  const maps=executable
+    ? (state.headers.length
+      ? '<div><label>확인된 CSV 열 매핑</label>'+t.fields.map(f=>'<div class="mapped-row"><label for="map-'+h(f.key)+'">'+h(f.label)+'</label><select data-action="map" id="map-'+h(f.key)+'" data-field="'+h(f.key)+'"><option value="">직접 확인 후 선택</option>'+state.headers.map(v=>'<option '+(state.mappings[f.key]===v?"selected":"")+' value="'+h(v)+'">'+h(v)+'</option>').join("")+'</select></div>').join("")+'</div>'
+      : "<p class='tiny'>CSV 파일을 선택하면 실제 열 이름을 확인하고 직접 매핑할 수 있습니다. 파일 본문은 서버로 전송하지 않습니다.</p>")
+    : "";
+  const inputPanel=executable
+    ? '<label class="upload-label" for="csv-upload">CSV 자료 선택 (로컬 처리)</label><input type="file" id="csv-upload" accept=".csv,text/csv" aria-label="CSV 파일 선택">'+
+      '<button type="button" class="button-outline" data-action="try-sample">합성 예제 바로 체험</button>'+
+      '<p class="tiny">예제에만 자동 매핑을 적용합니다. 실제 거래·매출 데이터가 아니며 내 파일은 직접 열을 확인해야 합니다.</p>'+
+      '<p class="tiny">'+h(state.fileMessage||"CSV만 지원하는 초기 버전 · XLSX 파일은 아직 지원하지 않음")+'</p>'+maps
+    : '<p class="tiny" role="status">이 템플릿은 설계 가이드 전용입니다. 실제 CSV 변환·업로드 기능은 제공하지 않습니다. 실행하려면 엑셀·CSV 통합 또는 매출 집계·보고서를 선택하세요.</p>';
+  return '<aside class="editor-panel"><div class="side-label">MY AX BLUEPRINT</div><h3>'+h(t.title)+'</h3><p>답변 완료 '+Object.keys(state.answers).filter(k=>state.answers[k]).length+'/'+t.questions.length+' · 설계 상태: <span class="status-warning">'+(b.state==="NEEDS_REVIEW"?"검토 필요":"사람의 최종 검토 필요")+'</span></p>'+
+    inputPanel+
+    '<div class="review-notice">자동 매핑을 확정하거나 외부 데이터를 전송하지 않습니다. 생성되는 파일은 구축을 위한 초안입니다.</div><button type="button" class="button-sm" data-action="download-json">AX 설계서 JSON 내려받기 ↓</button><button type="button" class="button-outline" data-action="download-guide">AI 구축 가이드 내려받기 ↓</button><p class="tiny">다운로드는 브라우저 안에서 수행됩니다. 인증키·개인정보는 외부 AI에 무심코 전달하지 마세요.</p>'+csvResultPanel(t)+'</aside>';
+}
 function render(){root.innerHTML=state.tab==="templates"?renderTemplates():renderChat();$("#tab-templates").classList.toggle("active",state.tab==="templates");$("#tab-chat").classList.toggle("active",state.tab==="chat");$("#tab-templates").setAttribute("aria-selected",String(state.tab==="templates"));$("#tab-chat").setAttribute("aria-selected",String(state.tab==="chat"))}
 // File.text() silently replaces invalid UTF-8 bytes; never let damaged business
 // data reach mapping or reporting. Legacy CSV must be saved as UTF-8.
@@ -131,6 +149,7 @@ document.addEventListener("input",event=>{if(event.target.id==="template-search"
 document.addEventListener("keydown",event=>{if(event.target.id==="chat-input"&&event.key==="Enter"){event.preventDefault();sendChat()}});
 document.addEventListener("change",async event=>{
   if(event.target.dataset.action==="map"){
+    if(!sampleCsvByTemplate[getTemplate()?.id])return;
     state.mappings[event.target.dataset.field]=event.target.value;
     state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";render();return;
   }
@@ -139,6 +158,7 @@ document.addEventListener("change",async event=>{
     state.salesPeriod=event.target.value;state.salesPreview=null;state.salesError="";if(getTemplate()?.id==="sales")state.answers.period=state.salesPeriod==="monthly"?"월별":"일별";render();return;
   }
   if(event.target.id==="csv-upload"){
+    if(!sampleCsvByTemplate[getTemplate()?.id])return;
     const file=event.target.files?.[0];if(!file)return;
     forgetCsv({preservePeriod:true});
     if(file.size>2*1024*1024){state.fileMessage="오류: CSV는 2MB 이하만 지원합니다.";render();return;}
