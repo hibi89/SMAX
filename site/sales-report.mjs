@@ -14,10 +14,14 @@ function toSalesReportCsv(rows) {
   return '\uFEFF' + rows.map(row => row.map(cell).join(',')).join('\r\n') + '\r\n';
 }
 function parseCents(amount) {
-  if (!/^-?\d{1,12}(?:\.\d{1,2})?$/.test(amount)) return null;
+  if (!/^-?\d+(?:\.\d{1,2})?$/.test(amount)) return null;
   const negative = amount.startsWith('-');
   const [whole, fraction = ''] = (negative ? amount.slice(1) : amount).split('.');
-  const cents = BigInt(whole) * 100n + BigInt(fraction.padEnd(2, '0') || '0');
+  // Only the numerical magnitude is capped. Harmless left-zero padding must
+  // not turn a 1-won transaction into an excluded over-limit sale.
+  const significantWhole = whole.replace(/^0+(?=\d)/, '');
+  if (significantWhole.length > 12) return null;
+  const cents = BigInt(significantWhole) * 100n + BigInt(fraction.padEnd(2, '0') || '0');
   return negative ? -cents : cents;
 }
 function formatCents(cents) {
