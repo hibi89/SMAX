@@ -13,7 +13,7 @@ const read = f=>readFileSync(join(root,'site',f),'utf8');
 const input=()=>({
   html:read('index.html'),
   css:read('styles.css'),
-  modules:['templates.mjs','core.mjs','csv-transform.mjs','app.mjs'].map(read)
+  modules:['templates.mjs','core.mjs','csv-transform.mjs','sales-report.mjs','app.mjs'].map(read)
 });
 const getScript=html=>html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 const digest=s=>createHash('sha256').update(s,'utf8').digest('base64');
@@ -38,7 +38,7 @@ test('offline SELF HTML is fully self-contained and has no remote runtime resour
 
 test('bundler rejects modified import contract and embedded network code',()=>{
   const a=input();
-  a.modules[3]=a.modules[3].replace('import {templates} from "./templates.mjs";','import {bad} from "./missing.mjs";');
+  a.modules[4]=a.modules[4].replace('import {templates} from "./templates.mjs";','import {bad} from "./missing.mjs";');
   assert.throws(()=>bundleOfflineSelf(a),/Unexpected import/);
   const b=input();
   b.modules[2]+='\nfetch("https://example.com");';
