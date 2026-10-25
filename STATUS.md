@@ -261,3 +261,8 @@
 ## 2026-10-25 KST — 실행 12: Native 34/34 PASS
 - 최신 스몽이 카피 수정 및 회귀 테스트 1건 추가. 실제 Node 22.23.4 전체 34 PASS/0 FAIL, qa:release exit 0. SELF HTML 73,352 bytes, SHA-256 94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca.
 - Linux ARM64 Chromium 실행은 시스템 공유 라이브러리 부족으로 시작 전에 차단. Windows 실기기 QA 미완. 상세 기록: docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md. 배포·크몽 등록 미진행.
+
+## 2026-10-25 KST — 스총 실행 13 / 실제 Chromium 오프라인 E2E PASS
+- 최신 `frontend` 실빌드 HTML 73,352 bytes / SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`를 Linux ARM64 실제 Chromium 156으로 `file://` 오프라인 상태에서 실행하여 CSV 4행/검토 2행, 결과 다운로드 UTF-8 BOM, 잘못된 매핑 차단, 모바일 입력 기능, HTTP 요청 0/JS 오류 0 확인.
+- JSON/AI 가이드 10종 각 2개, 총 **20개 파일의 실제 브라우저 다운로드 PASS**. 자동 다운로드 세션 제한을 회피하려 템플릿별 격리 브라우저 컨텍스트를 사용. `scripts/qa_browser.mjs`에 이를 재실행 가능한 독립 Node+Playwright QA로 작성하고, **원격과 동일 Git blob** 기준 실제 Node `node scripts/qa_browser.mjs` **exit 0 / 7 E2E checks PASS**. `npm run qa:browser:node` 명령 추가. 기존 Python QA 유지.
+- 이전 Chromium 환경 차단은 `/tmp`에만 Debian 공유 라이브러리·Fontconfig를 추출하여 해결(연결 프로젝트 소스·서비스 설정 변경 없음). **Windows 실기기 Edge/Chrome E2E는 미검증**. 상세 증거 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`. 개발자 전용 Node 모듈, 환경변수, 검사 보고서 등이 실수로 푸시되지 않도록 `.gitignore` 확대. Cloudflare 공개/크몽 등록/실판매 미진행. 다음 최우선 Windows 실제 PC 검증 및 UI/브랜드 승인 준비.
