@@ -451,3 +451,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **백업·비밀·비용:** Git remote 원본 커밋 보존, 합성 파일·바이트만 사용. 실제 회사 자료, 토큰, 개인정보, 유료 모델/외부 호출/송금/구매 없음. 수동 Actions 실행도 하지 않음.
 9. **다음 1작업:** 전체 최신 Private `frontend` 소스를 정확하게 확보한 Node≥20 환경에서 `npm run qa:release` 실실행해 Node tests PASS→디스크 HTML SHA/bytes/CSP, 제품 전체 QA 보고서 확인→동일 산출물 `npm run qa:browser:node` Chromium 10항 및 Windows `QA_SELF_WINDOWS.cmd /edge`. 실패시 미검증과 실패 구분, 통과 시 출력 SHA 정확히 기록.
 10. **시각·증거 한계:** 2026-10-25 KST, GitHub connector 현 HEAD 검수 + V8 4종 비교; 출고 승인 없음, 개발 마감 2026-11-07.
+
+## 2026-10-25 KST — 스총 인계: 비동기 원본 바이트 업로드 충돌 방지 (10항)
+1. **목표:** 사장님 SELF 로컬 CSV 정리·매출 2종의 고객 파일 선택 충돌 방지. 10종 교육·설계 템플릿 유지, WEB/결제/서버/외부 AI 비범위, 마감 2026-11-07.
+2. **결정/구현:** 실제 제품 `site/app.mjs`의 기존 `state.csvGeneration` / selected-template 확인은 두 async File 경합을 예방. 새 **`tests/csv-ui.test.mjs` 회귀**에 ①이전 CP949 raw 바이트가 늦게 오류로 도착해도 새 정상 UTF8 파일을 손상/삭제하지 않음 ②이전 정상 raw 바이트가 나중에 돌아와도 최신 UTF8 파일을 덮어쓰지 않음 검증 추가. 엔진 소스 수정 없음.
+3. **검증:** 실제 GitHub 5제품 모듈을 V8 이벤트 격리에서 실행한 File.arrayBuffer 비동기 인터리빙 테스트 **2 PASS/0 FAIL**. Node v22.16.0 UTF8 TextDecoder 바이트 기초 valid/invalid 동작 확인. 해당 신규 GitHub Node callback은 저장만, **Native Node 테스트의 실제 실행 NOT_RUN**. 전체 릴리스/해시/실 브라우저 역시 미실행.
+4. **완료·미완:** UI 안전 회귀 코드 원격 커밋 및 문서 인계 완료. `npm run qa:release`와 실제 Chromium·Windows Edge 파일 프로토콜 검증, 고객 판매/배포 승인 미완.
+5. **차단 원인·대안:** 현 모델 Node 컨테이너 `/mnt/data`에 Private checkout 없음. `github.com`/`raw.githubusercontent.com`/`api.github.com` DNS 실패. GitHub connector는 소스 읽기/커밋 가능하나 로컬 Node 전체 Git checkout 경로와 같지 않음. 이전 workflow logs 없이 실패했던 GitHub Actions 반복·과금 위험 회피. 대안으로 원격 실제 JS를 V8에 불러 합성 File API 검사.
+6. **원본/브랜치/커밋:** Private `hibi89/SMAX`, `frontend` 직전 HEAD `edecaf7028e72d5df1a8125e7f99030b92e1ceb5`, `tests/csv-ui.test.mjs` 신규 commit `61aff29c66e5b94c2c6a8ccd6d7253f39a9eba82`. `main` `952bc586...`, `backend` `f0f30924...` 그대로. 문서 기록 후 최종 `frontend` HEAD 조회 필요.
+7. **환경·배포:** Node≥20 개발자의 Private 전체 checkout에서 `npm run qa:release`, SHA 기록, 동일 산출물 Playwright `npm run qa:browser:node`, Windows Edge `QA_SELF_WINDOWS.cmd /edge`; 고객은 최종 HTML 1파일 사용 목표. Public URL·판매/결제·Cloudflare 배포 없음.
+8. **권한/비밀/백업:** 기존 blob/branches 보존, 임의 main merge/force push 금지. 합성 CSV만 사용; 개인정보/토큰/계정/원본 고객 문서는 서버·GitHub에 업로드하지 않음. 유료 리소스 집행/직거래/외부 인증 조작 없음.
+9. **다음 우선 행동·완료 기준:** 새 UI 회귀가 포함된 **최신 frontend의 실제 전체 Node 릴리스** exit0 확인 + HTML sha256/bytes/CSP/합성 두 CSV PASS → **동일 파일** 실제 Chromium E2E 10항 → Windows Edge 실PC 확인 → 사용자 출시/크몽 등록/Cloudflare 별도 승인. 승인 못 받은 배포 및 완성 주장 보류.
+10. **갱신 기준:** 2026-10-25 KST; GitHub 원본 코드·HEAD 및 로컬 Node TextDecoder/격리 V8 실행 근거만. 보고서·테스트 스크립트의 존재는 실브라우저/고객 사용성 보증이 아님.
