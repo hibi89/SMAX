@@ -1,3 +1,5 @@
+> **2026-10-26 SELF 가이드 실용화:** 기존 8종 가이드 전용 템플릿에도 **항목명 직접 입력**을 추가했습니다. 파일 업로드·실제 자동화 없이 사용자 본인이 항목명만 입력하면 설계서 JSON 및 AI 구축 가이드에 반영됩니다. 입력한 값은 검증된 원본 데이터 연결이 아니며 개인정보/토큰/고객 원문을 넣어서는 안 됩니다. 실행 가능한 로컬 CSV는 기존 2종만 유지. 원격 제품 모듈 격리 28/28 PASS, 실제 전체 Native Node·Chromium/Windows 릴리스 QA는 NOT_RUN.
+
 > **2026-10-26 UX 기능 경계 정리:** SELF의 CSV 파일 업로드/로컬 실행은 **엑셀·CSV 통합 + 매출 집계·보고서 2종**에서만 지원합니다. 다른 **8종 설계/교육 템플릿은 JSON/Markdown 구축 초안만 다운로드**할 수 있으며 실행 기능을 제공하지 않습니다. 잘못된 사용을 막기 위해 입력창도 숨겼습니다. `frontend` 관련 코드는 `site/app.mjs`, 회귀는 `tests/offline-ui-smoke.test.mjs`와 `scripts/qa_browser.mjs`. 격리 V8 UI 검사 28/28 통과; 최신 전체 Native Node 릴리스·실 Chromium·Windows QA는 NOT_RUN. 아래 과거 기능·PASS 상태와 다르면 이 문단과 최신 HEAD 우선.
 
 > **2026-10-25 최신 보안·QA 정정:** 최근 `frontend` 패치에서 비 UTF-8(CP949 등) CSV 파일을 브라우저 로컬 디코딩 단계에서 조기 거부하도록 강화했습니다. 잘못된 바이트를 자동 변환하거나 손상된 텍스트로 보고서를 만들지 않습니다. `tests/csv-ui.test.mjs`, `scripts/qa_browser.mjs` 검사 코드 업데이트. 변경 후 실제 전체 Node release QA / 신규 HTML SHA / 실 Chromium·Windows Edge는 **NOT_RUN**이므로 아래 기존 PASS 수치는 과거 빌드 한정입니다. 자세한 근거는 `STATUS.md`·`HANDOFF.md` 최신 섹션.
