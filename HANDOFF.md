@@ -295,3 +295,8 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **보안/원본/비용:** 기존 브랜치 보호, Git SHA 기반 이력, `public-site/`만 공개 후보, `site/` PRIVATE, `dist/` Git 무시. 실제 계정/PII 사용·전송 없음, 비용 지출/강제 푸시 없음.
 9. **다음 1순위:** 최신 Private frontend의 전체 native `npm test`/실 `npm run build:self` 실행 환경 확보·실 SHA/파일 크기/로그 증빙 → Windows Edge 실기기 파일입력·다운로드·네트워크 검증 → 상품 설명/지원/환불 확정·창업자 승인 후 main 안전통합/크몽 등록.
 10. **기준:** 2026-10-25 KST, remote GitHub source + V8 모의 Node 통합 4개/실 CSV Node 13개. 출시 승인/판매 가능 판정 전.
+
+## 2026-10-25 KST 최신 인계: Node 34 PASS / 브라우저 BLOCKED
+- 스몽이 카피 수정·회귀 1건; 실제 Node 22.23.4 전체 34/34 PASS, qa:release exit 0. HTML 73,352 bytes, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`.
+- Chromium ARM64는 libglib2 등 19개 라이브러리 누락으로 실행 전 차단. **Windows Edge/Chrome 실기기 검증 미완**, 디자인 승인도 보류.
+- 상세 정본 `docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md`. 다음 우선 Windows 브라우저 E2E → 상품 사용권/지원/가격 → 승인 후 출시. PUBLIC·크몽 배포 없음.
