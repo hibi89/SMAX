@@ -23,3 +23,16 @@
 4. 릴리스 전 구매자 사용권/복제·업데이트 정책 및 크몽 거래·환불·지원 안내를 검토. `main` 브랜드 변경을 보존하면서 사용자 승인 후 안전하게 통합. 공개 Cloudflare 배포·판매 게시·실고객 자료 업로드는 별도 승인.
 
 최종 제한: 현재 11월 7일은 마감 상한이며 확인된 검증 통과 시 앞당긴다. 실제 브라우저와 Windows 검증을 완료하기 전 크몽 게시 또는 판매 완료 주장 금지.
+
+## 최신 우선 적용: 매출 집계 포함 Node Playwright E2E (스총 후속 2026-10-25)
+- 이전의 Python 스크립트 진단/환경 BLOCKED 기록은 **과거 기준**. 현 검증기 `scripts/qa_browser.mjs`는 먼저 `dist/SELF_QA_REPORT.json`의 Node 통과·보안·SHA-256/bytes와 대상 HTML 동일성을 검사해 **불일치 시 Playwright 시작 전 중단**한다.
+- **올바른 실행 순서 (frontend 전체 최신 소스 필요)**:
+  1. `npm run qa:release` — 전체 Node 회귀, 단일 SELF HTML 빌드, 정적 공개/비공개 경계, 인라인 CSP 해시, QA JSON 생성.
+  2. 개발자 환경에 Playwright 및 테스트 브라우저가 준비된 경우 `npm run qa:browser:node` (Chromium) 또는 `npm run qa:browser:node -- --channel msedge` (Windows Edge). 개발자 전용 의존성, 구매자는 별도 설치할 필요가 없도록 단일 HTML 제공 목표.
+  3. **브라우저 출고 기준:** 브라우저 결과 `releaseQaArtifactMatch=PASS`, `htmlSha256`가 로컬 `SELF_QA_REPORT.json` 일치, 종료 0, 외부 HTTP(S) 0, 브라우저 오류 0.
+- Node 브라우저 검사 시나리오 **총 10개**:
+  - 기존 7개: 로컬 `file://` + 템플릿 10종, CSV 4행/검토2행, UTF-8 BOM 변환 다운로드, 잘못된 재매핑 결과 차단, 모바일 너비, 10종 JSON+MD(20개) 다운로드, JS 에러 0/HTTP 0.
+  - 신규 3개: (i) 합성 매출 CSV 5행 중 **잠정 2행/검토 3행/순액 79.90원** (ii) 매출 보고서/별도 검토 CSV **2개를 실제 다운로드**하고 각각 BOM·합계/제외 사유 `DUPLICATE`/`INVALID_DATE`/`FORMULA_PROTECTED` 검증 (iii) 월별 변경 시 보고서 무효화·재집계, 같은 열에 중복 매핑 시 실행·다운로드 차단.
+- 스크립트 `scripts/qa_browser.mjs`의 신규 브라우저 검사 코드 GitHub 원격 blob `40e46d79f05b01dcc87a01724565dcefb76dbaf3`. **V8 정적 구문 검사 PASS**, 기존 `site/sales-report.mjs`·`tests/sales-report.test.mjs` 원격 일치 로컬 **Node 7 PASS**, `scripts/self-qa-integrity.mjs`·해당 테스트 원격 일치 **Node 6 PASS**.
+- **미검증:** 이 최신 E2E 스크립트로 **실 Chromium/Edge를 돌려 10/10 PASS를 얻은 기록은 없음**. 최신 frontend 전체 `npm run qa:release`도 NOT_RUN. Chromium 구버전 7개 검사 통과와 Node 34개 검사 통과는 전 버전 HTML 증거이며 현 버전 완료를 의미하지 않는다. Windows 실기기 역시 별도 검수 필요.
+- 민감 데이터·상용 API·유료 계정·네트워크 사용·자동 배포 없음. 실제 판매/크몽 승인 없음. 마감 2026-11-07 유지.
