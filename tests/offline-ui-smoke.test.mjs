@@ -314,3 +314,32 @@ test('sales rejects XLSX and oversized CSV without exposing stale report downloa
   assert.match(env.rootNode.innerHTML,/2MB 이하/);
   assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
 });
+
+
+test('sales period guide question synchronizes with the actual report and blueprint',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  assert.match(env.rootNode.innerHTML,/월별/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/>주별</);
+  env.click('answer',{question:'period',answer:'월별'});
+  assert.match(env.rootNode.innerHTML,/value="monthly" selected/);
+  const source=readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'),'utf8');
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'sales.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
+  assert.match(env.rootNode.innerHTML,/<td>2026-10<\/td>/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/<td>2026-10-01<\/td>/);
+  await env.change({dataset:{action:'sales-period'},value:'daily'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/download-sales-report/);
+  env.click('download-json');
+  const blueprint=JSON.parse(env.blobs.at(-1).parts[0]);
+  assert.equal(blueprint.questions.find(q=>q.key==='period')?.answer,'일별');
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/<td>2026-10-01<\/td>/);
+});
