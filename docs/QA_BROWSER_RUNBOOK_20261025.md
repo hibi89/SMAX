@@ -49,3 +49,11 @@
 - `scripts/qa-release.mjs`와 `scripts/qa_browser.mjs`는 **이 동일 파일을 읽어** 매출 잠정 집계 2행/제외3행/순액79.90원, `DUPLICATE`, `INVALID_DATE`, `FORMULA_PROTECTED`, 양쪽 UTF-8 BOM을 검사. 파일 누락 시 출고 검증 실패. 하드코딩 입력이 검사마다 별도로 달라지는 위험 감소.
 - `tests/sales-report.test.mjs`에 공용 예제 회귀 1건 추가. 원격/로컬 Git blob **`c78effcfb7d272d7f0aa7afca0e88c85f5f5e8eb` 일치**, 동일 원본 `csv-transform`/`sales-report`의 Node v22.16.0 **8 PASS / 0 FAIL**, QA 무결성 기존 테스트 **8 PASS / 0 FAIL**. 모든 수치는 **개별 Node 단위 테스트** 증거이며 변경 후 전체 frontend `npm run qa:release` 및 실제 Chromium/Windows E2E **NOT_RUN**.
 - 구현 커밋: 합성 예제 `8f3ba3f17150f8ff8162a65843e54cdeac717cad`, 릴리스 검사 파일 통합 `b51c2501e3ee9812bed5e5529a92a72094de4465`, Chromium 검사 파일 통합 `f01e498afb3b5dfc4364bc3175541931eff06c7e`, 단위 회귀 8건 `3688df8e2a8dc2c36af8209563d3e3c4d8f82462`.
+
+## Windows 한 번에 QA 실행 — 선택형 실제 Edge 확인 (2026-10-25)
+- Private 최신 `frontend`를 Windows PC에 받은 개발자가 직접 실행하는 **검수 도구**입니다. **고객용 제품이 아닙니다.**
+- `QA_SELF_WINDOWS.cmd`(인수 검사 기본값): Node 20+ 사용 가능 여부, `npm run qa:release` 전체 테스트/단일 HTML 생성, QA JSON(기존 CSV 및 매출 샘플 양쪽 PASS), HTML 파일 SHA-256·바이트 일치 검사. **실제 Windows 브라우저 파일 다운로드를 실행하지 않으며 Node PASS를 Windows 브라우저 PASS로 표현하지 않습니다.**
+- `QA_SELF_WINDOWS.cmd /edge`(선택): 위 검증을 먼저 모두 수행한 뒤 설치된 개발자 Playwright와 Microsoft Edge를 사용해 `npm run qa:browser:node -- --channel msedge` 추가. 실제 `file://` 로컬 HTML의 기존 CSV 정리, 매출 일/월·2개 파일, 10종 가이드 출력, 외부 HTTP 0 및 JS 오류 0을 검사. 필요한 브라우저/Playwright가 없거나 실행을 차단하면 **exit 1**이며 성공 간주 금지. 사용자 실기기·실용성/디자인 수동 확인 및 출시는 별도.
+- `scripts/VERIFY_SELF_WINDOWS.ps1`은 성공한 Node QA 리포트라도 `allNodeTests`, `offlineBuild`, `cssAndScriptCsp`, `publicPrivateBoundary`, `syntheticCsv4Rows2Review`, `syntheticSales5Rows3Review`가 전부 정확히 `PASS`여야 허용. `saleApproval=NOT_GRANTED` 유지 요구. Edge 테스트 출구 검사 **이후**에만 `$ok=$true`.
+- 정확한 코드와 테스트 SHA: PowerShell `3bc6e82535cc52df9d8b0d0b957aeed4129501e8`, CMD `6597ca75300008be1d2ea94346ee02d5d14da39f`, `tests/windows-qa-contract.test.mjs` `3fbbc861933663ae32aa6330e5db15803d759215`. 세 파일 모두 실제 격리 Node 테스트 폴더의 `git hash-object`와 Private GitHub 원격 SHA **일치**. Node v22.16.0 `node --test tests/windows-qa-contract.test.mjs` **3 PASS/0 FAIL**.
+- **한계:** Windows PowerShell/Edge 실제 구동 **NOT_RUN**(현 컨테이너 Windows가 아님). 전체 최신 frontend `npm run qa:release` 및 Chromium 신규 10항목 실검사도 여전히 NOT_RUN. 코드를 쓰거나 정적 계약 검사를 통과했다고 브라우저 호환 또는 상품 출고를 주장하지 않는다.
