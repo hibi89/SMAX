@@ -18,3 +18,8 @@
 /* Official wordmark color: blue X and superscript ² are one continuous accent. */
 .brand-mainline{display:block;color:#eef6f3;line-height:1.12}
 .brand-accent{color:#43a6ff}
+
+/* 2026-10-25 official laptop-logo details: a darker square at X crossing; blue subline. */
+.brand-x{display:inline-block;position:relative;color:inherit}
+.brand-x::after{content:"";position:absolute;z-index:1;width:.18em;height:.18em;left:49%;top:52%;transform:translate(-50%,-50%);background:#18538e;border-radius:.015em;pointer-events:none}
+.brand-subname{color:#43a6ff}
