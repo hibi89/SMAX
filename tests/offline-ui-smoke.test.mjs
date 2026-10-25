@@ -204,7 +204,10 @@ test('sales local report preserves rejected records and downloads both UTF-8 BOM
   assert.equal(env.links.at(-1).download,'SMAX_SALES_REPORT.csv');
   const report=env.blobs.at(-1).parts[0];
   assert.match(report,/^\uFEFF기간,판매채널,/);
-  assert.match(report,/79\.90/);
+  // Report CSV is grouped by date/channel, so overall 79.90 appears in the UI summary,
+  // not as a synthetic grand-total row in the CSV.
+  assert.match(report,/100\.00/);
+  assert.match(report,/-20\.10/);
   env.click('download-sales-review');
   assert.equal(env.links.at(-1).download,'SMAX_SALES_REVIEW_ROWS.csv');
   const reviewed=env.blobs.at(-1).parts[0];
