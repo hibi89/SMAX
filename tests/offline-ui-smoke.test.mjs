@@ -244,3 +244,70 @@ test('sales result is invalidated when period/mapping/template changes',async()=
   assert.doesNotMatch(env.rootNode.innerHTML,/2개 열 감지/);
   assert.doesNotMatch(env.rootNode.innerHTML,/download-sales-report/);
 });
+
+
+test('single offline bundle safely switches between both executable tools without stale exports',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  const csv=readFileSync(join(root,'examples','SMAX_SELF_SAMPLE.csv'),'utf8');
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'standard.csv',size:Buffer.byteLength(csv,'utf8'),text:async()=>csv
+  }]});
+  for(const [field,value] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-csv');
+  assert.match(env.rootNode.innerHTML,/검토 필요 2행/);
+  env.click('download-csv');
+  const count=env.links.length;
+  assert.equal(env.links.at(-1).download,'SMAX_STANDARDIZED.csv');
+
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-csv"/);
+  env.click('download-csv');
+  assert.equal(env.links.length,count,'old spreadsheet export cannot be downloaded in sales workflow');
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+  const sales=readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'),'utf8');
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'sales.csv',size:Buffer.byteLength(sales,'utf8'),text:async()=>sales
+  }]});
+  for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 3행/);
+  env.click('download-sales-report');
+  env.click('download-sales-review');
+  assert.equal(env.links.at(-2).download,'SMAX_SALES_REPORT.csv');
+  assert.equal(env.links.at(-1).download,'SMAX_SALES_REVIEW_ROWS.csv');
+  assert.ok(env.blobs.at(-2).parts[0].startsWith('\uFEFF기간,'));
+  assert.ok(env.blobs.at(-1).parts[0].includes('FORMULA_PROTECTED'));
+
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+  const before=env.links.length;
+  env.click('download-sales-report');
+  env.click('download-sales-review');
+  assert.equal(env.links.length,before,'old sales artifacts cannot leak into spreadsheet workflow');
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-csv"/);
+});
+
+test('sales rejects XLSX and oversized CSV without exposing stale report downloads',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'wrong.xlsx',size:4,text:async()=>'fake'
+  }]});
+  assert.match(env.rootNode.innerHTML,/CSV 파일만 지원/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'huge.csv',size:2*1024*1024+1,text:async()=>{throw Error('must not read too-large file')}
+  }]});
+  assert.match(env.rootNode.innerHTML,/2MB 이하/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+});
