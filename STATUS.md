@@ -178,3 +178,14 @@
 - `main`에 별도 로고 관련 최신 커밋이 있어서 (`91549b01323c6d8f6a1d277c5bde2302c003f949` 관측), `main`을 덮어쓰거나 merge하지 않음. 병합 전 로고 CSS/HTML 최신 변경과 신규 CSV UI CSS를 충돌 없이 조정 필요.
 - 진행/차단: **코드 통합과 V8 UI 시뮬레이션 완료**; 실제 브라우저·Windows·`npm test`, 사용성, 공개/유료 코드 분리, 패키징·크몽 판매 품질은 **미검증/미완**. Cloudflare 공개/크몽 상품 게시/유료 서비스/개인정보 수신 없음.
 - 다음 작업 우선: 안전한 정적 웹 쇼룸과 유료 SELF 코어/로컬 전달물 분리의 2안 비교 및 구현 계획 → **Node 전체 테스트/실 브라우저 QA** → Windows 로컬 패키징 및 크몽 상품 설명·등록 심사 준비. 2026-11-07은 **최종 상한이지 목표 소요시간이 아니며**, 일찍 검증 통과하면 즉시 완료 판단.
+
+
+## 2026-10-25 KST — 스총 실행 3: 실제 Node 코어 재검증 / 공개·유료 배포 코드 분리
+- 사용자 지시: 11월 7일은 **완료 마감 상한**이며 일찍 끝나면 조기 완료. 범위 확대·외부 공개·비용은 승인되지 않음.
+- 실 테스트: 이번 턴 컨테이너 Node **v22.16.0**, 이전 코어의 원격 Git blob과 일치한 로컬 `site/csv-transform.mjs` (`5b87530f...`), `tests/csv-transform.test.mjs` (`5f2dda8d...`) 실행. `node --check` 2건 PASS; `node --test tests/csv-transform.test.mjs` **10 PASS / 0 FAIL**. 프론트 전체 `npm test`/실 Chromium/Windows는 **실행하지 못해 미검증**.
+- 배포 선택 A: `public-site/index.html`은 읽기 전용 공개 쇼룸(템플릿 10종·판매 전 안내, JS/유료 코어/파일 업로드/자체 결제 없음); `site/` SELF 내부 코드 보존. `wrangler.jsonc` 기본 `assets.directory="./public-site"`로 안전 수정. 기존 `./site` 그대로 배포하면 유료 기능이 노출될 위험을 줄임.
+- 검사: GitHub 원격 `public-site/index.html` 및 `wrangler.jsonc` 실제 재조회 후 공개 코드 경계/브랜드/허위 판매/앵커 등 정적 **11 PASS / 0 FAIL**(V8 기반 원격 콘텐츠 검사). 이를 위한 `tests/public-boundary.test.mjs`의 Node 실행은 **별도 미검증**, 브라우저 렌더링도 미검증.
+- `main`의 최신 공식 로고 `SMAX² / SMAX SQUARE / 함께 만드는 AX광장`를 `frontend site/index.html`에 동일 Git blob으로 반영했고 `site/styles.css`에 대응 CSS 규칙 추가. 기존 CSV 스타일 유지. 공개용 쇼룸도 동일 로고 텍스트 사용.
+- QA·설계 문서 `docs/PUBLIC_PRIVATE_RELEASE_BOUNDARY_20261025.md`, `README_LOCAL.md` 공개/SELF 경계 수정. GitHub 외부 공개/Cloudflare 계정 연결/크몽 상품 등록/현금 결제 **0회**.
+- 다음 안전 순서: 실제 `frontend` 전체 `npm test`와 Chromium/Windows 파일 업로드→매핑→실변환→다운로드 검증, 로컬 SELF 패키징 후 샘플 다운로드/사용 가이드, `main` 최신 로고 커밋을 존중한 비강제 통합 계획. 실제 Cloudflare 배포/크몽 등록은 별도 승인 필요.
+- 실제 브랜치/HEAD는 이번 STATUS 및 HANDOFF 문서 커밋이 끝나면 원격 재확인. 2026-11-07 마감 변경 없음.
