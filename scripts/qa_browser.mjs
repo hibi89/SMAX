@@ -62,6 +62,15 @@ async function main() {
       checks.push('Offline file and 10 templates open');
       await page.locator('[data-action="select"][data-id="spreadsheet"]').first().click();
       await page.locator('#tab-chat').click();
+      // Fail closed: invalid UTF-8 may silently corrupt Korean business CSV.
+      await page.locator('#csv-upload').setInputFiles({
+        name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
+        buffer:Buffer.from([0xbe,0xc8,0xb3,0xe7])
+      });
+      assert((await page.locator('.editor-panel').innerText()).includes('문자 인코딩 오류'),
+        'Malformed UTF-8 was not rejected before spreadsheet mapping');
+      assert(await page.locator('[data-action="download-csv"]').count() === 0,
+        'A broken encoding unexpectedly offered a CSV download');
       await page.locator('#csv-upload').setInputFiles(samplePath);
       for (const [field,label] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})) {
         await page.locator('#map-'+field).selectOption({label});
@@ -97,6 +106,14 @@ async function main() {
       try {
         await page.locator('[data-action="select"][data-id="sales"]').first().click();
         await page.locator('#tab-chat').click();
+        await page.locator('#csv-upload').setInputFiles({
+          name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
+          buffer:Buffer.from([0xbe,0xc8,0xb3,0xe7])
+        });
+        assert((await page.locator('.editor-panel').innerText()).includes('문자 인코딩 오류'),
+          'Malformed UTF-8 was not rejected before sales mapping');
+        assert(await page.locator('[data-action="download-sales-report"]').count() === 0,
+          'A broken encoding unexpectedly offered a sales report');
         const salesSample = readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'),'utf8');
         await page.locator('#csv-upload').setInputFiles({
           name:'SMAX_SALES_SYNTHETIC.csv',mimeType:'text/csv',
