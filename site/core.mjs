@@ -41,6 +41,7 @@ export function parseCsv(source) {
   if (!/[\r\n]$/.test(text) || row.length || cell.length || afterQuote) pushRow();
   const headers = (records.shift() ?? []).map(x => x.trim());
   if (!headers.length || headers.some(x => !x)) throw new Error("빈 열 이름이 있습니다.");
+  if (!records.length) throw new Error("헤더만 있고 처리할 데이터가 없습니다.");
   if (new Set(headers.map(x => x.toLocaleLowerCase("ko-KR"))).size !== headers.length) {
     throw new Error("중복된 CSV 열 이름이 있습니다.");
   }
