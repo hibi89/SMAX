@@ -217,3 +217,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. 복구: Git 파일 버전별 SHA 사용, 강제 머지 금지.
 9. 다음: frontend 전체 실제 npm test + 오프라인 패키징 + Windows E2E; 최신 브랜드 정책과 안전 병합.
 10. 2026-10-25 KST 검증 기준.
+
+## 2026-10-25 KST — 스총 후속 / P2 매출 집계 로컬 모듈 (10항)
+1. **목표·확정요구·기술:** 사장님 존 SELF의 가능한 두 번째 실사용 로컬 기능. 2026-11-07 상한, 기존 10종 설계 템플릿/CSV 정규화 보존. 사용자가 CSV 판매일·판매채널·판매금액 3열을 명시 매핑하고 일·월 집계 기간 선택, 실제 고객/서버 없이 Node `BigInt` 2자리 고정소수점 합산. 상품 출시·실회계 보장은 별도 검증/사용자 승인.
+2. **기능·변경·설계 비교:** 원본값 직접 헤더 자동 추정/즉시 합산(A)은 위험. 기존 `normalizeSpreadsheetCsv` 검증·검토행 분리 후 유효해 보이는 행만 잠정 집계(B)를 채택. `site/sales-report.mjs` 신규: 기간/채널별 양수 합계·음수조정 절댓값·순액/건수, `reportCsv` 및 누락/오류/중복/수식/거액 제외행 `reviewCsv`를 UTF-8 BOM 문자열로 제공. 임의 데이터 삭제/외부 요청 없음. `tests/sales-report.test.mjs` 7건 및 `docs/SALES_REPORT_ENGINE_CONTRACT_20261025.md` 신규.
+3. **명령·PASS/FAIL·미검증:** `node --test tests/sales-report.test.mjs` Node v22.16.0 **7 PASS / 0 FAIL**. 원격 blob과 로컬 파일 일치: 기존 `site/csv-transform.mjs` `2b004fb9474743a95294b42baf7f875602644a54`, 신규 engine `01050c8d3a3dd6a1f548d37484112aa7bd99b924`, test `4732565887cd2e3f007bb7b03a6e271e4520d159`. 전체 backend `npm test`, frontend 실제 제품·Playwright/Windows E2E는 **이번 수행 NOT_RUN**.
+4. **완료/진행/대기/차단:** 엔진+정적 계약+격리 단위 검증 완료, 코어 `backend` Private 반영. 고객이 누를 `sales` 화면/실제 다운로드·`build-self` 오프라인 HTML 통합 미완. 크몽 심사·판매/Cloudflare Public 배포·최종 디자인 승인/Windows PC 검증 미진행.
+5. **문제 근거/원인/시도/재시도 금지·대안:** 손실 위험(중복 합산, 결측값 합산, 숫자 float 오차) 방지 위해 제외행 별도 CSV·BigInt 채택. `READY_FOR_HUMAN_REVIEW`도 회계 승인 상태는 아님. 음수는 자동 환불로 해석하지 않고 `negativeAdjustment`로 표기. Windows QA는 Linux 검사로 대체 완료 판정하지 말 것. GitHub Actions 단계 없는 실패 반복 실행 금지.
+6. **repo/branch/SHA/경로:** Private `hibi89/SMAX`, **backend 전용**. 신규 코어 커밋 `4c497d4f1a1c189692c83294f63124787c3d489b`, 테스트 `c2ffd622a8f2ec6b36c303076cd3f72ea8c586fa`, 계약 `8b8e1d6fb36f180951edc2a77f1561f9c59c7f1b`, 상태 업데이트 `cc6f2b26bc52097d91f1dc93dfd5a808a1338a1b`. 최종 backend HEAD는 HANDOFF 커밋 뒤 API 재조회. `main`/`frontend` 변경 없음.
+7. **Production URL/Vercel/실행환경:** Production URL 없음. Cloudflare 정적 사이트 미배포, Vercel 미적용, 크몽 미등록. 개발 실행은 backend Node 20+ `node --test tests/sales-report.test.mjs`. `sales-report.mjs`의 소비자는 현재 함수 호출자만; 실제 사용자용 offline HTML에는 아직 포함되지 않음.
+8. **원본 위치/백업/인증·금지:** `backend/site/csv-transform.mjs` 원본 blob 재사용·불변. 기존 Git history가 복원 기준, force push/임의 병합 없음. 합성 테스트만 사용, 고객 개인정보·API 토큰·결제 정보 없음. `site/` 유료 코어는 Private, `public-site/` 공개 후보만 유지.
+9. **다음 우선·절차·완료기준·승인:** `frontend` 최신 SHA 먼저 확인 → sales 탭의 CSV 업로드·판매일/채널/금액 수동 매핑 → 일/월 주기와 검토 제외 건수 표시 → 보고/검토 두 CSV 다운로드 → 번들러 import 및 UI/Node/Chromium 회귀 → Linux/Windows 차이 별도 기록. 이후 main 안전 병합·Cloudflare/크몽 게시에는 창업자 사전 승인. WEB/학생/자체결제 확장 금지.
+10. **기준 시각·원천:** 2026-10-25 KST. 원격 SHA 확인 및 로컬 Node 7개 실행 결과/계약 문서로 한정. 이 문서의 기준 HEAD는 업데이트 후 재조회; 상품 완성/상용 실행/Windows E2E 검증으로 확대 해석 금지.
