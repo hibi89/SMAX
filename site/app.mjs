@@ -37,6 +37,7 @@ function salesResultPanel(){
     '<button type="button" class="button-sm" data-action="run-sales" '+(ready?"":"disabled")+'>매핑 확인 후 매출 집계</button>'+
     (state.salesError?'<p class="csv-error" role="alert">'+h(state.salesError)+'</p>':"")+
     (result?'<p class="tiny" role="status">원본 '+result.summary.sourceRows+'행 · 잠정 반영 '+result.summary.includedRows+'행 · 제외/검토 '+result.summary.excludedRows+'행 · 그룹 '+result.summary.groupCount+'개 · 순합계 '+h(result.summary.netAmount)+'원</p>'+
+      (result.excluded.some(row=>row.reason.split("|").includes("DUPLICATE"))?'<p class="tiny" role="note">중복 의심 거래가 잠정 합계에서 제외되었습니다. 판매일·판매채널·금액이 같아도 별개 주문일 수 있습니다. CSV에 주문번호 등 구분 열이 없으면 자동 구분할 수 없으므로 제외/검토 CSV의 원본레코드 번호를 실제 거래와 반드시 대조하세요.</p>':"")+
       '<p class="tiny">처음 5개 그룹 미리보기. 전체 내용은 보고서/검토 파일을 각각 다운로드하세요. 인력 최종 검토 전 확정 매출이 아닙니다.</p>'+table+
       '<button type="button" class="button-outline" data-action="download-sales-report">잠정 집계 CSV 다운로드 ↓</button>'+
       '<button type="button" class="button-outline" data-action="download-sales-review">제외/검토 행 CSV 다운로드 ↓</button>':
@@ -55,6 +56,7 @@ function csvResultPanel(t){
     '<button type="button" class="button-sm" data-action="run-csv" '+(ready?'':'disabled')+'>매핑 확인 후 변환·미리보기</button>'+
     (state.csvError?'<p class="csv-error" role="alert">'+h(state.csvError)+'</p>':'')+
     (result?'<p class="tiny" role="status">원본 '+result.summary.inputRows+'행 → 결과 '+result.summary.outputRows+'행 · 검토 필요 '+result.summary.reviewRows+'행 · 중복 '+result.summary.duplicateRows+'행</p>'+
+      (result.summary.duplicateRows?'<p class="tiny" role="note">중복 의심은 확정 중복이 아닙니다. 주문번호 등 원본의 추가 열도 비교하지만 구분 열이 없다면 별개 거래를 중복으로 표시할 수 있습니다. 원본레코드 번호와 검토 CSV를 대조하세요.</p>':"")+
       '<p class="tiny">처음 5행 미리보기 · NEEDS_REVIEW 행은 삭제되지 않으며 검토 사유가 함께 저장됩니다.</p>'+preview+
       '<button type="button" class="button-outline" data-action="download-csv">전체 결과 CSV 다운로드 ↓</button>'+
       (result.summary.reviewRows?'<button type="button" class="button-outline" data-action="download-csv-review">검토 필요 행만 CSV 다운로드 ↓</button>':''):
