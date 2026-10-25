@@ -122,3 +122,35 @@ test('equal monetary values in different CSV formats cannot inflate preliminary 
  assert.equal(r.groups[0].rows,3);
  assert.match(r.reviewCsv,/DUPLICATE/);
 });
+
+test('leading-zero monetary padding is accepted by value while over-limit values remain excluded',()=>{
+ const input='판매일,판매처,판매액,주문번호\n'
+  +'2026-10-01,온라인,0000000000001,ORDER-A\n'
+  +'2026-10-01,온라인,1.00,ORDER-A\n'
+  +'2026-10-01,온라인,0000000000001.20,ORDER-B\n'
+  +'2026-10-01,매장,-0000000000002.00,ORDER-C\n'
+  +'2026-10-01,온라인,1000000000000,ORDER-D\n'
+  +'2026-10-01,온라인,0001000000000000,ORDER-E';
+ const result=buildSalesReport(input,mapping,{period:'daily'});
+ assert.equal(result.summary.sourceRows,6);
+ assert.equal(result.summary.includedRows,3);
+ assert.equal(result.summary.excludedRows,3);
+ assert.equal(result.summary.positiveAmount,'2.20');
+ assert.equal(result.summary.negativeAdjustment,'2.00');
+ assert.equal(result.summary.netAmount,'0.20');
+ assert.deepEqual(result.excluded,[
+   {sourceRecord:'3',reason:'DUPLICATE'},
+   {sourceRecord:'6',reason:'AMOUNT_EXCEEDS_REPORT_LIMIT'},
+   {sourceRecord:'7',reason:'AMOUNT_EXCEEDS_REPORT_LIMIT'}
+ ]);
+ assert.match(result.reviewCsv,/0001000000000000,AMOUNT_EXCEEDS_REPORT_LIMIT/);
+ assert.doesNotMatch(result.reviewCsv,/0000000000001.20/);
+ const upper=buildSalesReport('판매일,판매처,판매액,주문번호\n'
+   +'2026-10-02,온라인,000999999999999.99,MAX\n'
+   +'2026-10-02,온라인,001000000000000.00,OVER',
+   mapping,{period:'monthly'});
+ assert.equal(upper.summary.includedRows,1);
+ assert.equal(upper.summary.excludedRows,1);
+ assert.equal(upper.summary.netAmount,'999999999999.99');
+ assert.match(upper.reviewCsv,/AMOUNT_EXCEEDS_REPORT_LIMIT/);
+});
