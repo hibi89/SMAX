@@ -26,3 +26,7 @@ test('CSV upload inspection preserves BOM, CRLF, empty field records and multili
   assert.deepEqual(parsed.rows[1],['','','']);
   assert.equal(parsed.rows[2][1],'줄1\n줄2');
 });
+test('CSV upload inspection blocks header-only files before mapping',()=>{
+  assert.throws(()=>parseCsv('거래날짜,품목,결제금액\\n'),/헤더만 있고 처리할 데이터/);
+  assert.throws(()=>parseCsv('거래날짜,품목,결제금액'),/헤더만 있고 처리할 데이터/);
+});
