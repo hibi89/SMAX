@@ -627,3 +627,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **프로젝트·실사용:** SELF 실행형 로컬 CSV 2종, 가이드 전용 8종. 출시 전 확인. UI 안내·원본주문 구분·화폐포맷 중복 보정은 앞선 인계대로 유지; 이번에 코어 변경 없음. 별도 RAG/SMAX 사업 main 전략/업무 자동화 범위를 확대하지 않음.
 9. **보안·비용/배포:** 실제 고객 CSV, 비밀키·토큰·결제/광고/Cloudflare/외부 통신 사용·금전 지출 없음. GitHub는 private, `public-site` 이외 소스 외부 공개 금지. 사용자 승인 전 상품 게시·배포·main 통합 금지.
 10. **기준·재개:** 2026-10-26 KST. 이 HANDOFF 커밋 직후 GitHub `frontend` 최신 HEAD를 조회. 개발 마감 **2026-11-07** 유지. 사용자가 새 실행 로그를 전달하면 현재 status와 이전 실제 Windows QA 증거를 비교 후 다음 게이트 수행.
+
+## 2026-10-26 KST — 스총 인계: 실 Windows Node 86/86 PASS·브라우저 게이트 대기
+1. **상태 변동:** 사용자가 실제 Windows PowerShell 로그를 제공. `frontend` 변경 반영 후 `npm run qa:release` **86/86 PASS / 0 FAIL**, Node `v24.21.0`, `OFFLINE_SELF_BUILT` 및 release report 생성 완료. 이전 `84/86`은 같은 원인 2건(Win Git EOL 테스트)에서 발생한 과거 실패이며 신규 성공 로그가 이를 해결함.
+2. **빌드 식별:** HTML `dist/SMAX_SELF_OFFLINE.html`, **92,076 bytes**, SHA-256 `884f004f45c5bbd7cafdaf744f1dfa8d6c7970e94a8bc31a4ecaa94a0b91227c`. 실PC `dist/SELF_QA_REPORT.json`의 status `LOCAL_NODE_PASS_BROWSER_NOT_TESTED`.
+3. **검증 6항:** 사용자 JSON 로그에서 `allNodeTests`, `offlineBuild`, `cssAndScriptCsp`, `publicPrivateBoundary`, `syntheticCsv4Rows2Review`, `syntheticSales5Rows3Review` **PASS**. 데이터 실운영/유료 기능이 검증되었다는 주장은 하지 않음.
+4. **여전히 미검증:** `chromiumEdgeFileProtocol NOT_RUN`, `windowsManualQA NOT_RUN`, `saleApproval NOT_GRANTED`. Node 테스트 성공을 최종 납품·크몽 등록/Cloudflare 공개 승인으로 확대 해석 금지.
+5. **다음 정확한 단계:** 사용자가 같은 `SMAX_SELF_QA` checkout에서 Playwright가 설치된 경우 `.\QA_SELF_WINDOWS.cmd /edge` 실행 → 새 Node 전체 재검사·HTML/보고서 SHA·크기 확인 → Windows Edge 자동 `file://` E2E. Playwright 미설치이면 개발용 `npm install --no-save --no-package-lock playwright` 실행 가능, 고객 PC에는 불필요. Edge 브라우저는 Windows에 설치돼 있어야 함. `scripts/VERIFY_SELF_WINDOWS.ps1`가 이 모두를 검수하고 exit code로 게이트 차단.
+6. **차단 해결 경위:** 이전 실PC 84/86의 실패는 `examples/SMAX_SELF_SAMPLE.csv` Git checkout CRLF와 app의 내장 LF 직접 문자열 비교 때문; 이를 수정한 `tests/demo-fixture-contract.test.mjs`/`tests/offline-ui-smoke.test.mjs` 후 실PC 86/86 PASS. 다른 CSV/매출/보안 테스트도 전체 통과.
+7. **저장소/복구:** Private `hibi89/SMAX`, `frontend`만 이번 `STATUS.md`·`HANDOFF.md` 기록 갱신; core/tests/`main`/`backend` 소스 불변. `STATUS.md` 실Windows 86/86 섹션 참고. git history로 복구 가능. force push/merge 없음.
+8. **안전:** 코어는 오프라인 SELF 유료 private 소스이므로 `public-site/`에 복제·외부 공용 호스팅 금지. 테스트는 합성 데이터. 고객 정보·인증키/계정·실결제·유료 외부 API/배포 모두 없음.
+9. **사업/범위:** SELF 실행형 로컬 CSV 2종, 나머지 8종 설계 가이드. 기존 main RAG Studio 전략 독립 보존. 출시/상품 공개·가격/결제·main 통합은 별도 사용자 승인 필요. **2026-11-07** 개발 상한 유지.
+10. **새 채팅 재개:** 최신 Github heads·`STATUS.md`·`HANDOFF.md` 읽고 실제 Edge 자동 E2E 결과를 기다리는 대신, 사용자가 전달하면 즉시 판정 및 결함 수정. 본 문서 커밋 이후 최종 branch SHA 재조회. Windows 수동 QA·출고 승인 게이트 남음.
