@@ -74,6 +74,17 @@ function normalizeAmount(value) {
   return raw.replace(/,/g, '');
 }
 
+function duplicateAmountKey(amount) {
+  // Numeric identity for duplicate detection only; never rewrite the displayed amount.
+  // Compare exact two-decimal currency values without float rounding or BigInt limits.
+  const negative = amount.startsWith('-');
+  const [integer, fraction = ''] = (negative ? amount.slice(1) : amount).split('.');
+  const whole = integer.replace(/^0+(?=\d)/, '');
+  const cents = fraction.padEnd(2, '0');
+  const sign = negative && (whole !== '0' || cents !== '00') ? '-' : '';
+  return sign + whole + '.' + cents;
+}
+
 function excelSafe(value) {
   const s = String(value);
   // CSV quotes do not stop spreadsheet formula evaluation; prepend an apostrophe.
@@ -123,7 +134,8 @@ export function normalizeSpreadsheetCsv(source, mapping) {
     // Preserve normalized comparisons for mapped fields, but include all other source columns.
     // Equal amounts on the same day can be distinct orders with different invoice IDs.
     const otherColumns = record.filter((_, index) => !columns.includes(index));
-    const duplicateKey = JSON.stringify([rawValues, otherColumns]);
+    const duplicateValues = [date ?? dateRaw, itemRaw, amount === null ? amountRaw : duplicateAmountKey(amount)];
+    const duplicateKey = JSON.stringify([duplicateValues, otherColumns]);
     if (seen.has(duplicateKey)) { flags.push('DUPLICATE'); counts.duplicateRows++; }
     seen.add(duplicateKey);
     const safeValues = rawValues.map(excelSafe);
