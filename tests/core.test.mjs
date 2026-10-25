@@ -30,3 +30,25 @@ test('CSV upload inspection blocks header-only files before mapping',()=>{
   assert.throws(()=>parseCsv('거래날짜,품목,결제금액\n'),/헤더만 있고 처리할 데이터/);
   assert.throws(()=>parseCsv('거래날짜,품목,결제금액'),/헤더만 있고 처리할 데이터/);
 });
+
+test('unverified guide-only field annotations can never masquerade as confirmed source mappings',()=>{
+  const guide=templates.find(t=>t.id==='faq');
+  const filled=Object.fromEntries(guide.questions.map(q=>[q.key,q.options[0]]));
+  const names=Object.fromEntries(guide.fields.map((f,i)=>[f.key,'현장기입'+i]));
+  const draft=buildBlueprint(guide,filled,names,{guideOnly:true});
+  assert.equal(draft.guideOnly,true);
+  assert.equal(draft.state,'NEEDS_REVIEW','all answers and names must not make a guide verified');
+  assert.equal(draft.missing.length,0);
+  for(const field of draft.fields){
+    assert.match(field.sourceColumn,/^현장기입/);
+    assert.equal(field.needsReview,true);
+    assert.equal(field.fieldVerification,'UNVERIFIED_MANUAL_FIELD_NAME');
+  }
+  const handoff=buildHandoff(guide,draft);
+  assert.match(handoff,/미검증 설계 항목명/);
+  assert.match(handoff,/현장 확인 필요/);
+  const runnable=templates.find(t=>t.id==='spreadsheet');
+  const executable=buildBlueprint(runnable,{},Object.fromEntries(runnable.fields.map(f=>[f.key,f.label])));
+  assert.equal(executable.guideOnly,false);
+  assert.ok(executable.fields.every(f=>f.fieldVerification==='HUMAN_SELECTED_SOURCE_COLUMN'&&!f.needsReview));
+});
