@@ -36,3 +36,10 @@
 - 스크립트 `scripts/qa_browser.mjs`의 신규 브라우저 검사 코드 GitHub 원격 blob `40e46d79f05b01dcc87a01724565dcefb76dbaf3`. **V8 정적 구문 검사 PASS**, 기존 `site/sales-report.mjs`·`tests/sales-report.test.mjs` 원격 일치 로컬 **Node 7 PASS**, `scripts/self-qa-integrity.mjs`·해당 테스트 원격 일치 **Node 6 PASS**.
 - **미검증:** 이 최신 E2E 스크립트로 **실 Chromium/Edge를 돌려 10/10 PASS를 얻은 기록은 없음**. 최신 frontend 전체 `npm run qa:release`도 NOT_RUN. Chromium 구버전 7개 검사 통과와 Node 34개 검사 통과는 전 버전 HTML 증거이며 현 버전 완료를 의미하지 않는다. Windows 실기기 역시 별도 검수 필요.
 - 민감 데이터·상용 API·유료 계정·네트워크 사용·자동 배포 없음. 실제 판매/크몽 승인 없음. 마감 2026-11-07 유지.
+
+## 2026-10-25 후속: 두 CSV 실행 도구를 묶은 fail-closed 릴리스 증빙
+- `scripts/qa-release.mjs`는 **실제 최신 버전의 릴리스 명령이 실행될 때** 기존 `syntheticCsv4Rows2Review=PASS`와 더불어 `syntheticSales5Rows3Review=PASS`를 JSON 보고서에 남긴다. 신규 매출 블록은 합성 5행(정상 2/검토 3), 정확한 합계 79.90원, 원본 검토 사유 `DUPLICATE/INVALID_DATE/FORMULA_PROTECTED`, 보고서/검토 CSV의 BOM, 월별 재집계까지 필수로 통과해야 한다.
+- `scripts/self-qa-integrity.mjs` 브라우저 선행 게이트는 두 항목이 **모두 PASS**가 아니면 출고 보고서를 유효하다고 인정하지 않는다. 예전 SHA가 일치하더라도 매출 테스트 증거가 없는 QA JSON이면 거부한다. 기존 JSON과의 호환성 단절은 의도된 판매 안전장치.
+- `tests/self-qa-integrity.test.mjs`에 **증빙 누락 거부 2건** 추가, 로컬 Node v22.16.0 실제 실행 **8 PASS / 0 FAIL**, 테스트/헬퍼 local Git hash-object = 원격 Git blob: `5e1f1112718e9753c2f3cb692a9b7e6d71f53001` / `804f744dc866e916fc8f86d43f972d1923e2b92e`.
+- 최신 `scripts/qa-release.mjs` Git blob `c8286e09da327876fcb34d84d310d585c4522517`, **V8 정적 문법 검사 PASS**. 최신 릴리스 매출 검증 블록을 원격 동일 `site/csv-transform.mjs`/ `site/sales-report.mjs`와 합성해 **V8 격리 실행 PASS**(2 포함/3 제외, 79.90원, CSV 2개 BOM, 3가지 오류 사유, 월별 합계). **V8 모의 실행은 전체 Node 릴리스 명령 실행 증거가 아님**.
+- 기존 매출 모듈 실제 Node v22.16.0 단위 테스트도 `7 PASS / 0 FAIL` 재확인. 변경 후 전체 최신 `npm run qa:release`와 실제 Chromium/Windows 실행은 **NOT_RUN**. 이 문서의 8/8 + 7/7은 각각 **격리 단위 테스트**이고 완성/판매 승인이 아님.
