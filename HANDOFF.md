@@ -439,3 +439,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본·백업·인증·비밀:** 기존 모든 Git 커밋/소스 원본 보존, 복구 커밋 위 2ed9e1. `site/` 및 `dist/` 유료 제품은 Public 게시 금지; 정적 `public-site/`만 후보. 합성 CSV 외 실제 회사자료·계정·API키·토큰·개인정보 전송 없음. 유료 API/구매/보안권한 변경 없음.
 9. **다음 작업·완료 기준·승인:** 우선 GitHub connector 외 정상 Node 환경에서 전체 `frontend` 동일 HEAD를 실제 `npm run qa:release` 실행, 새 HTML 해시/파일 크기·CSP·CSV/매출 fixture PASS 확인. 이후 동일 SHA Playwright 파일 프로토콜 실브라우저 10항, Windows Edge 다운로드·한글 검증, 운영·가격·환불/지원 UX 검수. 공개 배포/판매/범위 확대는 사용자 사전 승인, 2026-11-07 자동 연장 금지.
 10. **갱신 시간/확인 근거:** 2026-10-25 KST; 연결 GitHub 최신 파일/커밋, 격리 V8 4+4 흐름, 독립 Node 2 bytes, README/구매자 퀵스타트/STATUS 최신화. 문서·V8 검사는 상품 출시 검수 증빙이 아님.
+
+## 2026-10-25 KST — 스총 QA 보강 인수: 오프라인 번들 원시 바이트 (10항)
+1. **목표:** 브라우저 raw File API 기반 UTF-8 fail-closed 동작을 **단일 번들 인라인 실행 경로**에서도 회귀 검증. 2026-11-07 SELF 로컬 상품 개발, 교육 설계 10종/실행 CSV 2종 유지.
+2. **변경:** `tests/offline-ui-smoke.test.mjs`의 Node VM context에 글로벌 `TextDecoder`를 제공. 테스트 1건: spreadsheet/sales 각각 CP949-like raw ArrayBuffer 거부 및 UTF-8 raw ArrayBuffer 승인 확인, 오류 시 다운로드 버튼 비노출. 원본 제품 JS/매출 집계/설계서/사이트/업로드 원본 보존.
+3. **검증:** 실제 GitHub `scripts/build-self.mjs`와 5개 모듈을 격리 V8에서 합성하여 번들 inline script DOMContentLoaded, 4종 바이트 업로드 경로 **4/4 PASS**. 해당 V8 결과는 **새 Native Node VM 테스트 전체 PASS가 아님**. 해시 함수 모의, 진짜 CSP SHA 없음.
+4. **진척·차단:** 회귀 구현 완료, 전체 Node checkout 불가능한 연결 실행환경에서 `npm run qa:release`, 신규 artifact, Chromium/Windows Edge 실제 file:// 미검증. GH Actions 기존 실패 재시도 금지. 인프라 차단은 제품 결함이라고 추측하지 말 것.
+5. **오류/수정판단:** 기존 Node VM `offlineFixture()`에 `TextEncoder`만 전달, 신규 UTF-8 byte verification 경로를 테스트하려면 `TextDecoder` 글로벌 필요. 외부 API/저장소 노출이나 서비스 경로 추가보다 수동 검증 누락을 먼저 방지.
+6. **GitHub 위치:** Private `hibi89/SMAX`, `frontend`만 변경. 시작 HEAD `eab6bb7a9d17055e7ede79d945f328c94739815f`; 변경 커밋 `478e8086448faf4e6dd9d71ec649db3c7ac3869d`; `main/backend` 불변. 새 문서 커밋 후 frontend HEAD 갱신 확인.
+7. **Production:** 상품단일 `dist/SMAX_SELF_OFFLINE.html`은 승인 없이 Public Cloudflare/`public-site`에 업로드하면 안 됨. 쇼룸·결제·크몽 등록·실고객 배포 없음, 사용자 판매 승인 미부여.
+8. **백업·비밀·비용:** Git remote 원본 커밋 보존, 합성 파일·바이트만 사용. 실제 회사 자료, 토큰, 개인정보, 유료 모델/외부 호출/송금/구매 없음. 수동 Actions 실행도 하지 않음.
+9. **다음 1작업:** 전체 최신 Private `frontend` 소스를 정확하게 확보한 Node≥20 환경에서 `npm run qa:release` 실실행해 Node tests PASS→디스크 HTML SHA/bytes/CSP, 제품 전체 QA 보고서 확인→동일 산출물 `npm run qa:browser:node` Chromium 10항 및 Windows `QA_SELF_WINDOWS.cmd /edge`. 실패시 미검증과 실패 구분, 통과 시 출력 SHA 정확히 기록.
+10. **시각·증거 한계:** 2026-10-25 KST, GitHub connector 현 HEAD 검수 + V8 4종 비교; 출고 승인 없음, 개발 마감 2026-11-07.
