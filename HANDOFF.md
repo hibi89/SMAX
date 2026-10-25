@@ -493,3 +493,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 - 실제 Node 22.16.0 격리 VM 기능 검증 `3 PASS / 0 FAIL`(invalid bytes/valid Hangul/unrelated I/O error). 이것은 GitHub 전체 제품 Native suite 아님. `tests/offline-ui-smoke.test.mjs`의 기존 UTF-8 바이트 회귀와 직접 연관.
 - **해시 무효화 필수:** 이전 보고서 `docs/QA_IN_MEMORY_REAL_SHA_20261025.md`의 84,678-byte/57b9abda SHA는 변경 **전** 코드 기준 참고치. 새 HTML 디스크 출력/Native suite/Chromium·Windows QA를 반드시 새 SHA로 다시 검증. 이전 해시를 최신으로 주장 금지.
 - 다음 `ㄱ` 최우선: 최신 `frontend` Node 전체 QA/Browser, 이후 승인된 수동 `main` 통합 검토. `main` `952bc586...`/`backend` `f0f30924...` 변경하지 않음. 배포/판매/비용/고객데이터 조작 승인 없음. 11/7 개발 상한.
+
+## 2026-10-25 KST — 스총 원클릭 합성 예제 UX 인수인계 (10항)
+1. **범위:** SMAX² SELF 10종 템플릿 중 실로컬 CSV 2종에 첫 방문 시 버튼 하나로 체험할 수 있는 **합성 CSV 자동 매핑·미리보기** 제공. 외부 AI·고객 정보·유료 WEB/클라우드 기능 추가 없음.
+2. **구현:** `site/app.mjs`의 `sampleCsvByTemplate`에 기존 합성 fixture 동일 값 내장, `try-sample` 분기에서 해당 샘플만 매핑·실로컬 변환/잠정 매출 집계. 8종 다른 가이드는 예제 실행 버튼 미표시. 실 파일 업로드는 초기화→직접 원본 열 선택.
+3. **고객 경험·검수 수치:** CSV 표준화 예제 원본 4행/검토 2행, 매출 보고 예제 5행/잠정 2행/검토 3행/순 79.90. 데모는 `합성 예제 체험 중`으로 표시하며 `SMAX_DEMO_` 접두어 출력 3개, 실제 고객 파일 결과는 원래 `SMAX_` 출력 복귀.
+4. **테스트 실제 수행:** GitHub 5개 실제 제품 모듈 V8 UI 이벤트 **10/10 PASS**, 같은 코드 Blob 다운로드 이름 및 업로드 리셋 추가 **7/7 PASS**. 신규 `tests/offline-ui-smoke.test.mjs` 케이스 2개/Playwright 브라우저 스크립트 신규 단정 작성. **최신 Native 전체 Node `npm run qa:release`, 실제 Chromium/Windows Edge E2E NOT_RUN**.
+5. **변경 파일·GitHub commit:** `site/app.mjs` `07c037ae...`→`599889c6...`, `tests/offline-ui-smoke.test.mjs` `b7351c97...`→`e4e0b2b6...`, `scripts/qa_browser.mjs` `eed91236...`, `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` `aebb5cca...`→`e8d08e46...`. 최종 `frontend` HEAD는 docs commit 뒤 재조회. `main` `952bc586...`/`backend` `f0f30924...` 유지.
+6. **보호:** 합성 데이터임을 분명히 노출; 예제 결과 실제 거래·제출용 아님. `demoMode` 파일 접두어 분리, 사용자 실제 파일 업로드는 데모 데이터 전부 삭제하고 수동 매핑. 기존 비동기 세대 카운터로 과거 파일 오염 차단.
+7. **비용·제품경계:** 클라우드·결제·도메인·API/모델·유료 라이브러리 추가 0. `public-site` 무료 정적 공개 경계와 `site` 유료 비공개 경계 유지, 공개/크몽/배포 동작 없음.
+8. **다음 작업:** 최신 프라이빗 `frontend` 전체 checkout이 가능한 Native Node≥20 개발 환경에서 `npm run qa:release` 실제 전체 테스트/새 HTML SHA와 CSP 검증. 이후 실제 Playwright Chromium 및 Windows Edge 파일 프로토콜 테스트. 첫 체험 버튼 외 실제 UX 사용성 점검.
+9. **병합 승인:** `main/frontend`은 내용이 다른 동일 경로 5개와 main 전용 사업 문서 7개가 있어 제품 QA 후 수동 내용 조정. 지금 사용자 허가 없이 `main` merge/rebase/force 금지. 실판매/공개배포도 별도 승인.
+10. **출시 게이트/마감:** 2026-10-25 KST. 제품 기능 자체의 V8 격리 실흐름 확인과 QA 전체 출고 승인은 구별. 2026-11-07 개발 마감 목표 유지, 출시 인증·매출 없음.
