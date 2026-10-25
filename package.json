@@ -8,7 +8,8 @@
     "serve": "python -m http.server 8788 --directory site",
     "build:self": "node scripts/build-self.mjs",
     "qa:browser": "python scripts/qa_browser.py",
-    "qa:release": "node scripts/qa-release.mjs"
+    "qa:release": "node scripts/qa-release.mjs",
+    "qa:browser:node": "node scripts/qa_browser.mjs"
   },
   "engines": {
     "node": ">=20"
