@@ -38,6 +38,8 @@ try {
 
   requireCheck(existsSync(artifact), 'offline HTML was not generated');
   const html = readFileSync(artifact, 'utf8');
+  // Stable release bytes across Git Windows CRLF and POSIX LF checkouts.
+  requireCheck(!html.includes('\r'), 'offline HTML contains noncanonical CR newline (cross-platform SHA drift)');
   const script = html.match(/<script>([\s\S]*?)<\/script>/g) ?? [];
   const style = html.match(/<style>([\s\S]*?)<\/style>/g) ?? [];
   requireCheck(script.length === 1 && style.length === 1, 'expected exactly one inline script and stylesheet');
