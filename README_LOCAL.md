@@ -30,6 +30,18 @@
 5. 합성 자료 `examples/SMAX_SELF_SAMPLE.csv`, 안내문 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`, 빌드 설명 `docs/OFFLINE_SELF_PACKAGE_20261025.md` 참고.
 6. HTML 안에는 실행 JS가 그대로 포함된다. 저작권/사용권 통제나 무단복제 방지는 현재 구현되지 않음. 공개용 Cloudflare에 이 패키지/유료 `site/`를 올리지 말 것.
 
+## 실제 Chromium/Edge 오프라인 E2E — 개발자 전용 검수
+
+- 필수 선수조건: `npm test && npm run build:self`; 생성 산출물은 Private 로컬에서만 다룬다.
+- Python Playwright 및 브라우저(별도 개발 QA 환경에서만) 설치:
+  `python -m pip install playwright`
+  `python -m playwright install chromium`
+- Chromium: `python scripts/qa_browser.py` 또는 `npm run qa:browser`.
+- Windows Microsoft Edge: `python scripts/qa_browser.py --channel msedge` (Edge 설치 환경).
+- 합성 `examples/SMAX_SELF_SAMPLE.csv`로 `file://` 페이지 → 수동 3열 매핑 → 검토 미리보기 → UTF-8 BOM CSV 다운로드 → 4행 보존/검토 2행 → 변경 시 다운로드 폐기 → HTTP(S) 요청 0건을 확인. 개인·고객 데이터 사용 금지.
+- 검수가 실패하면 `FAIL` 결과를 그대로 보존하고 배포하지 않는다. **현재 연결 실행환경에서는 Chromium 브라우저의 파일/localhost 탐색이 `net::ERR_BLOCKED_BY_ADMINISTRATOR`로 제한되어 이 환경에서 실제 브라우저 E2E를 통과했다고 주장할 수 없음.** 브라우저 자체의 접근정책에 의한 차단이지 SELF 제품 불량이라고 결론 내릴 수는 없다.
+- Windows 현장 검증은 추가로 다운로드 위치, 로컬 파일 보안 경고, 한글·CSV 인코딩·모바일 표시 확인 필요. Playwright 설치·브라우저 설치는 **개발자 QA용**이며 일반 구매자에게 필요한 과정이 아니다.
+
 ## 공개 소개 페이지 / 유료 로컬 제품 분리 (2026-10-25)
 - `public-site/index.html`: **고객에게 공개 가능한 내용만 담은 정적 쇼룸 후보**. 10종 소개, 실제 출시 전 표시. 별도 테스트·승인 전 공개하지 않음.
 - `site/`: **PRIVATE SELF 제품 개발 파일**. CSV 실제 변환/설계서 실행 코드를 포함하므로 공개 정적 호스팅에 직접 올리지 않는다.
