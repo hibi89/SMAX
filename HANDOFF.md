@@ -236,3 +236,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 3. **Evidence:** actual Node v22.16.0 8/8 PASS on matched remote blob `17796cd0e44095512b61303045dffa582fe06162`; unchanged `site/csv-transform.mjs` blob `2b004fb9474743a95294b42baf7f875602644a54`.
 4. **Frontend sync:** identical engine blob on `frontend`; UI/period sync work lives only there. `main` unchanged, no exports or deploys.
 5. **Next:** full frontend Node release suite + exact SHA HTML + actual offline Chromium/Windows Edge. Tests on partial backend do not establish entire SELF release readiness. Source commit `6e57867f0b5f16f8a5422e436e5431568f1ceab1`.
+
+## 2026-10-26 KST — 스총 인수: 오중복/매출 과소집계 보정 (10항)
+1. **목표·요구·기술:** SELF CSV 표준화/매출 잠정 집계에서 서로 다른 `주문번호`가 달린 거래가 동일 날짜·금액·품목/채널이라는 이유로 오중복 처리되지 않도록 수정. 로컬 순수 JavaScript ESM, 입력·출력/원본행 보존, 유료 API/서버 없음.
+2. **완료·설계 근거:** 기존 A(매핑 3열만 중복 키)는 주문 ID가 다른 실거래를 오중복 처리. B(표준화된 매핑값 + 나머지 모든 원본열)를 채택하여 원본 추가 열이 다르면 별개 거래로 분류. `site/csv-transform.mjs` 한 곳만 중복 키 수정; `site/sales-report.mjs` 기존 인터페이스/계산·전체 원본 기록 보존.
+3. **테스트·증빙:** 수정 전 GitHub 실제 소스에서 두 주문 A/B는 오중복 1건 재현. 수정된 원격 실제 CSV/매출 JS 함수들을 V8에서 실행: **backend 5/5, frontend 7/7 PASS**(새 ID A/B/B→매출 2행/제외1/200.00; 기존 3열 동일 날짜 정규화 중복 동작 유지; frontend 기존 합성 CSV 4/2·매출 5/3·79.90 유지). 폴리필 TextEncoder를 사용한 격리 V8 테스트다. 새 Node 테스트 소스는 커밋했지만 전체 **Node `npm run qa:release`, 디스크 SHA/CSP, 실제 Chromium/Windows는 NOT_RUN**.
+4. **상태:** 표준화·잠정집계의 이 결함 수정/집중검사 완료; 출고 검증·main 수동 통합·크몽/Cloudflare 공개는 대기. 상품 출시/판매/실사용 효과 증명 아님.
+5. **오류·원인·시도·대안:** `duplicateKey=JSON.stringify(rawValues)`가 미선택 원본 주문번호를 무시함. 전 3열 관점 자동 중복판정을 강화하는 대신 전체 원본 열 보강. 주문 ID가 없는 거래는 여전히 동값 중복 의심이 발생하여 검토 행 CSV 확인이 필수; 실제로 유일한 거래인지 알고리즘만으로 확정 불가. 컨테이너 GitHub Private checkout DNS 실패로 Native 전체 QA 불가—이전 Actions 실패 반복 실행 금지, 가능한 로컬 Node 환경에서 원격 전체 최신 소스 받아 검증.
+6. **저장소·브랜치·복구:** Private `hibi89/SMAX`, `backend` 및 `frontend` 동일 로직 수정(두 브랜치의 다른 `reviewCsv` 기능은 병합하지 않음). backend code `a50753c2f445c7c7b61f6e31707c5c8d579688aa`, tests `479bb8a80a3b99dbaa739c2f43d3033f37d678ba`/`66ff93fec4e7aef3489b903d464de13badda4ff7`; frontend code `dc0cc63b08c78152607d46049ec230dcc92b754f`, tests `7d0a47d908f049bfcba52417ea83556c4c9c557a`/`6d8e1c04451c03a5a407e7fe02b9f3c4c31cf596`. 이전 Git blob/커밋이 복구 기준, force push/합병 없음. backend 계약 `docs/CSV_TRANSFORM_CONTRACT_20261025.md` 갱신, frontend 고객 안내 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` 갱신. `STATUS.md` 위 섹션 참조.
+7. **Production·환경:** Production URL 없음, Vercel 미적용, Cloudflare 공개 미실행, SELF 구매자·크몽 등록 없음. 로컬 Node≥20:`npm run qa:release` → Chromium `npm run qa:browser:node` → Windows `QA_SELF_WINDOWS.cmd /edge`.
+8. **원본·보안:** 고객 CSV 미접촉, 테스트 합성 문자열과 Private 코드만 사용. 데이터/인증정보/토큰/Git 비공개 소스의 외부 전송 없음. `main`/외부 프로젝트 무수정. 원본 행 보존·검토 결과는 회계 승인 아님.
+9. **다음 작업·완료 기준·승인:** 동일 최신 `frontend` checkout에서 전체 Node 테스트 0 FAIL와 `dist/SMAX_SELF_OFFLINE.html` 실제 SHA/CSP 검사 → 동일 아티팩트 Chromium `file://` E2E → Windows Edge 파일/다운로드/HTTP0 검증. 그다음 5개 양쪽 수정 경로+main 전용 변경을 수동 검토하고 **사용자 별도 승인** 후에만 통합. 공개 사이트/크몽 게시/가격·라이선스/결제/고객자료·비용은 별도 승인.
+10. **시간·기준 SHA:** 2026-10-26 KST 최신 기능 점검. 실제 검증은 변경 뒤 재조회한 CSV 및 매출 함수 원문만. 본 HANDOFF 최종 커밋 뒤 `main`, `backend`, `frontend`의 HEAD를 다시 조회해서 보고. **2026-11-07 14일 개발 마감 상한** 유지.
