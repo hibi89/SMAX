@@ -468,3 +468,11 @@
 - **이번 턴 실행 범위:** 원격 GitHub 최신 5개 생산 모듈을 V8 모의 DOM·Blob으로 통합 실행해 7/7 집중 확인(합성 매출·표준화 경고, 실제 4열 주문 ID A/B/B → 반영2·제외1·200.00, 원본 4번 검토 CSV, 매핑 변경 시 경고/다운로드 무효화, 중복0건 경고 부재). 이어서 **이번에 커밋한 정확한 신규 테스트 함수 원문을 최신 5모듈 대상으로 V8에서 실행 PASS**; 전체 테스트 소스는 `import.meta` 위치만 대체하여 V8 구문 검증 PASS. 이는 **Native Node `node --test` / `npm run qa:release`, 빌드 HTML SHA·CSP, 실제 Chromium/Windows 출고검증이 아니다**.
 - **CI·환경:** 해당 최신 commit들에 실제 성공 GitHub workflow/status 근거 없음. 컨테이너는 Node22/Chromium 존재하나 `github.com`, `api.github.com`, `raw.githubusercontent.com` 모두 DNS 조회 실패—private 전체 checkout 불가능. Actions 무한 재실행/비공개 소스 외부 전송/비용 지출 없음.
 - **차단/다음:** 실제 최신 Node≥20 전체 소스가 있는 승인된 작업 PC에서 `npm run qa:release` 성공·HTML/CSP 확인 → `npm run qa:browser:node` Chromium `file://` → Windows `QA_SELF_WINDOWS.cmd /edge`. 실패 또는 차단이면 출고 불가. 사업/가격·판매/Cloudflare 공개·main 강제병합 미실행. **2026-11-07 개발 기한 유지**.
+
+## 2026-10-26 KST — 스총: 금액 문자열 변형에 의한 중복 판정 누락 수정
+- **재현/원인:** 동일 날짜·품목·금액 `100`/`100.00`/`0100`이 기존 원시 금액 문자열 기반 키에서 **서로 다른 거래로 판정**돼 잠정 매출 중복 반영 가능. 실제 원격 기존 `frontend` 변환기에서 중복 0건 재현.
+- **수정:** 금액 표기만 중복 식별용으로 소수점 두 자리 문자열 정규화(`100`=`0100`=`100.00`=`₩100원`; `0`=`-0.00`). 부동소수점/BigInt 변환 사용 안 함. 출력 금액 원문 포맷과 모든 원본 레코드 보존. 기존 추가 원본열/주문번호 구분 로직 유지. `backend` 코드 `c93e71eac0ca70fe860fb5803d4d613847a83cf9`, `frontend` 코드 `73eb691e70f52a7575b3b28389ecec282c600d25`.
+- **회귀 작성:** CSV: backend `2058b03`, frontend `50e23b8`; 매출: backend `cddef25`, frontend `a27aa4d`; frontend 오프라인 UI `63d24b3`. 테스트 도중 backend에 없는 `reviewCsv` 반환을 잘못 가정한 **테스트 자체 결함** 수정 `6e6d4d6`; backend 제품 API에 reviewCsv를 무리하게 추가하지 않음.
+- **실행 검증:** GitHub 최신 실제 2개 코어를 독립 V8 실행: backend 신규 테스트 함수+256개 결정적 속성 케이스 **4/4 PASS**, frontend 동일 테스트+기존 2개 합성 예제 **6/6 PASS**. 최신 실제 5개 웹앱 모듈/모의 DOM·Blob로 신규 오프라인 매출 UI 테스트 본문 **1/1 PASS**: 4원본, 유효3, 제외1, 순합계300.01, 검토 원본행3, 다운로드 CSV 일치. 이는 **전체 Node 테스트/빌드 SHA/CSP/실제 Chromium 또는 Windows 출고 QA가 아니다**. GitHub Actions 성공 증거 없음.
+- **문서:** backend `docs/CSV_TRANSFORM_CONTRACT_20261025.md` `54ceddda`; frontend `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` `9f40357`. `main` 코드 변경/병합, 고객 원본/개인정보·외부 API·배포·판매·금전 지출 없음.
+- **다음 P0:** 승인된 최신 전체 `frontend` checkout이 가능한 로컬 환경에서 `npm run qa:release` 실제 Node PASS → 생성 HTML hash/CSP → `npm run qa:browser:node` Chromium `file://` → `QA_SELF_WINDOWS.cmd /edge`. 컨테이너 GitHub Private DNS 차단으로 해당 출고 QA NOT_RUN. 마감 **2026-11-07** 유지.
