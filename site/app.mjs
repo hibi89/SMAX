@@ -10,7 +10,7 @@ const icons={spreadsheet:"↗",inventory:"◫",faq:"◇",sales:"▥",email:"✉"
 const h=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const getTemplate=()=>templates.find(t=>t.id===state.selected);
 const toast=msg=>{const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__smaxToast);window.__smaxToast=setTimeout(()=>t.classList.remove("show"),2800)};
-function forgetCsv(){state.csvGeneration++;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";state.salesPeriod="daily";state.headers=[];state.mappings={};state.fileMessage=""}
+function forgetCsv({preservePeriod=false}={}){state.csvGeneration++;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";if(!preservePeriod)state.salesPeriod="daily";state.headers=[];state.mappings={};state.fileMessage=""}
 function updateSalesPeriodFromAnswer(answer){
   if(answer!=="일별"&&answer!=="월별")return false;
   state.salesPeriod=answer==="월별"?"monthly":"daily";
@@ -102,7 +102,7 @@ document.addEventListener("change",async event=>{
   }
   if(event.target.id==="csv-upload"){
     const file=event.target.files?.[0];if(!file)return;
-    forgetCsv();
+    forgetCsv({preservePeriod:true});
     if(file.size>2*1024*1024){state.fileMessage="오류: CSV는 2MB 이하만 지원합니다.";render();return;}
     if(!/\.csv$/i.test(file.name)){state.fileMessage="오류: 현재는 CSV 파일만 지원합니다.";render();return;}
     const generation=state.csvGeneration, selected=state.selected;
@@ -118,7 +118,7 @@ document.addEventListener("change",async event=>{
       render();
     }catch(e){
       if(generation!==state.csvGeneration||selected!==state.selected)return;
-      forgetCsv();state.fileMessage="해석 실패: "+(e instanceof Error?e.message:"알 수 없는 오류");render();
+      forgetCsv({preservePeriod:true});state.fileMessage="해석 실패: "+(e instanceof Error?e.message:"알 수 없는 오류");render();
     }
   }
 });
