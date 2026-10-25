@@ -1,3 +1,5 @@
+> **2026-10-26 UX 기능 경계 정리:** SELF의 CSV 파일 업로드/로컬 실행은 **엑셀·CSV 통합 + 매출 집계·보고서 2종**에서만 지원합니다. 다른 **8종 설계/교육 템플릿은 JSON/Markdown 구축 초안만 다운로드**할 수 있으며 실행 기능을 제공하지 않습니다. 잘못된 사용을 막기 위해 입력창도 숨겼습니다. `frontend` 관련 코드는 `site/app.mjs`, 회귀는 `tests/offline-ui-smoke.test.mjs`와 `scripts/qa_browser.mjs`. 격리 V8 UI 검사 28/28 통과; 최신 전체 Native Node 릴리스·실 Chromium·Windows QA는 NOT_RUN. 아래 과거 기능·PASS 상태와 다르면 이 문단과 최신 HEAD 우선.
+
 > **2026-10-25 최신 보안·QA 정정:** 최근 `frontend` 패치에서 비 UTF-8(CP949 등) CSV 파일을 브라우저 로컬 디코딩 단계에서 조기 거부하도록 강화했습니다. 잘못된 바이트를 자동 변환하거나 손상된 텍스트로 보고서를 만들지 않습니다. `tests/csv-ui.test.mjs`, `scripts/qa_browser.mjs` 검사 코드 업데이트. 변경 후 실제 전체 Node release QA / 신규 HTML SHA / 실 Chromium·Windows Edge는 **NOT_RUN**이므로 아래 기존 PASS 수치는 과거 빌드 한정입니다. 자세한 근거는 `STATUS.md`·`HANDOFF.md` 최신 섹션.
 
 > **최신 검증 — 2026-10-25 KST:** 실제 Node 22.23.4 전체 `34/34 PASS`; `npm run qa:release` 성공. 최신 SELF HTML **73,352 bytes**, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. 실제 **Linux ARM64 Chromium 156 오프라인 file:// 브라우저 E2E PASS**: 4행 CSV 변환/다운로드, 2행 검토, 모바일 컨트롤, 10종 설계서+가이드 **20개 다운로드**, JS 오류/HTTP 요청 0. **Windows 실기기 Edge/Chrome 테스트는 아직 미실행**이며, 크몽 판매/Cloudflare 공개/디자인 최종 승인은 보류. 근거 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`.
@@ -19,7 +21,7 @@ Windows Edge 별도 검증: `npm run qa:browser:node -- --channel msedge` (Edge 
 - 10종 템플릿 카탈로그, 한국어 키워드/동의어/예시 기반 유사도 검색
 - 템플릿 패널 / 규칙 기반 단계 질문(챗봇처럼 보이나 LLM 아님)
 - CSV 파일 로컬 헤더 분석, 사용자 수동 표준 필드 매핑
-- **엑셀·CSV 통합 템플릿** 선택 시에 한해 CSV 원문을 브라우저 메모리에 보관하여 거래일/상품명/금액 실제 변환 → 검토행 표시 → 최대 5행 미리보기 → `SMAX_STANDARDIZED.csv` 다운로드. XLSX는 여전히 미지원이며 다른 9종은 설계 가이드 초안.
+- **엑셀·CSV 통합** 및 **매출 집계·보고서** 2종에서만 CSV 업로드·수동 원본 열 매핑·실제 로컬 결과물 다운로드가 가능합니다(단일 HTML 내장 합성 예제 2종 포함). 나머지 **8종은 설계서 JSON·AI 구축 가이드만 제공하는 초안**이며 CSV 업로드창이 표시되지 않습니다. 실제 업로드 파일은 UTF-8 CSV(2MB 이하)로 제한되며 XLSX 직접 입력은 미지원입니다.
 - `AX_BLUEPRINT_*.json` 및 `AI_BUILD_PROMPT_*.md` 브라우저 내 생성/다운로드
 - 저장소의 `tests/core.test.mjs` Node 20+ 회귀 검사
 
