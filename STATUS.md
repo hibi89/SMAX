@@ -166,3 +166,12 @@
 - 정확한 새 채팅 문구 **`너는 스총이다 레포지토리보고 작업이어가셈`**. 최신 재개 문서 `CHAT_BOOTSTRAP.md` 및 목표/역사/범위/기술/현재 증거/다음 실제 작업 `docs/STECHONG_CANONICAL_CONTEXT_20261025.md`; 구형 부트스트랩 백업 `docs/history/CHAT_BOOTSTRAP_PRE_STECHONG_20261025.md`.
 - 2026-11-07까지 사장님 존 SELF에 집중. 실제 CSV 변환 1종 검증 → 공개/유료 분리 → QA/패키징. 대외 출시/실판매는 아직 없음.
 - 이번 커밋은 **역할·부트스트랩·인수인계만** 갱신. 실 제품 추가개발·Node/Windows 실테스트/외부 배포는 진행하지 않음.
+
+
+## 2026-10-25 KST — 스총 실행 1: SELF 실제 CSV 변환 로컬 코어 (backend)
+- 작업 브랜치: `backend`; 통합 `main`과 `frontend`는 **미수정**, 실제 공개 배포/크몽 게시 없음.
+- 기능: `site/csv-transform.mjs` 신규. 사람 승인 원본 열(date/item/amount)만 처리해 **표준 CSV 문자열을 실제로 생성**, 입력 레코드를 제거하지 않음. 날짜/원화 금액 제한 정규화, 원본 레코드 순서·번호, 결측/중복/형식오류/수식 위험을 `NEEDS_REVIEW`로 보존 및 표시. 오류 CSV/동일 열 중복매핑/2MB 초과는 예외 처리.
+- 검증: 로컬 Node.js v22.16.0 `node --check` 2개 구문 통과; `node --test tests/csv-transform.test.mjs` **10 PASS / 0 FAIL**(합성 골드 입력 및 예외). 원격 Git blob SHA가 로컬 `git hash-object`와 2파일 모두 일치: 코어 `5b87530f0a394122a25b3a1a61f889b03bbdbeea`, 테스트 `5f2dda8d096c4e9ffd38797471f81ad267dbd0bf`.
+- GitHub 소스 커밋: `4d5e100fe77c912fad9ebc84f72552d8fe9dc6b1`; 테스트: `ae5c78a88dc3cf6ddc4c99aa7749b6d25988693f`; 계약 문서: `74652a81febf5f4de0b87056e76165522326f79a`. 최종 원격 HEAD는 문서 갱신 후 다시 조회.
+- 경계: **프론트 업로드 UI와 변환·다운로드는 아직 미연결**. 기존 10종 검색/설계서 흐름·원본 데이터 불변. 기존 `tests/core.test.mjs`와 통합 `npm test` 재실행, 실제 브라우저/Windows/고객/보안 펜테스트 모두 **미검증**.
+- 상세 계약: `docs/CSV_TRANSFORM_CONTRACT_20261025.md`. 다음 1작업: 고객이 확인한 매핑 → 변환 미리보기/검토 표시 → 로컬 결과 CSV 다운로드 UI. 공개 사이트와 유료 코어 분리 이전 Cloudflare 배포 금지. 14일 스프린트 **11월 7일 마감** 유지.
