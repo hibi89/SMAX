@@ -89,6 +89,70 @@ async function main() {
       checks.push('Mobile-width upload present');
     } finally { await context.close(); }
 
+    // Sales report must use a real file:// browser with offline-only synthetic records.
+    // Separate context keeps the spreadsheet upload and its mapping isolated.
+    {
+      const {context,page} = await makeContext(browser,{width:1280,height:900});
+      try {
+        await page.locator('[data-action="select"][data-id="sales"]').first().click();
+        await page.locator('#tab-chat').click();
+        const salesSample = [
+          '판매일,판매처,판매액',
+          '2026-10-01,온라인,100',
+          '2026-10-01,온라인,100',
+          '2026-10-02,매장,-20.10',
+          '2026-02-30,매장,9',
+          '2026-10-03,=1+1,4'
+        ].join('\r\n')+'\r\n';
+        await page.locator('#csv-upload').setInputFiles({
+          name:'SMAX_SALES_SYNTHETIC.csv',mimeType:'text/csv',
+          buffer:Buffer.from(salesSample,'utf8')
+        });
+        for (const [field,label] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})) {
+          await page.locator('#map-'+field).selectOption({label});
+        }
+        await page.locator('[data-action="run-sales"]').click();
+        const overview = await page.locator('.csv-result').innerText();
+        assert(overview.includes('잠정 반영 2행') && overview.includes('제외/검토 3행') &&
+          overview.includes('79.90원'), 'Sales report row totals/amount incorrect');
+        checks.push('Sales CSV mapping: 2 included, 3 excluded, 79.90 net');
+        const [report] = await Promise.all([
+          page.waitForEvent('download',{timeout:10000}),
+          page.locator('[data-action="download-sales-report"]').click()
+        ]);
+        const reportBytes = readFileSync(await report.path());
+        assert(report.suggestedFilename() === 'SMAX_SALES_REPORT.csv', 'Sales report filename wrong');
+        assert(reportBytes.subarray(0,3).equals(Buffer.from([239,187,191])), 'Sales report BOM missing');
+        const reportText=reportBytes.toString('utf8');
+        assert(reportText.includes('2026-10-01') && reportText.includes('2026-10-02') &&
+          reportText.includes('100.00') && reportText.includes('-20.10'), 'Sales report content incorrect');
+        const [excluded] = await Promise.all([
+          page.waitForEvent('download',{timeout:10000}),
+          page.locator('[data-action="download-sales-review"]').click()
+        ]);
+        const excludedBytes = readFileSync(await excluded.path());
+        assert(excluded.suggestedFilename() === 'SMAX_SALES_REVIEW_ROWS.csv', 'Excluded rows filename wrong');
+        assert(excludedBytes.subarray(0,3).equals(Buffer.from([239,187,191])), 'Excluded rows BOM missing');
+        const excludedText=excludedBytes.toString('utf8');
+        for (const reason of ['DUPLICATE','INVALID_DATE','FORMULA_PROTECTED']) {
+          assert(excludedText.includes(reason), 'Missing sales exclusion reason: '+reason);
+        }
+        checks.push('Sales summary and excluded-row downloads contain BOM, totals and review reasons');
+        await page.locator('#sales-period').selectOption('monthly');
+        assert(await page.locator('[data-action="download-sales-report"]').count() === 0,
+          'Stale sales report after period change');
+        await page.locator('[data-action="run-sales"]').click();
+        assert((await page.locator('.csv-result').innerText()).includes('2026-10'),
+          'Monthly aggregation did not render');
+        await page.locator('#map-amount').selectOption({label:'판매처'});
+        assert(await page.locator('[data-action="download-sales-report"]').count() === 0,
+          'Stale sales report after remapping');
+        assert(await page.locator('[data-action="run-sales"]').isDisabled(),
+          'Duplicate sales mappings were accepted');
+        checks.push('Sales period reaggregation and invalid remapping fail closed');
+      } finally { await context.close(); }
+    }
+
     // Separate browser contexts avoid Chromium's automatic multiple-download cap.
     for (const id of ids) {
       const {context,page} = await makeContext(browser,{width:1280,height:900});
