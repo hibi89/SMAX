@@ -257,3 +257,7 @@
 - 별도 성과: `tests/offline-ui-smoke.test.mjs`에 실제 출시 가치가 있는 10종 교육/설계 템플릿 모두에서 `AX_BLUEPRINT_<id>.json`(해당 ID, `NEEDS_REVIEW`, 미구축 상태 표시) 및 `AI_BUILD_PROMPT_<id>.md`(개인정보·외부 전송 주의/검증 체크리스트) 다운로드를 검증하는 통합 회귀 1건 추가. 구현 코드 변경 없이 제품 출력 검증 확대. 커밋 `e0c52fdc54b48325e9ce2109dce833d3a8a1adbf`, 최종 테스트 파일 blob `260e9eaaf7aa011149a8b90afd65d6cd484900cc`.
 - GitHub 원격 `site/` 6파일 및 빌드 코드/신규 테스트 내용을 V8 모의 Node/브라우저 환경에서 재구성해 실행한 통합 **5/5 모의 검사 PASS**: 실제 CSV 입력·다운로드, 리맵/템플릿 변경 초기화, 지연 CSV 파일 읽기 차단, hidden-prefix formula 보호, 10종 JSON+MD 출력. 모두 **V8 모의 검사이고 실제 Node `vm` / Chromium E2E가 아님**.
 - `main`과 `backend` 미수정. Cloudflare 실배포/크몽 실등록/고객 파일·유료 API 사용·지출 없음. 장기 병목은 승인된 Windows/Node 실행 환경에서 Private frontend 전체 다운로드 후 `QA_SELF_WINDOWS.cmd` 또는 `npm run qa:release`를 실제 실행해 0 FAIL·SHA·크기 증거 확보하는 것. 이후 Windows Edge `file://` 다운로드 검증. 2026-11-07 마감 상한 유지.
+
+## 2026-10-25 KST — 실행 12: Native 34/34 PASS
+- 최신 스몽이 카피 수정 및 회귀 테스트 1건 추가. 실제 Node 22.23.4 전체 34 PASS/0 FAIL, qa:release exit 0. SELF HTML 73,352 bytes, SHA-256 94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca.
+- Linux ARM64 Chromium 실행은 시스템 공유 라이브러리 부족으로 시작 전에 차단. Windows 실기기 QA 미완. 상세 기록: docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md. 배포·크몽 등록 미진행.
