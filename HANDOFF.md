@@ -537,3 +537,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **다음 작업:** 최신 `frontend` 실제 전체 Node 테스트+릴리스 HTML 빌드→디스크 파일 SHA/CSP→동일 HTML의 Chromium/Edge `file://` E2E→실 Windows QA. 최신 테스트 소스 작성과 통과 증거를 혼동하지 않기.
 9. **승인:** 실사용성 검수·지원/라이선스/반품·사업 문서 통합 후 사용자가 별도 판매 승인 결정. 10종 중 자동실행은 현재 2종.
 10. **목표:** 2026-11-07 개발 상한. 비용 0원 원칙, 작업별 내용 `STATUS.md`와 GitHub 커밋으로 인계.
+
+## 2026-10-26 KST — 스총 최신 인계: 표준화 검토 전용 CSV 출력 추가
+1. **새 기능:** `frontend/site/csv-transform.mjs` `reviewCsv`는 전체 6헤더와 `NEEDS_REVIEW`만 포함하되, `csv` 전체 행은 손실 없이 유지. 원본 번호/사유·BOM 동일. commit `1e9f7a30...`.
+2. **UI:** `frontend/site/app.mjs`에서 spreadsheet 검토 건수가 있을 때만 `download-csv-review`, 실 파일 `SMAX_STANDARDIZED_REVIEW.csv`, 합성 `SMAX_DEMO_STANDARDIZED_REVIEW.csv`. 파일/매핑/템플릿 바꾸면 결과 무효, review0건은 다운로드 버튼 없음. commit `3d4cf7ff...`.
+3. **제품 검증:** 실제 GitHub 최신 5모듈을 V8 내 모의 DOM+Blob으로 결합 실행 **8/8 PASS**. 변환기 직접 확인 6/6 PASS. 이것은 전체 Native Node/브라우저 출고 테스트가 아님.
+4. **회귀:** `tests/csv-transform.test.mjs`(4행/2검토/번호 3,4/0행) commit `56746212...`, `tests/offline-ui-smoke.test.mjs`(실·샘플/무효화/0행) `d8447587...`, `scripts/qa_browser.mjs` 실제 E2E 시험 코드는 `5d9f3edd...`, `scripts/qa-release.mjs` 최종 QA 조건 `32213c08...`. 신규 전체 테스트 실제 실행은 NOT_RUN.
+5. **문서:** `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` 결과 전체/검토 분리 절차 기록 `94da4d6d...`.
+6. **보안·운영:** 기존 파일 업로드 UTF-8 2MB 상한, 오프라인 실행, 사람이 최종 결과 검토한다는 조건 그대로. 공용 `public-site`에 유료 코어 내보내지 않음.
+7. **예제:** 고정 합성 spreadsheet 4원본/2검토이면 검토 전용 CSV=헤더+2행; 정상 1건 파일은 버튼 없음. 매출 집계는 기존 별도 검토 CSV 기능 유지.
+8. **남은 게이트:** 최신 `frontend` 모든 Native Node `npm run qa:release` 성공·실 디스크 HTML hash/CSP, 실제 Chromium `file://`, Windows Edge/Chrome 실PC, 브랜치 `main` 결정 보존 통합. 컨테이너 Private git clone DNS 제한.
+9. **권한:** `main`·`backend` 미변경, 병합·상품 게시·클라우드 배포·고객 데이터 전송·비용 발생 행위 없음.
+10. **기한:** 2026-11-07 개발 상한; 안전한 SELF 완제품 QA가 남았으므로 최종 출시 승인 전.
