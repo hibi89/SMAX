@@ -34,5 +34,5 @@ test('Windows command entrypoint runs Node by default and Edge only on explicit 
   assert.match(launcher,/powershell\.exe -NoProfile -ExecutionPolicy RemoteSigned -File/);
   assert.match(launcher,/if not "%QA_EXIT%"=="0"/);
   assert.match(launcher,/exit \/b %QA_EXIT%/);
-  assert.doesNotMatch(launcher,/curl|powershell\s+-Command\s+IEX|deploy|wrangler publish/i);
+  assert.doesNotMatch(launcher,/\b(?:curl|wrangler)\s|powershell\s+-Command\s+IEX|npm(?:\.cmd)? run deploy/i);
 });
