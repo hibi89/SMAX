@@ -60,6 +60,11 @@ try {
   requireCheck(converted.summary.outputRows === 4, 'CSV transform dropped rows');
   requireCheck(converted.summary.reviewRows === 2, 'review count changed');
   requireCheck(converted.csv.startsWith('\uFEFF거래일,'), 'UTF-8 BOM missing');
+  requireCheck(converted.reviewCsv.startsWith('\uFEFF거래일,'), 'review-only CSV BOM missing');
+  requireCheck(converted.reviewCsv.trimEnd().split('\r\n').length === 3,
+    'review-only CSV should contain exactly 2 flagged source records plus header');
+  requireCheck(converted.reviewCsv.includes('DUPLICATE') && converted.reviewCsv.includes('INVALID_DATE'),
+    'review-only CSV missing flagged reasons');
 
   // A successful shipping QA must also cover the executable second tool (sales).
   // Synthetic-only, exact mapping, review rows retained separately; no external data.
