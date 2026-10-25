@@ -99,3 +99,19 @@ test('spreadsheet and sales CSV serializers remain independently named in offlin
   assert.equal((js.match(/function toCsv\(/g)||[]).length,1);
   assert.equal((js.match(/function toSalesReportCsv\(/g)||[]).length,1);
 });
+
+
+test('offline module top-level bindings remain unique to prevent silent shadowing',()=>{
+  const declared=new Map();
+  for(const name of ['templates.mjs','core.mjs','csv-transform.mjs','sales-report.mjs','app.mjs']){
+    const code=read(name);
+    for(const match of code.matchAll(/^(?:export\s+)?(?:const|let|class|function)\s+([A-Za-z_$][\w$]*)/gm)){
+      const symbol=match[1];
+      assert.equal(declared.has(symbol),false,
+        'Duplicate bundled top-level identifier '+symbol+' between '+declared.get(symbol)+' and '+name);
+      declared.set(symbol,name);
+    }
+  }
+  assert.equal(declared.get('toCsv'),'csv-transform.mjs');
+  assert.equal(declared.get('toSalesReportCsv'),'sales-report.mjs');
+});
