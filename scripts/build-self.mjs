@@ -2,7 +2,7 @@
 // Run: npm run build:self. The output is intentionally NOT tracked by Git.
 import {createHash} from 'node:crypto';
 import {readFileSync, mkdirSync, writeFileSync} from 'node:fs';
-import {resolve, join} from 'node:path';
+import {resolve, join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -84,9 +84,10 @@ export function buildSelf({output}={}) {
     html:read('index.html'),css:read('styles.css'),modules:paths.map(read)
   });
   const out = output ? resolve(output) : join(root,'dist','SMAX_SELF_OFFLINE.html');
-  // Packaging target is confined to dist/ unless explicitly called from tests.
-  if(!output && !out.startsWith(join(root,'dist')+'/')) throw Error('Invalid output path');
-  mkdirSync(resolve(out,'..'),{recursive:true});
+  // Use OS-native path handling: a POSIX '/' suffix rejects all Windows paths.
+  // The production default is fixed in dist; explicit output is solely for controlled tests.
+  if (!output && dirname(out) !== join(root,'dist')) throw Error('Invalid output path');
+  mkdirSync(dirname(out),{recursive:true});
   writeFileSync(out,html,'utf8');
   return {file:out,bytes:Buffer.byteLength(html,'utf8'),sha256:createHash('sha256').update(html).digest('hex')};
 }
