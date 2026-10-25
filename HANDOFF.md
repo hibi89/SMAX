@@ -191,3 +191,16 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 3. 크몽 안전결제만 고려; 사이트 자체 결제·회원/WEB/학생 존은 후순위. 맥콩·광장/염가 대중화 정체성 보존. 공개 배포 전 무료/유료 코드 유출 검사.
 4. 실코드 다음 우선 과제는 **결과 CSV를 실제 생성하는 로컬 변환 모듈 1개 + 골드 fixture/tests**. 기존 스모크 검증/소개페이지를 실사용 제품 완료로 오인하지 않는다.
 5. 이 변경은 **문서 체계 정비**. 정식 배포·상품게시·테스트 완성·고객 매출/계정/지출 없음. 해총 Public repo에 스총 Private 소스·전략 상세를 전송하거나 복사하지 말 것.
+
+
+## 2026-10-25 KST — 스총 실행 2 / frontend CSV UI 연결 완료 (최신 인수인계)
+1. **목표·용도·확정 요구·기술:** SMAX² Square 사장님용 SELF의 첫 번째 실제 로컬 처리 도구를 기존 규칙형 AX 가이드 UI에 연결. 10종 가이드 중 `spreadsheet`만 CSV 실제 변환을 제공. ES Module 순수 JS, 데이터 로컬 메모리 처리, 외부 API·필수 유료 LLM 0. 2026-11-07은 개발 **마감 상한**이며 사용자 최신 지시는 빠르게 완료하면 더 좋다는 것.
+2. **완료·변경·결정 근거:** `backend`의 `site/csv-transform.mjs`, `tests/csv-transform.test.mjs`를 `frontend`로 동일 Git blob 복사. `site/app.mjs`에 실제 소스 CSV 보관/업로드, 명시적 매핑, run-preview, 검토수/처음 5행, 별도 파일 다운로드, 오래된 비동기 파일 전환 방어. `site/styles.css`에 반응형 스크롤 미리보기 추가; `tests/csv-ui.test.mjs`에 Node DOM-stub 회귀 코드 추가. 기존 9종 자동화 실행 주장/공개 사이트 기능 확장 없음.
+3. **테스트 명령·결과·범위:** V8 스텁 DOM 이벤트 통합 검증 **17 PASS/0 FAIL**. actual GitHub의 앱/기존 코어/템플릿/변환 엔진 모듈 내용 로드, 업로드→매핑→변환→다운로드, 중복/오류, 악성 HTML escape, 잘못된 파일, 매핑 교체/늦은 비동기 읽기 차단 확인. `npm test` (`node --test tests/*.test.mjs`)는 **Node 실행 미검증**; 신규 `tests/csv-ui.test.mjs`는 소스 작성/구문 평가 일부 확인이지 Node PASS가 아님. 실제 브라우저·Windows·모바일 QA/네트워크 캡처 **미검증**. backend 과거 10 PASS는 별개 기록.
+4. **완료/진행/대기/차단:** CSV 실제 변환 UI 기능 작성 + 가상 DOM 통합 검증 완료. `main` 반영/유료 SELF 패키징·무료 공개 분리·실 QA·크몽 등록은 미완. Cloudflare 공개/고객 개인정보/유료 모델/판매 승인 필요. 실제 판매 가능 판정 금지.
+5. **오류 근거·시도·대안:** 첫 UI 커밋에서 CSV 확장자 검증 정규식의 백슬래시 중복을 확인해 `b746d5d`에서 최소 교정. 이후 `sample.csv` 업로드 포함 V8 17/17 재검증. 잘못된 업로드/매핑은 과거 다운로드 결과를 재사용하지 않음. 코드 복제가 가능한 유료 코어가 현재 `site/`에 있으므로 그대로 공개 배포 금지.
+6. **저장소·브랜치·SHA·경로:** 비공개 `hibi89/SMAX`, 이번 변경 전용 `frontend`. 앱 최종 코드 `b746d5de0691e950c42e9b714f4455ec219d3d84`; CSS `2148bc8020571d0ba960a119b54edb16be837bb6`; Node UI 회귀 소스 `14aa8e0a3d9b17bf0c64683d6653867fa13908b4`; STATUS `988c2671794c2c047a0ae1d1deff3e1bce5e594e`. 최종 HEAD는 이 문서 커밋 후 재조회해 다음 채팅에서 사용. `backend` 이전 인수인계 HEAD `c9a400c8268a2223eb841d0089fa61dadb52a3c4`.
+7. **Production·환경·실행 명령:** Production URL 없음. Vercel 미적용/Cloudflare Static Assets 미배포, 크몽 등록 전. Node 20+ `npm test` 및 Python 정적 개발서버 `python -m http.server 8788 -d site`는 예정 QA 절차. 고객 배포 파일 미패키징. 프론트 새 코드는 브라우저 ES Module이므로 `file://` 직접 배포 검증 전.
+8. **원본·백업·인증·보안:** 실행 전 main `91549b01323c6d8f6a1d277c5bde2302c003f949`, frontend 시작 `989cec1497e530f5547346bc341e7e92373f9910`, backend `c9a400c...`. `main`에 최신 로고/HTML/CSS 변경이 있어 병합 전 내용 보존·차이 검토 필수, force push/무단 main 덮어쓰기 금지. 업로드된 파일·결과는 브라우저 메모리 보관 후 템플릿 변경에 폐기, 서버 전송 코드 없음. 실제 자격증명/고객 파일 사용 없음.
+9. **다음 우선순위·완료 기준·승인:** 우선 (a) 현재 `frontend` UI의 **실 Node npm test + 브라우저 클릭/파일/다운로드 실검증** (b) 무료 쇼룸과 유료 SELF 코어/배포 산출물 분리 (c) Windows 자체 실행 경로/패키징·시연·크몽 등록 초안 최종화. `main` 로고 변경 존중, merge는 최종 사용자 승인을 받고 수행. 공개 배포, 고객 접촉, 유료 API/도메인, 크몽 실제 등록은 별도 사용자 승인.
+10. **KST 갱신·근거:** 2026-10-25 오후. 기준은 GitHub connector가 조회한 해당 브랜치 소스와 V8 모의 DOM 검사 17건. 원격 커밋 + 브랜치 SHA만 실제 사실로 기록, 브라우저 실동작/판매 준비 완료 주장하지 않음.
