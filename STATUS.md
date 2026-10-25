@@ -250,3 +250,10 @@
 - 실제 현 컨테이너 Node 22.16.0에서 GitHub 블롭 동일 `smax_frontend_csv_verified` 4파일을 `node --test tests/*.test.mjs`로 재실행하여 **CSV 부분 13/13 PASS**. 오프라인 패키지 내의 JS가 V8에서 합성·파싱되고 테스트 4건 모의 실행을 통과했으나 **실제 전체 `npm test`, Node `vm` 테스트 파일 실실행, `npm run build:self` 실제 파일 생성, Windows 브라우저 E2E는 아직 미검증**. 이 4건을 native Node test PASS라고 주장 금지.
 - Private Repo 환경: GitHub Actions 첫 실행은 단계 로그 없이 failure, 수동 전용 전환. 직접 Private repo clone은 외부 DNS 접근 차단. 실행 가능한 승인된 Windows 개발 환경에서 `QA_SELF_WINDOWS.cmd` → `npm run qa:release` → SHA 결과 및 Edge E2E를 확인해야 출시 승인 후보.
 - 공개/판매/외부 API 호출, 고객 개인자료 전송·유료 지출 0건. 기한 2026-11-07 상한 유지, 조기완료 허용.
+
+
+## 2026-10-25 KST — 스총 실행 10: 실 테스트 환경 병목 확인 + 10종 가이드 출력 통합 검증
+- 목표: 이전 실행부터 지연 중인 **전체 `npm test`와 단일 HTML 실생성**. 최신 Private `frontend` HEAD를 확인하고 컨테이너 Node v22.16.0/네트워크 상태 및 로컬 폴더를 점검. 기존 `/mnt/data/smax_full_checkout`에는 복원 도구만 있고 최신 저장소 소스 전체는 미존재. 컨테이너에서 `git ls-remote https://github.com/hibi89/SMAX.git`는 DNS `Could not resolve host: github.com`, GitHub connector의 원격 파일을 별도로 복원하려던 인코딩 전송은 검사 실패 → **원격 전체 소스를 해시 일치하게 로컬 설치하지 못함**. 따라서 `npm test`, `npm run build:self`를 현재 HEAD 대상으로 실행했다고 주장할 수 없음.
+- 별도 성과: `tests/offline-ui-smoke.test.mjs`에 실제 출시 가치가 있는 10종 교육/설계 템플릿 모두에서 `AX_BLUEPRINT_<id>.json`(해당 ID, `NEEDS_REVIEW`, 미구축 상태 표시) 및 `AI_BUILD_PROMPT_<id>.md`(개인정보·외부 전송 주의/검증 체크리스트) 다운로드를 검증하는 통합 회귀 1건 추가. 구현 코드 변경 없이 제품 출력 검증 확대. 커밋 `e0c52fdc54b48325e9ce2109dce833d3a8a1adbf`, 최종 테스트 파일 blob `260e9eaaf7aa011149a8b90afd65d6cd484900cc`.
+- GitHub 원격 `site/` 6파일 및 빌드 코드/신규 테스트 내용을 V8 모의 Node/브라우저 환경에서 재구성해 실행한 통합 **5/5 모의 검사 PASS**: 실제 CSV 입력·다운로드, 리맵/템플릿 변경 초기화, 지연 CSV 파일 읽기 차단, hidden-prefix formula 보호, 10종 JSON+MD 출력. 모두 **V8 모의 검사이고 실제 Node `vm` / Chromium E2E가 아님**.
+- `main`과 `backend` 미수정. Cloudflare 실배포/크몽 실등록/고객 파일·유료 API 사용·지출 없음. 장기 병목은 승인된 Windows/Node 실행 환경에서 Private frontend 전체 다운로드 후 `QA_SELF_WINDOWS.cmd` 또는 `npm run qa:release`를 실제 실행해 0 FAIL·SHA·크기 증거 확보하는 것. 이후 Windows Edge `file://` 다운로드 검증. 2026-11-07 마감 상한 유지.
