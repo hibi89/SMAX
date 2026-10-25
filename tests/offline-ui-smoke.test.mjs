@@ -413,6 +413,38 @@ test('one-click synthetic examples execute both local tools and never mix with o
   assert.doesNotMatch(env.rootNode.innerHTML,/data-action="try-sample"/);
 });
 
+
+test('synthetic demos watermark both blueprint JSON and AI guide; real uploads never inherit demo status',async()=>{
+  const env=offlineFixture();
+  for(const id of ['spreadsheet','sales']){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    env.click('try-sample');
+    env.click('download-json');
+    assert.equal(env.links.at(-1).download,'SMAX_DEMO_AX_BLUEPRINT_'+id+'.json');
+    const json=JSON.parse(env.blobs.at(-1).parts[0]);
+    assert.equal(json.syntheticDemo,true);
+    assert.match(json.demoNotice,/합성 예제 결과/);
+    env.click('download-guide');
+    assert.equal(env.links.at(-1).download,'SMAX_DEMO_AI_BUILD_PROMPT_'+id+'.md');
+    assert.match(env.blobs.at(-1).parts[0],/^# 합성 예제 결과입니다/);
+    const actual=id==='spreadsheet'
+      ? '거래날짜,품목,결제금액\n2026-10-25,원본,100'
+      : '판매일,판매처,판매액\n2026-10-25,매장,100';
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'real-utf8.csv',size:Buffer.byteLength(actual,'utf8'),text:async()=>actual
+    }]});
+    env.click('download-json');
+    assert.equal(env.links.at(-1).download,'AX_BLUEPRINT_'+id+'.json');
+    const real=JSON.parse(env.blobs.at(-1).parts[0]);
+    assert.equal(Object.hasOwn(real,'syntheticDemo'),false);
+    assert.equal(Object.hasOwn(real,'demoNotice'),false);
+    env.click('download-guide');
+    assert.equal(env.links.at(-1).download,'AI_BUILD_PROMPT_'+id+'.md');
+    assert.doesNotMatch(env.blobs.at(-1).parts[0],/^# 합성 예제 결과/);
+  }
+});
+
 test('synthetic demo cancels an earlier pending real-file byte read',async()=>{
   const env=offlineFixture();
   env.click('select',{id:'sales'});
