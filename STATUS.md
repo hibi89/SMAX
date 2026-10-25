@@ -175,3 +175,10 @@
 - GitHub 소스 커밋: `4d5e100fe77c912fad9ebc84f72552d8fe9dc6b1`; 테스트: `ae5c78a88dc3cf6ddc4c99aa7749b6d25988693f`; 계약 문서: `74652a81febf5f4de0b87056e76165522326f79a`. 최종 원격 HEAD는 문서 갱신 후 다시 조회.
 - 경계: **프론트 업로드 UI와 변환·다운로드는 아직 미연결**. 기존 10종 검색/설계서 흐름·원본 데이터 불변. 기존 `tests/core.test.mjs`와 통합 `npm test` 재실행, 실제 브라우저/Windows/고객/보안 펜테스트 모두 **미검증**.
 - 상세 계약: `docs/CSV_TRANSFORM_CONTRACT_20261025.md`. 다음 1작업: 고객이 확인한 매핑 → 변환 미리보기/검토 표시 → 로컬 결과 CSV 다운로드 UI. 공개 사이트와 유료 코어 분리 이전 Cloudflare 배포 금지. 14일 스프린트 **11월 7일 마감** 유지.
+
+
+## 2026-10-25 KST — 스총 CSV 안전성 보강 (core)
+- 실제 Local Node 22.16.0에서 추가 경계 사례 발견: 연도 `0000`이 잘못 정상 날짜 처리되고, 일부 zero-width/format 문자 뒤의 CSV 수식형 텍스트가 공식 검사 범위에서 빠졌음.
+- `site/csv-transform.mjs`에서 `y < 1` 날짜 거부 및 앞단 형식 문자 `U+200B~200D/U+2060/U+FEFF/U+00AD` 안전 인용 처리 추가. 레코드 자동 삭제/병합/네트워크 동작 없음.
+- `tests/csv-transform.test.mjs` 회귀 2건 추가(backend 자체 12 tests). `tests/csv-hardening.test.mjs` 독립 검수 2건 추가. 해시 동일 실제 로컬 Node `node --test tests/*.test.mjs` 14/14 PASS.
+- Core Git blob `2b004fb9474743a95294b42baf7f875602644a54`, hardening tests `9756435b6cdb0b3b968bd86339e83b7e63743948`. 해당 변경을 frontend에도 동일 Blob으로 미러링. 전체 앱/npm test/실 Windows QA/크몽 판매까지 검증한 것은 아님.
