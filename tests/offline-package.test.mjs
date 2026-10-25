@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync, mkdtempSync, rmSync} from 'node:fs';
-import {join, resolve} from 'node:path';
+import {join, resolve, win32} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
 import {Script} from 'node:vm';
@@ -66,4 +66,15 @@ test('offline artifact built in temporary directory is deterministic and UTF-8',
     const second=buildSelf({output:out});
     assert.equal(second.sha256,first.sha256);
   }finally{rmSync(folder,{recursive:true,force:true});}
+});
+
+test('Windows-style paths keep the output under dist without POSIX separator assumptions',()=>{
+  const windowsRoot='C:\\SMAX';
+  const output=win32.join(windowsRoot,'dist','SMAX_SELF_OFFLINE.html');
+  assert.equal(win32.dirname(output),win32.join(windowsRoot,'dist'));
+  // The old implementation checked for '/' after a Windows path and rejected this valid output.
+  assert.equal(output.startsWith(win32.join(windowsRoot,'dist')+'/'),false);
+  const builderSource=readFileSync(join(root,'scripts','build-self.mjs'),'utf8');
+  assert.match(builderSource,/dirname\(out\) !== join\(root,'dist'\)/);
+  assert.match(builderSource,/mkdirSync\(dirname\(out\)/);
 });
