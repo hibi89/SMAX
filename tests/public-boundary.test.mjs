@@ -40,6 +40,9 @@ test('marketing headings, correct limitations and links are present', () => {
   assert.match(html, /함께 만드는 AX광장/);
   assert.match(html, /현재 구매할 수 없습니다/);
   assert.match(html, /완성형 프로그램은 아닙니다/);
+  assert.match(html, /CSV 표준화·잠정 매출 집계 2종/);
+  assert.match(html, /나머지 8종은 설계·교육 가이드 전용/);
+  assert.doesNotMatch(html, /CSV 변환 1종은 로컬 실동작 검증 중/);
   assert.equal((html.match(/<article class="card">/g)||[]).length,10);
   const ids=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
   for(const link of html.matchAll(/\bhref="#([^"]+)"/g)) {
