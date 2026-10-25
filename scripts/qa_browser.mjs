@@ -3,7 +3,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createHash } from 'node:crypto';
+import {verifySelfQaArtifact} from './self-qa-integrity.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
@@ -13,6 +13,7 @@ function arg(name, fallback) {
 }
 const htmlPath = resolve(arg('--html', join(root, 'dist', 'SMAX_SELF_OFFLINE.html')));
 const samplePath = resolve(arg('--sample', join(root, 'examples', 'SMAX_SELF_SAMPLE.csv')));
+const reportPath = resolve(arg('--report', join(root, 'dist', 'SELF_QA_REPORT.json')));
 const channel = arg('--channel', 'chromium');
 const headed = args.includes('--headed');
 const ids = ['spreadsheet','inventory','faq','sales','email','rag','quote','booking','web','reviews'];
@@ -40,6 +41,8 @@ async function main() {
   assert(['chromium','msedge'].includes(channel), 'Use --channel chromium or msedge');
   assert(existsSync(htmlPath) && htmlPath.endsWith('.html'), 'Offline HTML missing; run npm run qa:release first');
   assert(existsSync(samplePath) && samplePath.endsWith('.csv'), 'Synthetic CSV fixture missing');
+  assert(existsSync(reportPath), 'Release QA report missing; run npm run qa:release first');
+  const artifactEvidence = verifySelfQaArtifact(htmlPath, reportPath);
   let chromium;
   try {
     ({chromium} = await import('playwright'));
@@ -112,10 +115,9 @@ async function main() {
     assert(!errors.length, 'JavaScript/console errors: '+errors.join('; '));
     assert(!requests.length, 'External requests: '+requests.join('; '));
     checks.push('0 JS errors and 0 outbound HTTP(S) requests');
-    const html = readFileSync(htmlPath);
     console.log(JSON.stringify({
       status:'PASS', browser:channel, browserVersion:browser.version(),
-      htmlSha256:createHash('sha256').update(html).digest('hex'),
+      htmlSha256:artifactEvidence.sha256, releaseQaArtifactMatch:'PASS',
       checks, syntheticFixture:true, guideDownloads:20,
       outboundHttpRequests:0, browserErrors:0
     },null,2));
