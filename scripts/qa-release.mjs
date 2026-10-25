@@ -6,6 +6,7 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, rmSync } from 'node
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeSpreadsheetCsv } from '../site/csv-transform.mjs';
+import { buildSalesReport } from '../site/sales-report.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const dist = join(root, 'dist');
@@ -60,6 +61,32 @@ try {
   requireCheck(converted.summary.reviewRows === 2, 'review count changed');
   requireCheck(converted.csv.startsWith('\uFEFF거래일,'), 'UTF-8 BOM missing');
 
+  // A successful shipping QA must also cover the executable second tool (sales).
+  // Synthetic-only, exact mapping, review rows retained separately; no external data.
+  const salesSample = [
+    '판매일,판매처,판매액',
+    '2026-10-01,온라인,100',
+    '2026-10-01,온라인,100',
+    '2026-10-02,매장,-20.10',
+    '2026-02-30,매장,9',
+    '2026-10-03,=1+1,4'
+  ].join('\\r\\n');
+  const sales = buildSalesReport(salesSample,
+    {date:'판매일', channel:'판매처', amount:'판매액'}, {period:'daily'});
+  requireCheck(sales.summary.sourceRows === 5 && sales.summary.includedRows === 2 &&
+    sales.summary.excludedRows === 3, 'Sales release fixture inclusion/exclusion changed');
+  requireCheck(sales.summary.netAmount === '79.90', 'Sales release fixture net amount changed');
+  requireCheck(sales.reportCsv.startsWith('\\uFEFF기간,') &&
+    sales.reviewCsv.startsWith('\\uFEFF원본레코드,'), 'Sales release fixture BOM missing');
+  for (const flag of ['DUPLICATE','INVALID_DATE','FORMULA_PROTECTED']) {
+    requireCheck(sales.reviewCsv.includes(flag), 'Sales release fixture lost review flag: '+flag);
+  }
+  const monthly = buildSalesReport(salesSample,
+    {date:'판매일', channel:'판매처', amount:'판매액'}, {period:'monthly'});
+  requireCheck(monthly.summary.netAmount === '79.90' &&
+    monthly.groups.every(group => group.period === '2026-10'),
+    'Sales monthly release fixture changed');
+
   mkdirSync(dist, { recursive: true });
   const result = {
     status: 'LOCAL_NODE_PASS_BROWSER_NOT_TESTED',
@@ -73,6 +100,7 @@ try {
       cssAndScriptCsp: 'PASS',
       publicPrivateBoundary: 'PASS',
       syntheticCsv4Rows2Review: 'PASS',
+      syntheticSales5Rows3Review: 'PASS',
       chromiumEdgeFileProtocol: 'NOT_RUN',
       windowsManualQA: 'NOT_RUN',
       saleApproval: 'NOT_GRANTED'
