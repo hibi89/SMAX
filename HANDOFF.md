@@ -463,3 +463,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **권한/비밀/백업:** 기존 blob/branches 보존, 임의 main merge/force push 금지. 합성 CSV만 사용; 개인정보/토큰/계정/원본 고객 문서는 서버·GitHub에 업로드하지 않음. 유료 리소스 집행/직거래/외부 인증 조작 없음.
 9. **다음 우선 행동·완료 기준:** 새 UI 회귀가 포함된 **최신 frontend의 실제 전체 Node 릴리스** exit0 확인 + HTML sha256/bytes/CSP/합성 두 CSV PASS → **동일 파일** 실제 Chromium E2E 10항 → Windows Edge 실PC 확인 → 사용자 출시/크몽 등록/Cloudflare 별도 승인. 승인 못 받은 배포 및 완성 주장 보류.
 10. **갱신 기준:** 2026-10-25 KST; GitHub 원본 코드·HEAD 및 로컬 Node TextDecoder/격리 V8 실행 근거만. 보고서·테스트 스크립트의 존재는 실브라우저/고객 사용성 보증이 아님.
+
+## 2026-10-25 KST — 스총 최신 인수: 실 SHA-256/CSP 인메모리 출고 후보 (10항)
+1. **목표:** 정체된 단위 회귀 보강 대신 현재 Private `frontend` 빌드 후보의 **실 암호학적 SHA-256/보안 CSP** 측정. SMAX² SELF, 사장님 존, 10종 가이드·실로컬 CSV 2종, 2026-11-07 마감.
+2. **실제 완료:** GitHub 원본 `scripts/build-self.mjs`의 `bundleOfflineSelf`를 V8에서 평가, `site/index.html`, CSS 및 5개 엔진 모듈 실제 blob 결합. SHA256 자체 알고리즘 코드를 세 기준 `abc`, `한글 CSV 테스트`, `SMAX² Square`의 Python `hashlib`와 **3/3 교차 검증** 후 Node crypto만 대체해 진짜 CSP SHA 계산. 제품 코드 변경 없음.
+3. **증거/계산:** 인메모리 HTML **84,678 UTF8 bytes**, SHA256 `57b9abdadce1f9c489f51bdc585ff1f4bfed5a6a4703402cc388a03998f9a838`, 1 JS/1 CSS, 각 CSP 해시 일치, 외부 리소스 없는 구조/연결 금지/JS 문법 PASS. 합성 CSV 4행 2검토·매출 5행 2반영/3제외·순79.90 및 공개코어 분리 **10/10 PASS**.
+4. **미완/차단:** 위 해시는 **메모리 내 V8 계산**. 사용자 파일 디스크 생성 없음, `npm run qa:release` 실제 Native Node 전체 실행·그 출력 파일의 SHA/bytes·실 Chromium E2E·Windows Edge는 **NOT_RUN**. 과거 Node 34/34와 Chromium PASS는 과거 빌드이며 현 HEAD 완료 증거 아님. 이 계산만으로 출시 승인 금지.
+5. **방식·오류·전환:** GitHub Private repo에 연결된 GitHub connector는 읽기/쓰기 가능, 컨테이너 `github.com` DNS 차단으로 `git clone` 불가. Actions 실패 원인 미확정(과거 실행에 단계 로그 없음)이며 무단 재실행 금지. 원격 소스 메모리 계산으로 우회하되 Native QA와 등치하지 않음.
+6. **GitHub 증거:** 문서 `docs/QA_IN_MEMORY_REAL_SHA_20261025.md` 커밋 `f56c8d5d572927faffac7701c11f9727314974af`; 상세 소스 blob·해시 재현 조건은 해당 문서 참고. 시작 `frontend` HEAD `16372add1edc289424dd7b348d38d111b8d760ad`. `main` `952bc586c132066d84e5a29e5b10254120b35f14`, `backend` `f0f309241f8ebd776b9ce6bfd1d872d406f5b444` 변경 없음; 문서 후 HEAD 재조회.
+7. **배포/실행 절차:** 승인받은 실제 개발자 환경 Node>=20에서 `npm run qa:release`→그 `dist/SMAX_SELF_OFFLINE.html` 디스크 바이트/sha256과 **동일 HEAD** 인메모리 참고치 비교→QA JSON 검증→`npm run qa:browser:node`→Windows `QA_SELF_WINDOWS.cmd /edge`. 고객은 최종 하나의 HTML만 사용 목표; 아직 실기기 확인 전.
+8. **권한/보존:** 모든 기존 브랜치·제품 소스 보존, Git 강제 병합/태그·외부 게시·Cloudflare/Vercel 배포/크몽 판매·개인정보/자격증명/고객 계정 업로드·유료 API 호출·지출 없음. 내부 고정 합성 fixture만 사용.
+9. **다음 작업/완료 기준:** 첫 순서 최신 checkout에서 실제 `npm run qa:release` exit0 + SHA/bytes + Node 전체 suite. SHA 다르면 동일 blob/인코딩/함수 환경 다시 교차확인 후 원인 해소. 이후 실제 브라우저 `file://` 10항·Windows Edge 실PC 검증, 지원·라이선스·환불 조건 사용자의 출시 승인.
+10. **기준 시각/출시 상태:** 2026-10-25 KST, 인메모리 후보 구조 **검증 완료**, 실제 disk/Native QA **NOT_RUN**, 상용화 **미승인**. 새 대화 `ㄱ`는 반복 V8보다 Native/browser 진척을 우선한다.
