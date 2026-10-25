@@ -241,3 +241,12 @@
 - `tests/csv-property.test.mjs`를 backend와 동일 Git blob으로 추가. 256개 deterministic 합성 CSV를 매 실행에 생성하고 원본 행수/검토상태/UTF-8 BOM/같은 입력 결과 일치를 확인.
 - 로컬 Node v22.16.0 실제 `node --test tests/*.test.mjs` **CSV 한정 13/13 PASS** (원격 해시 동일 4개 파일: site/csv-transform.mjs, tests/csv-transform.test.mjs, csv-hardening.test.mjs, csv-property.test.mjs). 별도 랜덤 입력 1,600건도 누락 행 0건.
 - `scripts/qa-release.mjs`의 필수 테스트 목록에 `csv-property.test.mjs` 추가. 실제 전체 `frontend npm run qa:release`, 단일 HTML 생성, Windows Chrome/Edge E2E 및 사용자 판매 승인 미완. 로컬 사용자 권한/환경 제약 우회나 제품 외부 공개 없음.
+
+
+## 2026-10-25 KST — 스총 실행 9: 오프라인 HTML 자체 통합 스모크 4종 추가
+- 사용자 `ㄱ`: 사장님 SELF 실제 전체 검증 조기 완료 우선. 최신 `frontend` 기준으로 `tests/offline-ui-smoke.test.mjs`를 추가, `scripts/qa-release.mjs` 필수 테스트 목록에 포함. `main`, `backend` 수정 없음.
+- 테스트는 `bundleOfflineSelf()`로 실제 `site/index.html`+CSS+템플릿+코어+CSV 엔진+app을 **단일 HTML 인라인 JS로 생성**한 다음 Node `vm.runInNewContext()`의 synthetic browser DOM에서 실행하도록 설계. 검사 4개: ① CSV 업로드/3열 명시 매핑/원본 3행 보존/오류 2행/UTF-8 BOM 다운로드 ② 잘못된 매핑·다른 템플릿 이동 시 과거 결과 폐기 ③ 비동기 파일 읽기 중 템플릿 변경 시 오염 방지 ④ 보이지 않는 문자로 시작하는 수식형 입력 `FORMULA_PROTECTED` 처리/출력.
+- GitHub 실제 소스 기준의 V8 코드 실행에서 초기 테스트 1건은 테스트 모의 브라우저 `window` 누락으로 FAIL 발생. 제품 코드가 아니라 fixture 누락으로 확인하고 `window:{}` 추가(`55299c41623e68e9c81215b7aee1302bc263770b`). 이어 테스트 2건 더 확장해 **가상 Node API 환경에서 4/4 PASS**. GitHub 최신 테스트 blob `0289beb9f77d2ae8416cdda7f4a6226317cbe69e`.
+- 실제 현 컨테이너 Node 22.16.0에서 GitHub 블롭 동일 `smax_frontend_csv_verified` 4파일을 `node --test tests/*.test.mjs`로 재실행하여 **CSV 부분 13/13 PASS**. 오프라인 패키지 내의 JS가 V8에서 합성·파싱되고 테스트 4건 모의 실행을 통과했으나 **실제 전체 `npm test`, Node `vm` 테스트 파일 실실행, `npm run build:self` 실제 파일 생성, Windows 브라우저 E2E는 아직 미검증**. 이 4건을 native Node test PASS라고 주장 금지.
+- Private Repo 환경: GitHub Actions 첫 실행은 단계 로그 없이 failure, 수동 전용 전환. 직접 Private repo clone은 외부 DNS 접근 차단. 실행 가능한 승인된 Windows 개발 환경에서 `QA_SELF_WINDOWS.cmd` → `npm run qa:release` → SHA 결과 및 Edge E2E를 확인해야 출시 승인 후보.
+- 공개/판매/외부 API 호출, 고객 개인자료 전송·유료 지출 0건. 기한 2026-11-07 상한 유지, 조기완료 허용.
