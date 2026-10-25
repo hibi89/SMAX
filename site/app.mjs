@@ -60,7 +60,7 @@ document.addEventListener("change",async event=>{
     const file=event.target.files?.[0];if(!file)return;
     forgetCsv();
     if(file.size>2*1024*1024){state.fileMessage="오류: CSV는 2MB 이하만 지원합니다.";render();return;}
-    if(!/\\.csv$/i.test(file.name)){state.fileMessage="오류: 현재는 CSV 파일만 지원합니다.";render();return;}
+    if(!/\.csv$/i.test(file.name)){state.fileMessage="오류: 현재는 CSV 파일만 지원합니다.";render();return;}
     const generation=state.csvGeneration, selected=state.selected;
     try{
       const source=await file.text();
