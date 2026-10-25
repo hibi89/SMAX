@@ -576,3 +576,49 @@ test('spreadsheet review-only CSV export contains flagged records, never drops f
   env.click('download-csv-review');
   assert.equal(env.links.length,before,'no review-only export for zero flagged records');
 });
+
+test('eight guide-only templates accept local field-name annotations in blueprints without any CSV upload',async()=>{
+  const env=offlineFixture();
+  for(const id of ['inventory','faq','email','rag','quote','booking','web','reviews']){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    const editor=env.rootNode.innerHTML;
+    assert.match(editor,/설계 가이드 전용입니다/);
+    assert.match(editor,/data-action="guide-field"/);
+    assert.doesNotMatch(editor,/id="csv-upload"/);
+    const field=editor.match(/data-action="guide-field" data-field="([^"]+)"/)?.[1];
+    assert.ok(field,id+' must have a first editable blueprint field');
+    const custom='업무'+id+'열';
+    await env.change({dataset:{action:'guide-field',field},value:custom});
+    env.click('download-json');
+    let blueprint=JSON.parse(env.blobs.at(-1).parts[0]);
+    assert.equal(blueprint.fields.find(f=>f.standardField===field)?.sourceColumn,custom,id);
+    env.click('download-guide');
+    assert.match(env.blobs.at(-1).parts[0],new RegExp(custom));
+  }
+  // XSS-like labels must not be interpreted as HTML; no persistent cross-template fields.
+  env.click('select',{id:'faq'});
+  env.click('tab',{tab:'chat'});
+  const field=env.rootNode.innerHTML.match(/data-action="guide-field" data-field="([^"]+)"/)?.[1];
+  await env.change({dataset:{action:'guide-field',field},value:'필드"<img src=x onerror=alert(1)>\n제목'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/<img src=x/);
+  assert.match(env.rootNode.innerHTML,/&lt;img/);
+  env.click('download-json');
+  const safe=JSON.parse(env.blobs.at(-1).parts[0]);
+  assert.doesNotMatch(safe.fields.find(f=>f.standardField===field).sourceColumn,/[\r\n]/);
+  env.click('select',{id:'rag'});
+  env.click('tab',{tab:'chat'});
+  env.click('download-json');
+  const switched=JSON.parse(env.blobs.at(-1).parts[0]);
+  assert.ok(switched.fields.every(f=>f.sourceColumn===null),'no field leaks to a different guide');
+
+  // Forged guide inputs can neither rewrite executable mappings nor spawn CSV uploads.
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  await env.change({dataset:{action:'guide-field',field:'channel'},value:'forged'});
+  env.click('download-json');
+  const runnable=JSON.parse(env.blobs.at(-1).parts[0]);
+  assert.ok(runnable.fields.every(f=>f.sourceColumn===null));
+  assert.match(env.rootNode.innerHTML,/id="csv-upload"/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="guide-field"/);
+});
