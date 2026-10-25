@@ -196,3 +196,8 @@
 - **원격 코드:** `backend` 브랜치의 새 코어 `4c497d4f1a1c189692c83294f63124787c3d489b`; 회귀 테스트 `c2ffd622a8f2ec6b36c303076cd3f72ea8c586fa`; 계약 문서 `docs/SALES_REPORT_ENGINE_CONTRACT_20261025.md` 커밋 `8b8e1d6fb36f180951edc2a77f1561f9c59c7f1b`. 기존 CSV 변환/10종 검색·기존 frontend 기능 변경 없음.
 - **제한/미검증:** 전체 backend 테스트/프런트 제품 전체 회귀는 이번 작업에서 NOT_RUN. `frontend`의 매출 집계 버튼/다운로드 연결 및 오프라인 HTML 패키징·Windows Edge/Chrome E2E는 미구현/미검증; **두 번째 고객용 완성 도구 출시 아님**. 세금/회계 신고·실사용 정확성 근거 아님.
 - **다음 작업:** 판매 템플릿 UI에 일·월 주기/3열 수동 매핑/잠정 합계·제외행 두 CSV 내려받기, 변경 시 이전 결과 무효화 연결 → 번들러/테스트 업데이트 → 전체 Node/Chromium·가능한 Windows QA. `main`/공개 Cloudflare 배포·크몽 판매·실고객 데이터 접근 금지, 2026-11-07 마감 상한 유지.
+
+## 2026-10-25 — CSV serializer namespace hardening
+- Offline SELF builder concatenates modules into one JavaScript scope. Both spreadsheet and sales modules declared top-level `toCsv`, allowing silent shadowing. Renamed **only sales private serializer** to `toSalesReportCsv`; no public API/output/schema changes. Backend and frontend now share identical source blob `17796cd0e44095512b61303045dffa582fe06162`.
+- Backend commit `6e57867f0b5f16f8a5422e436e5431568f1ceab1`; frontend matching commit `1c0368e88e2597a5e0c09b41119b5f9fda1f2998`. Local actual Node v22.16.0 `/mnt/data/smax_sales_work` `git hash-object site/sales-report.mjs` matched remote and `node --test tests/*.test.mjs` **8/8 PASS**.
+- Latest frontend has now connected sales workflow; old handoff text describing sales UI as unimplemented is historical. Whole frontend `npm run qa:release` and real Chromium/Windows E2E remain **NOT_RUN**. No main merge/public launch.
