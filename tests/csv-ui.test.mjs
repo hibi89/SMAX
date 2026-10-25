@@ -21,9 +21,9 @@ test('SELF CSV upload / manual map / preview / download and stale-state safety',
   };
   globalThis.document=fakeDocument;
   globalThis.window={};
-  globalThis.URL={createObjectURL:()=> 'blob:local-test',revokeObjectURL:()=>{}};
   try {
     await import('../site/app.mjs?csv-ui-regression');
+    globalThis.URL={createObjectURL:()=> 'blob:local-test',revokeObjectURL:()=>{}};
     const click=(action,other={})=>listeners.click({target:{closest:()=>({dataset:{action,...other}})}});
     const change=target=>listeners.change({target});
     click('select',{id:'spreadsheet'});
