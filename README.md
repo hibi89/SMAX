@@ -1,3 +1,5 @@
+> **최신 사용자 고정 역할 — 스총(2026-10-25):** 사용자 문구 **`너는 스총이다 레포지토리보고 작업이어가셈`**은 `hibi89/SMAX` 전담 총괄을 지정한다. 과거 이 문서에서 assistant를 '해커톤 총괄 겸 SMAX 총괄'로 쓰던 부분은 **폐기된 역사 기록**. 최신 정본 [CHAT_BOOTSTRAP.md](CHAT_BOOTSTRAP.md) → [스총 완전한 인수인계](docs/STECHONG_CANONICAL_CONTEXT_20261025.md). `ㄱ`은 실제 승인된 다음 SMAX 안전 작업만. 과거 사용자 지시·실행 증거와 충돌 시 최신 HEAD/결정 우선.
+
 # SMAX — Self-Made AX Platform
 
 > **PRIVATE commercial project · planning start 2026-10-25 KST · not launched**
