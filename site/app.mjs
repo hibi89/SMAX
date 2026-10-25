@@ -1,15 +1,16 @@
 import {templates} from "./templates.mjs";
 import {searchTemplates,parseCsv,suggestFieldMap,buildBlueprint,buildHandoff} from "./core.mjs";
 import {normalizeSpreadsheetCsv} from "./csv-transform.mjs";
+import {buildSalesReport} from "./sales-report.mjs";
 const root=document.getElementById("work-area");
 const $=sel=>document.querySelector(sel);
 const categories=["전체",...new Set(templates.map(t=>t.category))];
-const state={tab:"templates",category:"전체",query:"",selected:null,answers:{},headers:[],mappings:{},searchTerm:"",fileMessage:"",csvSource:null,csvName:"",csvPreview:null,csvError:"",csvGeneration:0};
+const state={tab:"templates",category:"전체",query:"",selected:null,answers:{},headers:[],mappings:{},searchTerm:"",fileMessage:"",csvSource:null,csvName:"",csvPreview:null,csvError:"",salesPreview:null,salesError:"",salesPeriod:"daily",csvGeneration:0};
 const icons={spreadsheet:"↗",inventory:"◫",faq:"◇",sales:"▥",email:"✉",rag:"▤",quote:"▧",booking:"◷",web:"◎",reviews:"♡"};
 const h=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const getTemplate=()=>templates.find(t=>t.id===state.selected);
 const toast=msg=>{const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__smaxToast);window.__smaxToast=setTimeout(()=>t.classList.remove("show"),2800)};
-function forgetCsv(){state.csvGeneration++;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.headers=[];state.mappings={};state.fileMessage=""}
+function forgetCsv(){state.csvGeneration++;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";state.salesPeriod="daily";state.headers=[];state.mappings={};state.fileMessage=""}
 function selectTemplate(id){const t=templates.find(x=>x.id===id);if(!t)return;state.selected=id;state.answers={};forgetCsv();render()}
 function card(t){return '<button type="button" class="template-card '+(state.selected===t.id?"selected":"")+'" data-action="select" data-id="'+h(t.id)+'"><div class="template-top"><span class="template-icon">'+h(icons[t.id]||"▣")+'</span><span class="draft-tag">설계 가이드 초안</span></div><strong>'+h(t.title)+'</strong><p>'+h(t.summary)+'</p><span class="card-end"><span>'+h(t.category)+'</span><span>자세히 보기 ↗</span></span></button>'}
 function renderTemplates(){const results=state.query.trim()?searchTemplates(state.query,templates,10).map(r=>r.template):templates;const filtered=results.filter(t=>state.category==="전체"||t.category===state.category);const selected=getTemplate();return '<div class="studio-grid"><div><div class="workspace-title"><div><h3>템플릿 라이브러리</h3><p>원하는 작업을 선택하세요. 말하듯 검색해도 됩니다.</p></div></div><div class="search-wrap"><span class="search-glyph" aria-hidden="true">⌕</span><input id="template-search" class="input" type="search" autocomplete="off" placeholder="예: 메일로 들어온 엑셀 정리하고 싶어" value="'+h(state.query)+'" aria-label="템플릿 검색"></div><div class="categories">'+categories.map(c=>'<button type="button" class="chip '+(state.category===c?"active":"")+'" data-action="category" data-name="'+h(c)+'">'+h(c)+'</button>').join("")+'</div><div class="result-info">'+filtered.length+'개 템플릿 · 검색은 사전 정의된 동의어와 규칙 기반입니다</div>'+(filtered.length?'<div class="template-grid">'+filtered.map(card).join("")+'</div>':'<div class="empty-state"><h3>일치하는 템플릿을 찾지 못했어요.</h3><p>다른 말로 검색하거나 카테고리를 변경해보세요. 무료 제안 기능은 준비 중입니다.</p></div>')+'</div>'+detailPanel(selected)+'</div>'}
@@ -18,7 +19,26 @@ function renderChat(){const t=getTemplate();const intro='<div class="bubble assi
 if(!t){if(state.searchTerm){lines+='<div class="bubble user">'+h(state.searchTerm)+'</div>';const ranked=searchTemplates(state.searchTerm,templates,3);if(ranked.length){lines+='<div class="bubble assistant">이 업무와 관련 있을 만한 템플릿을 찾았어요. 하나를 선택하면 필요한 항목을 확인하겠습니다.</div>';choices=ranked.map(r=>'<button class="choice" type="button" data-action="select" data-id="'+h(r.template.id)+'">'+h(r.template.title)+'</button>').join("")}else{lines+='<div class="bubble assistant">일치하는 템플릿이 아직 없습니다. 더 구체적으로 입력하거나 템플릿 패널에서 직접 찾아보세요. 신규 템플릿 제안 기능은 준비 중입니다.</div>'}}else{lines+='<div class="bubble assistant">먼저 어떤 작업인지 알려주세요. 예: 손님들이 같은 질문을 반복해요.</div>'}}
 else{lines+='<div class="bubble user">'+h(t.title)+' 템플릿으로 시작할게요.</div><div class="bubble assistant">'+h(t.summary)+'<br>필요한 조건을 하나씩 확인하겠습니다.</div>';for(const q of t.questions){if(state.answers[q.key]){lines+='<div class="bubble assistant">'+h(q.prompt)+'</div><div class="bubble user">'+h(state.answers[q.key])+'</div>'}}const next=t.questions.find(q=>!state.answers[q.key]);if(next){lines+='<div class="bubble assistant">'+h(next.prompt)+'</div>';choices=next.options.map(o=>'<button type="button" class="choice" data-action="answer" data-question="'+h(next.key)+'" data-answer="'+h(o)+'">'+h(o)+'</button>').join("")}else{lines+='<div class="bubble assistant">기본 질문에 답하셨습니다. 오른쪽에서 필요하면 CSV 헤더를 읽고 매핑을 확인한 뒤 AX 설계 초안을 내려받으세요. 실제 구축은 외부 AI·도구에서 직접 수행합니다.</div>'}}
 return '<div class="chat-wrap"><div><div class="chat-panel"><div class="chat-header"><div><strong>SMAX 가이드</strong><small>'+(t?h(t.title):"자동화 아이디어 찾기")+'</small></div><button type="button" class="button-outline" data-action="reset-chat">다른 작업</button></div><div class="chat-messages">'+lines+(choices?'<div class="choice-list">'+choices+'</div>':"")+'</div><div class="chat-compose"><input id="chat-input" class="input" type="text" maxlength="280" autocomplete="off" placeholder="'+(t?"간단한 답변이나 추가 조건 입력":"어떤 업무를 바꾸고 싶나요?")+'" aria-label="SMAX 가이드 메시지"><button class="button-sm" data-action="chat-send" type="button">입력</button></div></div><p class="chat-caption">규칙에 없는 요청은 정확히 이해하지 못할 수 있습니다. 추천 결과를 직접 확인하세요.</p></div>'+editorPanel(t)+'</div>'}
+function salesResultPanel(){
+  const keys=["date","channel","amount"],picked=keys.map(k=>state.mappings[k]);
+  const ready=!!state.csvSource&&picked.every(v=>v&&state.headers.includes(v))&&new Set(picked).size===3;
+  const result=state.salesPreview;
+  const table=result?'<div class="csv-scroll"><table class="csv-table"><thead><tr>'+["기간","판매채널","건수","양수합계","음수조정","순합계"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead><tbody>'+result.groups.slice(0,5).map(g=>'<tr>'+[g.period,g.channel,String(g.rows),g.positiveAmount,g.negativeAdjustment,g.netAmount].map(v=>'<td>'+h(v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>':"";
+  return '<section class="csv-result" aria-label="로컬 매출 집계">'+
+    '<h4>로컬 매출 보고서 (잠정 집계)</h4><p class="tiny">판매일·판매채널·판매금액 열을 직접 확인하세요. 검토가 필요한 행은 합계에서 제외하며, 원본 번호/사유를 별도 파일로 보존합니다. 음수는 반품으로 추정하지 않고 조정액으로 표시합니다. 세무·회계 신고용이 아닙니다.</p>'+
+    '<label for="sales-period">집계 주기</label><select id="sales-period" data-action="sales-period"><option value="daily" '+(state.salesPeriod==="daily"?"selected":"")+'>일별</option><option value="monthly" '+(state.salesPeriod==="monthly"?"selected":"")+'>월별</option></select>'+
+    '<button type="button" class="button-sm" data-action="run-sales" '+(ready?"":"disabled")+'>매핑 확인 후 매출 집계</button>'+
+    (state.salesError?'<p class="csv-error" role="alert">'+h(state.salesError)+'</p>':"")+
+    (result?'<p class="tiny" role="status">원본 '+result.summary.sourceRows+'행 · 잠정 반영 '+result.summary.includedRows+'행 · 제외/검토 '+result.summary.excludedRows+'행 · 그룹 '+result.summary.groupCount+'개 · 순합계 '+h(result.summary.netAmount)+'원</p>'+
+      '<p class="tiny">처음 5개 그룹 미리보기. 전체 내용은 보고서/검토 파일을 각각 다운로드하세요. 인력 최종 검토 전 확정 매출이 아닙니다.</p>'+table+
+      '<button type="button" class="button-outline" data-action="download-sales-report">잠정 집계 CSV 다운로드 ↓</button>'+
+      '<button type="button" class="button-outline" data-action="download-sales-review">제외/검토 행 CSV 다운로드 ↓</button>':
+      '<p class="tiny">CSV 최대 2MB, XLSX 직접 입력 미지원. 파일과 수동 열 매핑이 완료돼야 실행할 수 있습니다.</p>')+
+    '</section>';
+}
+
 function csvResultPanel(t){
+  if(t.id==="sales")return salesResultPanel();
   if(t.id!=="spreadsheet")return "";
   const keys=["date","item","amount"],picked=keys.map(k=>state.mappings[k]);
   const ready=!!state.csvSource&&picked.every(v=>v&&state.headers.includes(v))&&new Set(picked).size===3;
@@ -47,6 +67,20 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
 }else if(action==="download-csv"){
   if(getTemplate()?.id!=="spreadsheet"||!state.csvPreview)return;
   download("SMAX_STANDARDIZED.csv",state.csvPreview.csv,"text/csv;charset=utf-8");
+}else if(action==="run-sales"){
+  if(getTemplate()?.id!=="sales")return;
+  state.salesPreview=null;state.salesError="";
+  try{
+    if(!state.csvSource)throw Error("CSV 파일을 먼저 선택하세요.");
+    state.salesPreview=buildSalesReport(state.csvSource,state.mappings,{period:state.salesPeriod});
+  }catch(e){state.salesError=e instanceof Error?e.message:"매출 집계에 실패했습니다.";}
+  render();
+}else if(action==="download-sales-report"){
+  if(getTemplate()?.id!=="sales"||!state.salesPreview)return;
+  download("SMAX_SALES_REPORT.csv",state.salesPreview.reportCsv,"text/csv;charset=utf-8");
+}else if(action==="download-sales-review"){
+  if(getTemplate()?.id!=="sales"||!state.salesPreview)return;
+  download("SMAX_SALES_REVIEW_ROWS.csv",state.salesPreview.reviewCsv,"text/csv;charset=utf-8");
 }else if(action==="download-json"||action==="download-guide"){const t=getTemplate();if(!t)return;const b=buildBlueprint(t,state.answers,state.mappings);if(action==="download-json")download("AX_BLUEPRINT_"+t.id+".json",JSON.stringify(b,null,2),"application/json;charset=utf-8");else download("AI_BUILD_PROMPT_"+t.id+".md",buildHandoff(t,b),"text/markdown;charset=utf-8")}});
 function sendChat(){const input=$("#chat-input");const msg=input&&input.value.trim();if(!msg)return;if(!state.selected){state.searchTerm=msg.slice(0,280)}else{const t=getTemplate(),next=t.questions.find(q=>!state.answers[q.key]);if(next)state.answers[next.key]=msg.slice(0,280);else{toast("기본 질문은 완료됐습니다. 다른 업무는 '다른 작업'을 선택하세요.");return}}render()}
 document.addEventListener("input",event=>{if(event.target.id==="template-search"){const pos=event.target.selectionStart;state.query=event.target.value.slice(0,120);render();const box=$("#template-search");if(box){box.focus();box.setSelectionRange(pos,pos)}}});
@@ -54,7 +88,11 @@ document.addEventListener("keydown",event=>{if(event.target.id==="chat-input"&&e
 document.addEventListener("change",async event=>{
   if(event.target.dataset.action==="map"){
     state.mappings[event.target.dataset.field]=event.target.value;
-    state.csvPreview=null;state.csvError="";render();return;
+    state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";render();return;
+  }
+  if(event.target.dataset.action==="sales-period"){
+    if(!["daily","monthly"].includes(event.target.value))return;
+    state.salesPeriod=event.target.value;state.salesPreview=null;state.salesError="";render();return;
   }
   if(event.target.id==="csv-upload"){
     const file=event.target.files?.[0];if(!file)return;
