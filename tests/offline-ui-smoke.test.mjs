@@ -44,7 +44,7 @@ function offlineFixture() {
   };
   const timeouts=[];
   runInNewContext(script,{
-    document,window:{},TextEncoder,Blob:TestBlob,URL,
+    document,window:{},TextEncoder,TextDecoder,Blob:TestBlob,URL,
     setTimeout(callback){timeouts.push(callback);return timeouts.length},
     clearTimeout(){}
   },{filename:'SMAX_SELF_OFFLINE.html',timeout:5000});
@@ -342,4 +342,30 @@ test('sales period guide question synchronizes with the actual report and bluepr
   assert.equal(blueprint.questions.find(q=>q.key==='period')?.answer,'일별');
   env.click('run-sales');
   assert.match(env.rootNode.innerHTML,/<td>2026-10-01<\/td>/);
+});
+
+test('packaged app rejects invalid CP949 bytes and accepts UTF-8 across both local workflows',async()=>{
+  const env=offlineFixture();
+  for(const id of ['spreadsheet','sales']){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    const invalid=Uint8Array.from([0xbe,0xc8,0xb3,0xe7]);
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'legacy-cp949.csv',size:invalid.byteLength,
+      arrayBuffer:async()=>invalid.buffer,
+      text:async()=>{throw Error('raw file bytes should be decoded first');}
+    }]});
+    assert.match(env.rootNode.innerHTML,/해석 실패: 문자 인코딩 오류: CSV UTF-8/);
+    assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-(?:csv|sales-report|sales-review)"/);
+    const input=id==='spreadsheet'
+      ? '거래날짜,품목,결제금액\n2026-01-01,볼펜,100'
+      : '판매일,판매처,판매액\n2026-01-01,매장,100';
+    const valid=Buffer.from(input,'utf8');
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'valid-utf8.csv',size:valid.byteLength,
+      arrayBuffer:async()=>Uint8Array.from(valid).buffer
+    }]});
+    assert.match(env.rootNode.innerHTML,/3개 열 감지/);
+    assert.doesNotMatch(env.rootNode.innerHTML,/문자 인코딩 오류/);
+  }
 });
