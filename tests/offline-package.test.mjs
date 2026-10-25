@@ -115,3 +115,19 @@ test('offline module top-level bindings remain unique to prevent silent shadowin
   assert.equal(declared.get('toCsv'),'csv-transform.mjs');
   assert.equal(declared.get('toSalesReportCsv'),'sales-report.mjs');
 });
+
+test('Windows CRLF CSS uses browser-canonical LF content and matching strict CSP hash',()=>{
+  const source=input();
+  const linuxCss=source.css.replace(/\r\n?/g,'\n');
+  const windowsCss=linuxCss.replace(/\n/g,'\r\n');
+  assert.notEqual(windowsCss,linuxCss,'fixture must cover a CSS newline');
+  const windowsHtml=bundleOfflineSelf({...source,css:windowsCss});
+  const inlineCss=windowsHtml.match(/<style>([\s\S]*?)<\/style>/)?.[1];
+  assert.ok(inlineCss,'expected one bundled inline stylesheet');
+  assert.equal(inlineCss,linuxCss,'browser parser and CSP must see the same LF CSS');
+  assert.doesNotMatch(inlineCss,/\r/,'inline CSS must never embed CRLF');
+  assert.ok(windowsHtml.includes("style-src 'sha256-"+digest(inlineCss)+"'"));
+  assert.doesNotMatch(windowsHtml,/style-src 'unsafe-inline'/,'do not weaken CSP');
+  assert.equal(windowsHtml,bundleOfflineSelf({...source,css:linuxCss}),
+    'Windows CSS checkout newline differences must not alter the HTML build');
+});
