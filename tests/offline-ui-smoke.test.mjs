@@ -180,3 +180,67 @@ test('all ten guidance templates export a review-only blueprint and safe AI hand
   }
   assert.equal(env.links.filter(link=>link.clicked).length,20);
 });
+
+
+test('sales local report preserves rejected records and downloads both UTF-8 BOM CSV files',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  assert.match(env.rootNode.innerHTML,/로컬 매출 보고서/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+  const source='판매일,판매처,판매액\n2026-10-01,온라인,100\n2026-10-01,온라인,100\n2026-10-02,매장,-20.10\n2026-02-30,매장,9\n2026-10-03,=1+1,4';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'sales.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/잠정 반영 2행/);
+  assert.match(env.rootNode.innerHTML,/제외\/검토 3행/);
+  assert.match(env.rootNode.innerHTML,/79\.90원/);
+  assert.match(env.rootNode.innerHTML,/data-action="download-sales-report"/);
+  env.click('download-sales-report');
+  assert.equal(env.links.at(-1).download,'SMAX_SALES_REPORT.csv');
+  const report=env.blobs.at(-1).parts[0];
+  assert.match(report,/^\uFEFF기간,판매채널,/);
+  assert.match(report,/79\.90/);
+  env.click('download-sales-review');
+  assert.equal(env.links.at(-1).download,'SMAX_SALES_REVIEW_ROWS.csv');
+  const reviewed=env.blobs.at(-1).parts[0];
+  assert.match(reviewed,/^\uFEFF원본레코드,/);
+  assert.match(reviewed,/DUPLICATE/);
+  assert.match(reviewed,/INVALID_DATE/);
+  assert.match(reviewed,/FORMULA_PROTECTED/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/<script/i);
+});
+
+test('sales result is invalidated when period/mapping/template changes',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  const source='판매일,판매처,판매액\n2026-10-01,매장,5\n2026-10-02,온라인,10';
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'sales.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  for(const [field,value] of Object.entries({date:'판매일',channel:'판매처',amount:'판매액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/download-sales-report/);
+  await env.change({dataset:{action:'sales-period'},value:'monthly'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/download-sales-report/);
+  const count=env.links.length;
+  env.click('download-sales-report');
+  assert.equal(env.links.length,count,'stale download blocked');
+  env.click('run-sales');
+  assert.match(env.rootNode.innerHTML,/2026-10/);
+  await env.change({dataset:{action:'map',field:'amount'},value:'판매처'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/download-sales-report/);
+  env.click('select',{id:'spreadsheet'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/로컬 매출 보고서/);
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/2개 열 감지/);
+  assert.doesNotMatch(env.rootNode.innerHTML,/download-sales-report/);
+});
