@@ -6,7 +6,7 @@ import { normalizeSpreadsheetCsv, CsvTransformError } from './csv-transform.mjs'
 const REPORT_COLUMNS = Object.freeze(['기간', '판매채널', '집계행수', '양수금액합계(원)', '음수조정절댓값(원)', '순합계(원)']);
 const REVIEW_COLUMNS = Object.freeze(['원본레코드', '거래일', '판매채널', '금액', '검토사유']);
 
-function toCsv(rows) {
+function toSalesReportCsv(rows) {
   const cell = v => {
     const text = String(v);
     return /[",\r\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
@@ -77,7 +77,7 @@ export function buildSalesReport(source, mapping, {period} = {}) {
       negativeAdjustment: formatCents(negativeAdjustments), netAmount: formatCents(positive - negativeAdjustments)
     },
     groups: summaries, excluded: reviewRows.map(row => ({sourceRecord: row[0], reason: row[4]})),
-    reportCsv: toCsv([REPORT_COLUMNS, ...summaries.map(g => [g.period, g.channel, String(g.rows), g.positiveAmount, g.negativeAdjustment, g.netAmount])]),
-    reviewCsv: toCsv([REVIEW_COLUMNS, ...reviewRows])
+    reportCsv: toSalesReportCsv([REPORT_COLUMNS, ...summaries.map(g => [g.period, g.channel, String(g.rows), g.positiveAmount, g.negativeAdjustment, g.netAmount])]),
+    reviewCsv: toSalesReportCsv([REVIEW_COLUMNS, ...reviewRows])
   };
 }
