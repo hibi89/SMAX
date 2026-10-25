@@ -1,2 +1,16 @@
 # Generated private SELF customer bundles; do not publish or commit.
 /dist/
+
+# Developer-only QA runtime and browser reports.
+/node_modules/
+/playwright-report/
+/test-results/
+/.playwright/
+/.venv/
+__pycache__/
+*.pyc
+
+# Credentials and local machine settings.
+.env
+.env.*
+!.env.example
