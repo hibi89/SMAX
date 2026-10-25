@@ -510,7 +510,10 @@ test('offline synthetic CSV source downloads provide BOM UTF-8 training files wi
     env.click('download-sample-input');
     assert.equal(env.links.at(-1).download,downloadName);
     const value=env.blobs.at(-1).parts[0];
-    assert.equal(value,'\uFEFF'+readFileSync(join(root,'examples',sourceFile),'utf8'));
+    // Windows Git may rewrite fixture record separators LF <-> CRLF at checkout.
+    // BOM, content, field values and record count must still match the embedded demo.
+    const normalizeEol=text=>text.replace(/\r\n/g,'\n');
+    assert.equal(normalizeEol(value),normalizeEol('\uFEFF'+readFileSync(join(root,'examples',sourceFile),'utf8')));
     assert.equal(env.blobs.at(-1).options.type,'text/csv;charset=utf-8');
     assert.equal(env.rootNode.innerHTML,before,'downloading source example must not change state');
     // Owners must still map their columns manually after upload.
