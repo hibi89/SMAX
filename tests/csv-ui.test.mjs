@@ -59,6 +59,29 @@ test('SELF CSV upload / manual map / preview / download and stale-state safety',
     assert.match(root.innerHTML,/해석 실패: 헤더만 있고 처리할 데이터가 없습니다/);
     assert.doesNotMatch(root.innerHTML,/data-action="download-csv"/);
 
+    // A legacy Korean CP949 CSV must never be silently misread as UTF-8.
+    const cp949=Uint8Array.from([0xbe,0xc8,0xb3,0xe7]);
+    await change({id:'csv-upload',dataset:{},files:[{
+      name:'legacy-cp949.csv',size:cp949.byteLength,
+      arrayBuffer:async()=>cp949.buffer,
+      text:async()=>{throw Error('browser bytes path should be used');}
+    }]});
+    assert.match(root.innerHTML,/문자 인코딩 오류: CSV UTF-8/);
+    assert.doesNotMatch(root.innerHTML,/data-action="download-csv"/);
+    // Replacement characters from legacy file.text() mocks are also rejected.
+    const damaged='거래날짜,품목,결제금액\n2026-01-01,�펜,100';
+    await change({id:'csv-upload',dataset:{},files:[{
+      name:'damaged.csv',size:Buffer.byteLength(damaged),text:async()=>damaged
+    }]});
+    assert.match(root.innerHTML,/문자 인코딩 오류: CSV UTF-8/);
+    // Valid raw UTF-8 bytes should still open the existing local mapping workflow.
+    const utf8Bytes=Uint8Array.from(Buffer.from(csv,'utf8'));
+    await change({id:'csv-upload',dataset:{},files:[{
+      name:'valid-utf8.csv',size:utf8Bytes.byteLength, arrayBuffer:async()=>utf8Bytes.buffer
+    }]});
+    assert.match(root.innerHTML,/3개 열 감지/);
+    assert.doesNotMatch(root.innerHTML,/문자 인코딩 오류/);
+
     let release;
     const pending=change({id:'csv-upload',dataset:{},files:[{name:'later.csv',size:csv.length,text:()=>new Promise(resolve=>{release=resolve})}]});
     click('select',{id:'faq'});
