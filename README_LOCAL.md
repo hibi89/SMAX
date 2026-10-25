@@ -1,3 +1,5 @@
+> **2026-10-25 최신 보안·QA 정정:** 최근 `frontend` 패치에서 비 UTF-8(CP949 등) CSV 파일을 브라우저 로컬 디코딩 단계에서 조기 거부하도록 강화했습니다. 잘못된 바이트를 자동 변환하거나 손상된 텍스트로 보고서를 만들지 않습니다. `tests/csv-ui.test.mjs`, `scripts/qa_browser.mjs` 검사 코드 업데이트. 변경 후 실제 전체 Node release QA / 신규 HTML SHA / 실 Chromium·Windows Edge는 **NOT_RUN**이므로 아래 기존 PASS 수치는 과거 빌드 한정입니다. 자세한 근거는 `STATUS.md`·`HANDOFF.md` 최신 섹션.
+
 > **최신 검증 — 2026-10-25 KST:** 실제 Node 22.23.4 전체 `34/34 PASS`; `npm run qa:release` 성공. 최신 SELF HTML **73,352 bytes**, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. 실제 **Linux ARM64 Chromium 156 오프라인 file:// 브라우저 E2E PASS**: 4행 CSV 변환/다운로드, 2행 검토, 모바일 컨트롤, 10종 설계서+가이드 **20개 다운로드**, JS 오류/HTTP 요청 0. **Windows 실기기 Edge/Chrome 테스트는 아직 미실행**이며, 크몽 판매/Cloudflare 공개/디자인 최종 승인은 보류. 근거 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`.
 
 ## 실제 브라우저 QA 재현 (개발자 전용)
