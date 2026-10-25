@@ -228,6 +228,14 @@ async function main() {
           'Template synthetic demo capability was misrepresented: '+id);
         if(!csvExecutable)assert((await page.locator('.editor-panel').innerText()).includes('설계 가이드 전용입니다'),
           'Guide-only disclosure missing: '+id);
+        let guideField=null;
+        if(!csvExecutable){
+          const editor=page.locator('[data-action="guide-field"]').first();
+          guideField=await editor.getAttribute('data-field');
+          assert(guideField,'Guide-only template lacks editable field name: '+id);
+          await editor.fill('검증용 항목 '+id);
+          await editor.blur();
+        }
         const [j] = await Promise.all([
           page.waitForEvent('download',{timeout:10000}),
           page.locator('[data-action="download-json"]').click()
@@ -235,6 +243,8 @@ async function main() {
         const json = JSON.parse(readFileSync(await j.path(),'utf8'));
         assert(j.suggestedFilename() === 'AX_BLUEPRINT_'+id+'.json', 'Blueprint filename wrong: '+id);
         assert(json.templateId === id && json.state === 'NEEDS_REVIEW', 'Blueprint not review-only: '+id);
+        if(guideField)assert(json.fields.find(f=>f.standardField===guideField)?.sourceColumn==='검증용 항목 '+id,
+          'Guide-only custom field name was not exported to the blueprint: '+id);
         const [g] = await Promise.all([
           page.waitForEvent('download',{timeout:10000}),
           page.locator('[data-action="download-guide"]').click()
@@ -242,6 +252,7 @@ async function main() {
         const guide = readFileSync(await g.path(),'utf8');
         assert(g.suggestedFilename() === 'AI_BUILD_PROMPT_'+id+'.md', 'Guide filename wrong: '+id);
         assert(guide.includes('개인정보') && guide.includes('검증 체크리스트'), 'Guide safety/checklist missing: '+id);
+        if(guideField)assert(guide.includes('검증용 항목 '+id), 'AI build guide omitted customized field: '+id);
       } finally { await context.close(); }
     }
     checks.push('All 10 template JSON and Markdown guides downloaded (20 files)');
