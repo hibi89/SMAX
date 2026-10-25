@@ -71,6 +71,15 @@ async function main() {
         'Built-in CSV demo was not visibly labeled synthetic');
       assert(await page.locator('[data-action="download-csv"]').count()===1,
         'Built-in CSV demo did not offer its result file');
+      const [trainingCsv] = await Promise.all([
+        page.waitForEvent('download',{timeout:10000}),
+        page.locator('[data-action="download-sample-input"]').click()
+      ]);
+      assert(trainingCsv.suggestedFilename()==='SMAX_DEMO_SPREADSHEET.csv',
+        'Wrong synthetic training CSV filename');
+      const expectedTrainingCsv=Buffer.concat([Buffer.from([239,187,191]),readFileSync(samplePath)]);
+      assert(readFileSync(await trainingCsv.path()).equals(expectedTrainingCsv),
+        'Downloaded spreadsheet training CSV differs from the repository fixture');
       // Fail closed: invalid UTF-8 may silently corrupt Korean business CSV.
       await page.locator('#csv-upload').setInputFiles({
         name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
@@ -122,6 +131,16 @@ async function main() {
           'Built-in sales demo did not produce its declared preliminary total');
         assert((await page.locator('.editor-panel').innerText()).includes('합성 예제 체험 중'),
           'Built-in sales demo was not visibly labeled synthetic');
+        const [trainingSales] = await Promise.all([
+          page.waitForEvent('download',{timeout:10000}),
+          page.locator('[data-action="download-sample-input"]').click()
+        ]);
+        assert(trainingSales.suggestedFilename()==='SMAX_DEMO_SALES.csv',
+          'Wrong synthetic sales training CSV filename');
+        const originalSalesFixture=readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'));
+        assert(readFileSync(await trainingSales.path()).equals(
+          Buffer.concat([Buffer.from([239,187,191]),originalSalesFixture])
+        ),'Downloaded sales training CSV differs from repository fixture');
         await page.locator('#csv-upload').setInputFiles({
           name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
           buffer:Buffer.from([0xbe,0xc8,0xb3,0xe7])
