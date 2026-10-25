@@ -204,3 +204,16 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본/백업/보안/수정금지**: 원본 SHA는 시작 `main/backend/frontend = 989cec1497e530f5547346bc341e7e92373f9910`. Git 기존 main 스냅샷을 복구 기준으로 보존. 실제 고객 개인정보, 계정, 토큰 입력 없음; 전송하지 않음. 원본 사용자 파일 절대 덮어쓰지 않고 변환 결과 텍스트만 메모리 반환.
 9. **다음 작업 우선순위·완료 기준·승인**: (P0) frontend UX에서 **현재 매핑 드롭다운과 신규 함수 연결**, 업로드 파일 내용을 안전하게 메모리 보관, 처리 버튼 클릭 시 검토행 수/사유 표시, 결과 CSV 다운로드, 상태 변경/템플릿 전환 때 원본 데이터 삭제와 재확인. 합성 브라우저 스모크/전체 테스트. (P1) 공개 소개/유료 코어 분리. (P1) Windows 실행/크몽 안내. **main 병합·Cloudflare 공개·크몽 상품 발행은 별도 사용자 승인.**
 10. **갱신·검증 기준(KST)**: 2026-10-25 오후 작업. 확인 기준은 backend의 신규 2개 원격 Git blob과 격리된 Node 테스트 결과. 문서 최종 커밋과 원격 HEAD는 채팅 종료 전 조회해 보고. 성공 판정은 **CSV 로컬 코어 범위에 한정**.
+
+
+## 2026-10-25 KST — backend CSV 코어 추가 하드닝 인수
+1. 목표: CSV 정규화에서 연도 `0000`을 정상 승인하지 않고, 비가시적 Unicode 전치문자 뒤 위험한 수식 표시를 보호.
+2. 구현: `site/csv-transform.mjs`의 dateISO 연도 최소 1 제한 및 excelSafe 방어 전치 문자 확대.
+3. 증거: 실제 로컬 Node 22.16.0 / backend 동일 Git Blob source + 기존 12 및 독립 2 tests → 14 PASS / 0 FAIL. 단 전체 frontend Node/Windows Edge/Chrome은 미검증.
+4. 커밋: `559e78af4c6269e0587fd3725d953b324c65426c` 코어, `6189215c7139cac8a3f3392f169b5988035e32d7` 기존 테스트, `de91bbefce46066e35cb679042f56669522dc622` hardening 테스트. core blob `2b004fb9474743a95294b42baf7f875602644a54`.
+5. frontend 사용: 같은 코어 파일 blob으로 즉시 동기화 완료. frontend의 `tests/csv-transform.test.mjs`는 기존 10건 보존하고 `tests/csv-hardening.test.mjs`로 새 2건 분리.
+6. 범위: 기존 3컬럼 수동 매핑/원본 행 보존/검토 태깅 유지. WEB API/유료 AI API/사용자 자료 접촉 없음.
+7. 실 서비스: 미배포/미판매. 이 Node 회귀만으로 고객 제공 가능 판정 불가.
+8. 복구: Git 파일 버전별 SHA 사용, 강제 머지 금지.
+9. 다음: frontend 전체 실제 npm test + 오프라인 패키징 + Windows E2E; 최신 브랜드 정책과 안전 병합.
+10. 2026-10-25 KST 검증 기준.
