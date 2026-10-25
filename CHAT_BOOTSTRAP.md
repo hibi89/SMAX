@@ -1,3 +1,5 @@
+> **최신 QA 업데이트 2026-10-25 KST:** Linux ARM64 Chromium 156의 실제 `file://` **오프라인 E2E PASS**, CSV 4행 보존/검토2행/UTF-8 BOM 실제 다운로드, JS 오류·외부 HTTP 요청 0. 10종 템플릿 JSON+MD 가이드 **20건 실제 다운로드 성공**. 재현 명령 `npm run qa:browser:node`; 상세 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`. 기존 Node 34/34 PASS 및 HTML 73,352 bytes, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca` 유지. **Windows 실제 PC Edge/Chrome 검증·상품 출시 승인/디자인 확정은 아직 미완료.** 아래 'Linux 브라우저 BLOCKED' 옛 문장보다 이 최신 증거 우선.
+
 > **최신 작업 상태 2026-10-25 KST:** 현재 주 캐릭터 이름 **스몽이**만 확정, 실제 웹 디자인 최종 승인 보류(`main/docs/SMONGI_PRIMARY_MASCOT_DECISION_20261025.md`). SELF 화면의 구형 맥콩 안내 문구 수정. Native Node 22.23.4 전체 **34 PASS / 0 FAIL**, `npm run qa:release` 실제 성공, HTML **73,352 bytes**, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. Linux Chromium은 공유 라이브러리 부족으로 실행 전 차단, **Windows 실기기 E2E 미검증**. 최신 증거 `docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md`. 아래 이전 33 PASS·NAON2·맥콩 '현행' 서술보다 이 최신 상태와 `main`의 변경이 우선.
 
 # 스총 새 채팅 자동 복원 — SMAX² Square (최신 2026-10-25)
