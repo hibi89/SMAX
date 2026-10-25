@@ -13,3 +13,9 @@
 - 우선순위 1: 최신 `frontend`를 승인된 Node 20+ 개발 환경에 내려받아 `QA_SELF_WINDOWS.cmd` 또는 `npm run qa:release` **실제로 실행**해 전체 테스트 0 FAIL 및 `dist/SMAX_SELF_OFFLINE.html` SHA-256/크기 기록.
 - 우선순위 2: Windows Edge의 `file://` 모드로 합성 샘플 입력4행/검토2행/다운로드 BOM 확인 및 외부 요청 0을 테스트.
 - 출시·Cloudflare 공개·크몽 등록·판매는 QA 통과 및 사용자 승인 전 금지. 2026-11-07 마감 상한 유지. 10종 템플릿은 실제 자동화 실행 10개가 아니라 규칙형 교육/설계 가이드임.
+
+## **최신 2026-10-25 KST 갱신 — Native Node 실 QA 관문 통과**
+- 이전 본문에서 ‘전체 Node 미검증’이라고 적힌 내용은 **과거 상태**. 실제 GitHub frontend 소스 20개 파일 각각 SHA 확인 후 격리 Linux Node 22.23.4 임시 VM에서 `node --test` **33/33 PASS, 0 FAIL**, `npm run qa:release` **exit 0** 확인.
+- 실제 오프라인 단일 HTML `dist/SMAX_SELF_OFFLINE.html`: **73,341 bytes**, SHA-256 `093d1c8bff820369b664007fbecdd252a387b6cf354398247c754fb59b680563`; report와 byte/hash 일치, 별도 재빌드도 byte-identical.
+- 1차 증거 정본: `docs/QA_FULL_NODE_AND_OFFLINE_BUILD_20261025.md` (commit `95f72393dd0be0eee77c539e69bc868ea2ed4257`). **실 Windows Edge/Chrome file:// 동작 및 CSV 다운로드는 여전히 미검증**. Node 33 PASS를 판매 QA PASS와 혼동 금지.
+- 다음 `ㄱ`: Windows 실기기 Edge/Chrome 검수와 증거 확보, 최신 main 브랜드 변경 안전 병합 검토, 크몽 상품 조건/최종 사용자 승인. Cloudflare 공개·상용 판매 미실행.
