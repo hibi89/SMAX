@@ -86,3 +86,16 @@ test('SELF preview uses current Smongi naming without claiming design approval',
   assert.doesNotMatch(html,/맥콩이 안내하는/);
   assert.match(html,/시연 화면입니다/);
 });
+
+
+test('spreadsheet and sales CSV serializers remain independently named in offline bundle',()=>{
+  const csvSource=read('csv-transform.mjs');
+  const salesSource=read('sales-report.mjs');
+  assert.match(csvSource,/function toCsv\(/);
+  assert.match(salesSource,/function toSalesReportCsv\(/);
+  assert.doesNotMatch(salesSource,/function toCsv\(/);
+  const js=getScript(bundleOfflineSelf(input()));
+  assert.ok(js);
+  assert.equal((js.match(/function toCsv\(/g)||[]).length,1);
+  assert.equal((js.match(/function toSalesReportCsv\(/g)||[]).length,1);
+});
