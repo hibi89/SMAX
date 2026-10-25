@@ -62,14 +62,18 @@ export function bundleOfflineSelf({html, css, modules}) {
     ...scripts,
     '});'
   ].join('\n;\n');
-  if (/<\/script/i.test(bundled) || /<\/style/i.test(css)) {
+  // Git for Windows may convert CSS line endings from LF to CRLF on checkout.
+  // HTML parsing normalizes CRLF to LF before inline-style CSP hashing.
+  // Hash and embed the SAME LF-canonical CSS so Edge validates it offline.
+  const inlineCss = css.replace(/\r\n?/g, '\n');
+  if (/<\/script/i.test(bundled) || /<\/style/i.test(inlineCss)) {
     throw Error('Unsafe closing tag inside bundled source');
   }
   const csp = "default-src 'none'; script-src 'sha256-"+hash(bundled)+
-    "'; style-src 'sha256-"+hash(css)+
+    "'; style-src 'sha256-"+hash(inlineCss)+
     "'; img-src 'self' data:; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'";
   let result = html;
-  result = exactlyOnce(result,stylesheetTag,'stylesheet').join('<style>'+css+'</style>');
+  result = exactlyOnce(result,stylesheetTag,'stylesheet').join('<style>'+inlineCss+'</style>');
   result = exactlyOnce(result,scriptTag,'module entrypoint').join('<script>'+bundled+'</script>');
   const current = result.match(/<meta http-equiv="Content-Security-Policy" content="[^"]*">/g);
   if (!current || current.length!==1) throw Error('Missing or duplicate CSP meta');
