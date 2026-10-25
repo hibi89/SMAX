@@ -186,6 +186,13 @@ async function main() {
       try {
         await page.locator('[data-action="select"][data-id="'+id+'"]').first().click();
         await page.locator('#tab-chat').click();
+        const csvExecutable=id==='spreadsheet'||id==='sales';
+        assert((await page.locator('#csv-upload').count()===1)===csvExecutable,
+          'Template CSV upload capability was misrepresented: '+id);
+        assert((await page.locator('[data-action="try-sample"]').count()===1)===csvExecutable,
+          'Template synthetic demo capability was misrepresented: '+id);
+        if(!csvExecutable)assert((await page.locator('.editor-panel').innerText()).includes('설계 가이드 전용입니다'),
+          'Guide-only disclosure missing: '+id);
         const [j] = await Promise.all([
           page.waitForEvent('download',{timeout:10000}),
           page.locator('[data-action="download-json"]').click()
