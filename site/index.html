@@ -3,28 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="SMAX — 누구나 스스로 시작하는 AX. 업무 자동화 템플릿을 찾고, 배우고, 직접 구현해보세요.">
+  <meta name="description" content="SMAX² Square 사장님 존 — 반복 업무를 정리하고 직접 자동화를 배우는 템플릿 광장.">
   <meta name="theme-color" content="#081423">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'none'">
-  <title>SMAX — 누구나 스스로 시작하는 AX</title>
+  <title>SMAX² Square — 사장님 존 · 셀프 AX</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.mjs"></script>
 </head>
 <body>
   <div class="site">
     <header class="topbar" id="top">
-      <a class="brand" href="#top" aria-label="SMAX 첫 화면"><span class="brand-mark">S<span>×</span></span><span class="brand-word">SMAX<span class="brand-caption">SELF-MADE AX</span></span></a>
-      <nav class="desktop-nav" aria-label="메인 메뉴"><a href="#studio">템플릿 스튜디오</a><a href="#method">이용 방법</a><a href="#community">함께 만드는 AX</a></nav>
-      <a class="nav-pill" href="#studio">스튜디오 체험 <span aria-hidden="true">↗</span></a>
+      <a class="brand" href="#top" aria-label="SMAX 스퀘어 첫 화면"><span class="brand-mark">S<span>²</span></span><span class="brand-word">SMAX²<span class="brand-caption">SQUARE · 스맥스 스퀘어</span></span></a>
+      <nav class="desktop-nav" aria-label="메인 메뉴"><a href="#studio">템플릿</a><a href="#method">이용 방법</a><a href="#community">광장 소개</a><a href="#product">상품 안내</a></nav>
+      <a class="nav-pill" href="#studio">템플릿 살펴보기 <span aria-hidden="true">↗</span></a>
     </header>
     <main>
       <section class="hero shell" aria-labelledby="hero-title">
         <div class="hero-content">
-          <div class="eyebrow"><span class="eyedot"></span> 독립적인 업무 자동화의 시작</div>
+          <div class="eyebrow"><span class="eyedot"></span> 사장님 존 · 먼저 시작하는 셀프 AX</div>
           <h1 id="hero-title">반복되는 일,<br><em>직접 바꿀 수 있도록.</em></h1>
           <p class="hero-copy">전문가에게 맡기기 전에, 먼저 내가 이해하고 만들어보는 AX. 복잡한 업무를 템플릿으로 정리하고, AI와 함께 직접 자동화를 구축하는 방법을 배웁니다.</p>
           <div class="hero-actions"><a class="button-primary" href="#studio">템플릿 둘러보기 <span aria-hidden="true">↗</span></a><a class="button-link" href="#method">SMAX가 하는 일 알아보기 <span aria-hidden="true">→</span></a></div>
-          <p class="hero-note">현재 기획·개발 초기 버전의 공개 시연 화면입니다. 실제 외부 업무 자동화 실행 서비스는 아닙니다.</p>
+          <p class="hero-note">현재 개발 중인 규칙형 사장님 존 시연 화면입니다. 맥콩이 안내하는 브랜드 세계관을 준비 중이며, 외부 업무 자동화를 대신 실행하는 서비스는 아닙니다.</p>
         </div>
         <div class="hero-visual" aria-label="업무 단계 예시">
           <div class="visual-top"><span class="visual-dots"><i></i><i></i><i></i></span><span>SMAX / WORKFLOW MAP</span><span>EXAMPLE</span></div>
@@ -37,7 +37,7 @@
         <div class="shell">
           <div class="section-top"><div><div class="section-eyebrow">01 — THE STUDIO</div><h2>어떤 일을 바꾸고 싶으세요?</h2><p>템플릿을 찾아도 좋고, 잘 모르겠다면 질문부터 시작해도 좋습니다.</p></div><span class="section-count">INITIAL 10 TEMPLATES</span></div>
           <div class="studio-window">
-            <div class="studio-toolbar"><div class="studio-title"><span class="studio-symbol">S<span>+</span></span><div><strong>SMAX Studio</strong><small>템플릿 탐색 · 업무 가이드</small></div></div><span class="offline-indicator"><i></i> 브라우저 내 처리</span></div>
+            <div class="studio-toolbar"><div class="studio-title"><span class="studio-symbol">S<span>+</span></span><div><strong>SMAX² Studio</strong><small>템플릿 탐색 · 업무 가이드</small></div></div><span class="offline-indicator"><i></i> 브라우저 내 처리</span></div>
             <div class="tabbar" role="tablist" aria-label="SMAX 작업 방식"><button id="tab-templates" class="tab active" data-action="tab" data-tab="templates" type="button" role="tab" aria-selected="true">▦ <span>템플릿 패널</span></button><button id="tab-chat" class="tab" data-action="tab" data-tab="chat" type="button" role="tab" aria-selected="false">☰ <span>챗봇 패널</span></button><span class="tab-note">같은 템플릿 엔진을 공유합니다</span></div>
             <div id="work-area" class="workspace" aria-live="polite"></div>
           </div>
@@ -49,9 +49,13 @@
         <div class="method-grid"><article><span>01</span><h3>목적을 찾아요</h3><p>일상적인 말로 검색하거나 검증된 업무 유형을 선택합니다.</p></article><article><span>02</span><h3>자료를 정리해요</h3><p>필요한 항목을 확인하고 누락되거나 모호한 규칙을 직접 결정합니다.</p></article><article><span>03</span><h3>설계서를 받아요</h3><p>업무 구조, AI 구축 요청서, 단계별 주의사항과 검증표를 받습니다.</p></article><article><span>04</span><h3>직접 구현해요</h3><p>자신이 선택한 AI·외부 도구에서 안내대로 설정하고 테스트합니다.</p></article></div>
       </section>
       <section id="community" class="community-section"><div class="shell community-layout"><div><div class="section-eyebrow">03 — GROW TOGETHER</div><h2>필요한 자동화가 없다면,<br><em>함께 늘려가면 됩니다.</em></h2><p>사용자가 제안한 업무를 공통 템플릿으로 발전시키는 참여형 라이브러리를 준비하고 있습니다. 하나의 좋은 요청이 다른 사장님에게도 도움이 되도록요.</p><p class="subtle">제안 기능 준비 중 · 실제 회사 자료나 개인정보는 받지 않습니다 · 요청한 모든 기능의 개발을 보장하지 않습니다.</p></div><div class="community-flow"><div><span>REQUEST</span><strong>필요한 업무 제안</strong></div><div><span>REVIEW</span><strong>공통 적용 가능성 검토</strong></div><div><span>SHARE</span><strong>누구나 배우는 템플릿</strong></div></div></div></section>
-      <section class="product-section shell"><div><div class="section-eyebrow">04 — OUR OFFER</div><h2>도구 하나, 그리고 배울 수 있는 방법.</h2><p>첫 유료 상품을 준비 중입니다. 최종 제공 범위와 가격은 실제 등록 시 확정됩니다.</p></div><div class="price-grid"><article class="price-card"><span>SMAX SELF</span><strong>₩50,000 <small>예정</small></strong><p>로컬 업무 구조화 · 템플릿 가이드 · AX 설계 파일 · AI 구축 명령어</p><span class="price-state">상품 등록 준비 중</span></article><article class="price-card"><span>SMAX GUIDE / 선택</span><strong>+₩50,000 <small>예정</small></strong><p>직접 구축 중 막히는 지점에 대한 범위가 정해진 비동기 문자 학습 지원</p><span class="price-state">제공 조건 확정 전</span></article></div><p class="price-fine">계정 접속·자동화 구축 대행·전화·원격 제어·실제 회사 자료 수신은 제공하지 않습니다. 외부 AI·자동화 도구의 별도 요금이 발생할 수 있습니다.</p></section>
+      <section class="product-section shell" id="product">
+        <div><div class="section-eyebrow">04 — SMAX² SELF</div><h2>사장님을 위한 셀프 AX 도구를 준비 중입니다.</h2><p>SMAX² SELF는 검증된 로컬 데이터 정리·템플릿 설계·AI 구축 가이드 형태로 개발 중입니다. 실제 제공 범위와 구매 조건은 상품 등록 후 안내합니다.</p></div>
+        <div class="price-grid"><article class="price-card"><span>SMAX² SELF / 개발 중</span><strong>템플릿부터 시작</strong><p>업무 구조화 · 규칙형 안내 · 검토 가능한 AX 설계 파일 · 외부 AI 구축 가이드. 실제 작동 범위는 출시 시 확정합니다.</p><span class="price-state">크몽 상품 준비 중 · 현재 구매 불가</span></article><article class="price-card"><span>SMAX² GUIDE / 향후 선택</span><strong>필요할 때 도움받기</strong><p>직접 만들다 막힌 부분을 위한 제한된 비동기 문자 학습 안내. 제공 기간과 범위는 미확정입니다.</p><span class="price-state">이용 조건 준비 중 · 현재 구매 불가</span></article></div>
+        <p class="price-fine">이 사이트는 결제·회원가입·직거래 문의를 받지 않습니다. 상품이 실제로 등록되면 크몽 안전결제 안내 여부를 정책 검토 후 결정합니다. 학생·학부모 배움의 광장 및 유료 WEB은 후속 개발입니다.</p>
+      </section>
     </main>
-    <footer class="footer shell"><div><a class="brand footer-brand" href="#top"><span class="brand-mark">S<span>×</span></span><span class="brand-word">SMAX<span class="brand-caption">SELF-MADE AX</span></span></a><p>배우고, 만들고, 함께 확장하는 자동화 라이브러리.</p></div><p>© 2026 SMAX · 초기 개발 시연 · 구매/문의 기능 미운영</p></footer>
+    <footer class="footer shell"><div><a class="brand footer-brand" href="#top"><span class="brand-mark">S<span>²</span></span><span class="brand-word">SMAX²<span class="brand-caption">SQUARE · 스맥스 스퀘어</span></span></a><p>배우고, 만들고, 함께 확장하는 자동화 라이브러리.</p></div><p>© 2026 SMAX² Square · 사장님 존 시연 · 회원가입/사이트 결제 미운영</p></footer>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
