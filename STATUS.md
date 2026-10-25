@@ -227,3 +227,12 @@
 - **릴리스 실패 시 과거 산출물 오판매 방지:** `scripts/qa-release.mjs` 실패 핸들러에서 이전 `dist/SMAX_SELF_OFFLINE.html`을 삭제하고 `SELF_QA_REPORT.json` FAIL을 새로 기록하도록 개선(커밋 `884d054ccf1075151de77770bdebb845a8935b71`). GitHub 최신 소스 V8 모의 Node/파일시스템 4조건(정상/Node 테스트 실패/CSP 실패/테스트 누락) **4/4 기대 결과**; 실제 전체 Node QA는 아직 미검증.
 - 이번 턴 **실제 컨테이너 Node v22.16.0** `/mnt/data/smax_backend_work`의 원격 Git blob 동일 파일로 `node --test tests/csv-transform.test.mjs` 실행: **10 pass/0 fail**. 원격 blob: `site/csv-transform.mjs` `5b87530f0a394122a25b3a1a61f889b03bbdbeea`, `tests/csv-transform.test.mjs` `5f2dda8d096c4e9ffd38797471f81ad267dbd0bf`. 이 단위 결과를 전체 suite PASS라고 표시하지 않음.
 - `README_LOCAL.md`에 Windows 개발자용 더블클릭 절차 및 CI runner 불확실성 기록. 다음 작업: 최신 Private frontend 전체 소스가 접근 가능한 Windows/Node 실행 환경에서 `QA_SELF_WINDOWS.cmd` 또는 `npm run qa:release` 실제 실행 → HTML SHA·JSON `LOCAL_NODE_PASS_BROWSER_NOT_TESTED` → Edge/Chrome `file://` UI/다운로드 실제 검증(`scripts/qa_browser.py`) → 그 후 사용자 승인에 따라 브랜치 안전 병합·크몽 심사 준비. 외부 배포/크몽 등록 미실시, 2026-11-07 개발 상한 유지.
+
+
+## 2026-10-25 KST — 스총 실행 8: CSV 연도/비가시적 수식 입력 하드닝 실 테스트
+- 사용자 `ㄱ` 후 실제 로컬 Node 22.16.0 검증: 원격 GitHub 파일과 blob 해시가 정확히 일치하는 `site/csv-transform.mjs`(`2b004fb9474743a95294b42baf7f875602644a54`), `tests/csv-transform.test.mjs`(`5f2dda8d096c4e9ffd38797471f81ad267dbd0bf`), `tests/csv-hardening.test.mjs`(`9756435b6cdb0b3b968bd86339e83b7e63743948`)를 Node `--test`로 실행해 **12/12 PASS**.
+- `backend`는 동일 코어에 기존 테스트 2건 추가, 별도 hardening 2건 추가로 **14/14 PASS**(원격 변경 해시 대응 로컬 복사본). 전체 `frontend npm test`의 실행 증거가 아님.
+- 확인된 오류 및 수정: 입력 `0000-01-01`을 정상 거래일로 통과시키던 문제 → `INVALID_DATE`와 `NEEDS_REVIEW` 유지. 비가시적 문자가 수식형 문자열 앞에 있을 경우 보호 접두부가 누락될 수 있는 문제 → 작은 따옴표를 붙이고 `FORMULA_PROTECTED`로 기록. 원본 행을 삭제하지 않음.
+- 변경 `frontend` `site/csv-transform.mjs`를 `backend`와 동일 Git blob로 동기화; `tests/csv-hardening.test.mjs` 별도 생성, `scripts/qa-release.mjs` 필수 테스트 파일 검사 명단에도 추가. `main` 미변경.
+- Private Github을 로컬 컨테이너에서 직접 clone하는 것은 DNS 실패로 막혀 있음. 따라서 전체 UI/패키징 Node suite, 단일 HTML 실제 빌드, Windows 브라우저 E2E는 **여전히 미검증**. 기존 GitHub Actions 1회는 단계 로그 없는 failure이며 재시도하지 않음.
+- 앞으로 테스트에 사용하는 코드가 원격 소스 SHA와 일치하는지 확인 후 실패/성공 근거를 기록하고, 안전한 Windows QA 환경에서 `QA_SELF_WINDOWS.cmd` 및 Edge 실기기 점검 진행. 상용 판매/Cloudflare 공개/고객 데이터 수신/비용 지출 없음. 11월 7일 개발 상한 유지.
