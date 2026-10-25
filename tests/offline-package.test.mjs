@@ -134,3 +134,26 @@ test('Windows CRLF CSS uses browser-canonical LF content and matching strict CSP
   assert.equal(windowsHtml,bundleOfflineSelf({...source,css:linuxCss}),
     'Windows CSS checkout newline differences must not alter the HTML build');
 });
+
+test('full offline build has identical bytes and hashes for Linux and Windows checkout EOL',()=>{
+  const linux=input();
+  const toLf=text=>text.replace(/\r\n?/g,'\n');
+  const toCrLf=text=>toLf(text).replace(/\n/g,'\r\n');
+  const windows={
+    html:toCrLf(linux.html),
+    css:toCrLf(linux.css),
+    modules:linux.modules.map(toCrLf)
+  };
+  const expected=bundleOfflineSelf({
+    html:toLf(linux.html),
+    css:toLf(linux.css),
+    modules:linux.modules.map(toLf)
+  });
+  const actual=bundleOfflineSelf(windows);
+  assert.equal(actual,expected,'Windows checkout must produce byte-identical offline HTML');
+  assert.equal(digest(actual),digest(expected),'full-HTML SHA must be platform-independent');
+  assert.doesNotMatch(actual,/\r/,'all bundled inline content and outer HTML must be LF');
+  assert.match(actual,/connect-src 'none'/);
+  assert.match(actual,/form-action 'none'/);
+  assert.doesNotMatch(actual,/style-src 'unsafe-inline'/);
+});
