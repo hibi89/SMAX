@@ -1,6 +1,13 @@
-> **2026-10-25 최신 검증(우선):** 공식 캐릭터명 **스몽이**, 디자인 시안 최종 승인 보류. 실제 Node.js v22.23.4 `npm run qa:release` 통과, 전체 **34/34 PASS**. 생성된 단일 HTML은 **73,352 bytes**, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. Chromium Linux ARM64는 공유 라이브러리 19개 부족으로 시작 단계 차단. 실제 Windows Edge/Chrome 브라우저 `file://` 시험과 크몽 판매 승인은 **미완료**. 증거: `docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md`.
+> **최신 검증 — 2026-10-25 KST:** 실제 Node 22.23.4 전체 `34/34 PASS`; `npm run qa:release` 성공. 최신 SELF HTML **73,352 bytes**, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. 실제 **Linux ARM64 Chromium 156 오프라인 file:// 브라우저 E2E PASS**: 4행 CSV 변환/다운로드, 2행 검토, 모바일 컨트롤, 10종 설계서+가이드 **20개 다운로드**, JS 오류/HTTP 요청 0. **Windows 실기기 Edge/Chrome 테스트는 아직 미실행**이며, 크몽 판매/Cloudflare 공개/디자인 최종 승인은 보류. 근거 `docs/QA_REAL_CHROMIUM_E2E_20261025.md`.
 
-> **최신 QA 판정 (2026-10-25 KST):** GitHub `frontend` 원격 SHA 확인본 20파일을 격리 Linux Node 22.23.4에서 직접 `node --test` → **33 PASS/0 FAIL**, `npm run qa:release` → **exit 0**. 생성 HTML은 **73,341 bytes / SHA-256 `093d1c8bff820369b664007fbecdd252a387b6cf354398247c754fb59b680563`**이며 재빌드 결과 동일. 상세 증거 `docs/QA_FULL_NODE_AND_OFFLINE_BUILD_20261025.md`. 이 문서 아래에 과거 '전체 Node 미검증' 문구가 있더라도 현재는 이 결과가 우선함. **Windows Edge/Chrome 실기기 E2E 및 판매 승인만 미완료**.
+## 실제 브라우저 QA 재현 (개발자 전용)
+```bash
+npm run qa:release
+npm install --no-save --no-package-lock playwright
+npx playwright install chromium
+npm run qa:browser:node
+```
+Windows Edge 별도 검증: `npm run qa:browser:node -- --channel msedge` (Edge 설치 필요). 이 명령은 고객이 사용하는 SELF HTML에 Node/Playwright 설치를 요구하지 않음.
 
 # SMAX D1 — local-first prototype
 
