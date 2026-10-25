@@ -496,3 +496,37 @@ test('only two executable SELF templates expose CSV upload; eight design guides 
     assert.equal(env.links.at(-1).download,'AI_BUILD_PROMPT_'+id+'.md');
   }
 });
+
+test('offline synthetic CSV source downloads provide BOM UTF-8 training files without changing workflow state',async()=>{
+  const env=offlineFixture();
+  for(const [id,sourceFile,downloadName] of [
+    ['spreadsheet','SMAX_SELF_SAMPLE.csv','SMAX_DEMO_SPREADSHEET.csv'],
+    ['sales','SMAX_SALES_SAMPLE.csv','SMAX_DEMO_SALES.csv']
+  ]){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    assert.match(env.rootNode.innerHTML,/data-action="download-sample-input"/);
+    const before=env.rootNode.innerHTML;
+    env.click('download-sample-input');
+    assert.equal(env.links.at(-1).download,downloadName);
+    const value=env.blobs.at(-1).parts[0];
+    assert.equal(value,'\uFEFF'+readFileSync(join(root,'examples',sourceFile),'utf8'));
+    assert.equal(env.blobs.at(-1).options.type,'text/csv;charset=utf-8');
+    assert.equal(env.rootNode.innerHTML,before,'downloading source example must not change state');
+    // Owners must still map their columns manually after upload.
+    const owner=id==='spreadsheet'
+      ? '거래날짜,품목,결제금액\n2026-10-26,연필,100'
+      : '판매일,판매처,판매액\n2026-10-26,온라인,100';
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'owner.csv',size:Buffer.byteLength(owner,'utf8'),text:async()=>owner
+    }]});
+    assert.match(env.rootNode.innerHTML,/owner\.csv/);
+    assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-(?:csv|sales-report|sales-review)"/);
+  }
+  env.click('select',{id:'faq'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/data-action="download-sample-input"/);
+  const count=env.links.length;
+  env.click('download-sample-input');
+  assert.equal(env.links.length,count,'forged sample download in guide-only workflow');
+});
