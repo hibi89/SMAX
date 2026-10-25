@@ -3,3 +3,7 @@
 .brand-word{display:flex;flex-direction:column;align-items:flex-start;font-size:27px;font-weight:900;letter-spacing:-.5px;line-height:1.12;white-space:nowrap}
 .brand-subname{display:block;margin-top:3px;color:var(--mint);font-size:10px;font-weight:800;letter-spacing:2px;line-height:1.4}
 .brand-tagline{display:block;margin-top:1px;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.15px;line-height:1.45}
+
+/* Official wordmark color: blue X and superscript ² are one continuous accent. */
+.brand-mainline{display:block;color:#eef6f3;line-height:1.12}
+.brand-accent{color:#43a6ff}
