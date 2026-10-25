@@ -64,7 +64,7 @@ function dateISO(value) {
   if (!parts) return null;
   const [y, mo, d] = parts.map(Number);
   const days = [31, y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  if (mo < 1 || mo > 12 || d < 1 || d > days[mo - 1]) return null;
+  if (y < 1 || mo < 1 || mo > 12 || d < 1 || d > days[mo - 1]) return null;
   return `${String(y).padStart(4, '0')}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
@@ -77,7 +77,7 @@ function normalizeAmount(value) {
 function excelSafe(value) {
   const s = String(value);
   // CSV quotes do not stop spreadsheet formula evaluation; prepend an apostrophe.
-  return /^[\s\u0000-\u001F]*[=+@-]/.test(s) && !/^-?\d+(?:\.\d+)?$/.test(s) ? `'${s}` : s;
+  return /^[\s\u0000-\u001F\u200B-\u200D\u2060\uFEFF\u00AD]*[=+@-]/.test(s) && !/^-?\d+(?:\.\d+)?$/.test(s) ? `'${s}` : s;
 }
 
 function csvCell(value) {
