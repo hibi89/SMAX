@@ -31,6 +31,11 @@ function salesResultPanel(){
   const ready=!!state.csvSource&&picked.every(v=>v&&state.headers.includes(v))&&new Set(picked).size===3;
   const result=state.salesPreview;
   const table=result?'<div class="csv-scroll"><table class="csv-table"><thead><tr>'+["기간","판매채널","건수","양수합계","음수조정","순합계"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead><tbody>'+result.groups.slice(0,5).map(g=>'<tr>'+[g.period,g.channel,String(g.rows),g.positiveAmount,g.negativeAdjustment,g.netAmount].map(v=>'<td>'+h(v)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>':"";
+  const excludedPreview=result?.excluded.length
+    ? '<div class="csv-scroll"><table class="csv-table" aria-label="잠정 매출 제외 거래 검토"><thead><tr><th>원본레코드</th><th>제외·검토 사유</th></tr></thead><tbody>'+
+      result.excluded.slice(0,5).map(row=>'<tr><td>'+h(row.sourceRecord)+'</td><td>'+h(row.reason)+'</td></tr>').join("")+
+      '</tbody></table></div>'
+    : "";
   return '<section class="csv-result" aria-label="로컬 매출 집계">'+
     '<h4>로컬 매출 보고서 (잠정 집계)</h4><p class="tiny">판매일·판매채널·판매금액 열을 직접 확인하세요. 검토가 필요한 행은 합계에서 제외하며, 원본 번호/사유를 별도 파일로 보존합니다. 음수는 반품으로 추정하지 않고 조정액으로 표시합니다. 반품·취소 정책에 관한 설계 답변은 이 집계 계산을 변경하지 않습니다. 세무·회계 신고용이 아닙니다.</p>'+
     '<label for="sales-period">집계 주기</label><select id="sales-period" class="sales-period-select" data-action="sales-period"><option value="daily" '+(state.salesPeriod==="daily"?"selected":"")+'>일별</option><option value="monthly" '+(state.salesPeriod==="monthly"?"selected":"")+'>월별</option></select>'+
@@ -39,6 +44,7 @@ function salesResultPanel(){
     (result?'<p class="tiny" role="status">원본 '+result.summary.sourceRows+'행 · 잠정 반영 '+result.summary.includedRows+'행 · 제외/검토 '+result.summary.excludedRows+'행 · 그룹 '+result.summary.groupCount+'개 · 순합계 '+h(result.summary.netAmount)+'원</p>'+
       (result.excluded.some(row=>row.reason.split("|").includes("DUPLICATE"))?'<p class="tiny" role="note">중복 의심 거래가 잠정 합계에서 제외되었습니다. 판매일·판매채널·금액이 같아도 별개 주문일 수 있습니다. CSV에 주문번호 등 구분 열이 없으면 자동 구분할 수 없으므로 제외/검토 CSV의 원본레코드 번호를 실제 거래와 반드시 대조하세요.</p>':"")+
       '<p class="tiny">처음 5개 그룹 미리보기. 전체 내용은 보고서/검토 파일을 각각 다운로드하세요. 인력 최종 검토 전 확정 매출이 아닙니다.</p>'+table+
+      (result.excluded.length?'<p class="tiny">제외·검토 대상 처음 '+Math.min(5,result.excluded.length)+'건의 원본레코드와 사유입니다. 전체 검토 대상은 아래 CSV를 내려받아 원본 거래와 비교하세요.</p>'+excludedPreview:'')+
       '<button type="button" class="button-outline" data-action="download-sales-report">잠정 집계 CSV 다운로드 ↓</button>'+
       '<button type="button" class="button-outline" data-action="download-sales-review">제외/검토 행 CSV 다운로드 ↓</button>':
       '<p class="tiny">CSV 최대 2MB, XLSX 직접 입력 미지원. 파일과 수동 열 매핑이 완료돼야 실행할 수 있습니다.</p>')+
