@@ -1,17 +1,7 @@
 # SMAX² SELF — code-only verification, no deployment and no customer data.
 name: SELF local verification
+# Manually triggered only until private GitHub Actions runner/billing is verified.
 on:
-  push:
-    branches: [frontend]
-    paths:
-      - 'site/**'
-      - 'public-site/**'
-      - 'scripts/**'
-      - 'tests/**'
-      - 'examples/**'
-      - 'package.json'
-      - 'wrangler.jsonc'
-      - '.github/workflows/self-ci.yml'
   workflow_dispatch:
 permissions:
   contents: read
