@@ -12,8 +12,8 @@ try {
     if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)) {
         throw 'npm.cmd was not found on PATH.'
     }
-    $nodeMajorText = (& node.exe -p 'process.versions.node.split(".")[0]').Trim()
-    $nodeMajor = [int]$nodeMajorText
+    $nodeVersion = (& node.exe -p "process.versions.node").Trim()
+    $nodeMajor = [int](($nodeVersion -split '\.')[0])
     if ($nodeMajor -lt 20) {
         throw "Node.js 20+ required; detected major version $nodeMajor"
     }
