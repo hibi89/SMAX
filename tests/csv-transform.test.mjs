@@ -82,3 +82,19 @@ test('pure and repeatable: no input mutation or persistence', () => {
   assert.deepEqual(convert(source, m), first);
   assert.deepEqual(m, mapping);
 });
+
+test('year 0000 is invalid, never approved as a standard business date', () => {
+  const result = convert('거래날짜,품목,결제금액\n0000-01-01,볼펜,100');
+  assert.equal(result.summary.invalidDateRows, 1);
+  assert.equal(result.rows[0][4], 'NEEDS_REVIEW');
+  assert.equal(result.rows[0][0], '0000-01-01');
+});
+
+test('invisible format prefixes cannot bypass spreadsheet formula defense', () => {
+  const result = convert('거래날짜,품목,결제금액\n2026-02-01,"\u200B=HYPERLINK(\"\"x\"\",\"\"y\"\")",100\n2026-02-02,"\u2060+123",100');
+  assert.equal(result.summary.formulaProtectedRows, 2);
+  for (const row of result.rows) {
+    assert.ok(row[1].startsWith("'"));
+    assert.match(row[5], /FORMULA_PROTECTED/);
+  }
+});
