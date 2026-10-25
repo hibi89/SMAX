@@ -33,7 +33,7 @@ test('offline SELF HTML is fully self-contained and has no remote runtime resour
   assert.ok(script);
   assert.match(html,new RegExp("script-src 'sha256-"+digest(script).replace(/[+]/g,'\\+')+"'"));
   // The browser hashes normalized inline CSS, not Windows Git's CRLF source.
-  const css=html.match(/<style>([\\s\\S]*?)<\\/style>/)?.[1];
+  const css=html.match(/<style>([\s\S]*?)<\/style>/)?.[1];
   assert.ok(css,'expected inline CSS for CSP comparison');
   assert.match(html,new RegExp("style-src 'sha256-"+digest(css).replace(/[+]/g,'\\+')+"'"));
   new Script(script,{filename:'SMAX_SELF_OFFLINE.html'});
