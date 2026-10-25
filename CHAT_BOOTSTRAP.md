@@ -22,3 +22,7 @@
 
 ## 장기 원본 보존
 과거 구형 부트스트랩은 `docs/history/CHAT_BOOTSTRAP_PRE_STECHONG_20261025.md`에 백업. 이 문서가 그보다 우선.
+
+## 2026-10-25 최신 Native QA 상태 (옛 HANDOFF/STATUS의 '전체 미검증' 문구보다 우선)
+- 정본 증거 `docs/QA_FULL_NODE_AND_OFFLINE_BUILD_20261025.md`: Private frontend 실제 GitHub SHA 일치 소스 20파일, Node 22.23.4 전체 **33/33 PASS**, `npm run qa:release` 통과. `SMAX_SELF_OFFLINE.html` **73,341 bytes**, SHA-256 `093d1c8bff820369b664007fbecdd252a387b6cf354398247c754fb59b680563`, 별도 재빌드 일치.
+- 미완료: 실제 Windows Edge/Chrome `file://` E2E·사용자 승인·main 안전통합·크몽 등록. **다음 `ㄱ`은 브라우저 QA 최우선**, 이미 끝난 CSV/Node 반복 검증에 개발 시간 낭비 금지.
