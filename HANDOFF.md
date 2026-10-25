@@ -603,3 +603,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **보안·데이터:** 전부 합성 주문번호·매출/검토 문자열만 테스트. 원본 고객·토큰·영업정보 업로드/저장/외부 송신 없음. 유료 API/별도 클라우드 툴/금전 지출 없음.
 9. **다음 단계·승인/완료 기준:** 동일 최신 `frontend` 전체 Git checkout에서 `npm run qa:release` 실제 exit0·신규 생성 HTML SHA/CSP → `npm run qa:browser:node` Chromium `file://` → Windows Edge 실제 PC `QA_SELF_WINDOWS.cmd /edge`. 이후 사용자가 **별도로 승인한 경우에만** main의 RAG 전략/사업 문서와 기존 겹치는 경로들을 보존하여 통합·출시/외부 배포 논의.
 10. **기준:** 2026-10-26 KST; 최종 SHA는 HANDOFF 기록 커밋 직후 GitHub 브랜치 목록 재조회. **2026-11-07** 목표일 유지. 사용자 `ㄱ`에서 최신 `frontend`·`STATUS.md`·`HANDOFF.md`를 우선 읽고 다음 P0 진행.
+
+## 2026-10-26 KST — 스총 최신 인수: 금액 표기 동등성 중복 교정
+1. **목표/버그:** 오프라인 SELF 매출 CSV에서 같은 거래가 `100`, `100.00`, `0100` 등으로 들어오면 별개 거래로 이중 집계될 수 있던 실제 오류를 수정했다. 수정 전 GitHub 제품 함수에서 표기차 중복 누락 0건을 재현했다.
+2. **설계/기능:** `site/csv-transform.mjs`에 중복 비교 전용 `duplicateAmountKey` 추가. 2자리 정확한 금액 문자열 정규화; `-0.00`과 `0` 동일, `100`과 `100.01` 구분, 서로 다른 주문번호/나머지 원본열 구분 유지. CSV 실제 출력 값·레코드 보존. 매출 코어 변경 없음.
+3. **커밋:** backend code `c93e71eac0ca70fe860fb5803d4d613847a83cf9`, CSV tests `2058b03`, sales tests `cddef25`, backend-only test correction `6e6d4d6`; frontend code `73eb691e70f52a7575b3b28389ecec282c600d25`, CSV tests `50e23b8`, sales tests `a27aa4d`, UI test `63d24b3`. backend contract doc `54ceddda`, frontend customer quickstart `9f40357`; 각 브랜치 `STATUS.md` 최신 추가 기록.
+4. **실제 확인:** 원격 실제 코어 제품 코드 대상으로 V8 CSV+매출 신설 테스트 함수 backend **4/4**, frontend **6/6**, frontend 신규 오프라인 UI 함수 실제 모의 DOM/Blob **1/1** PASS. 256개 결정적 속성 케이스, 기존 합성 SELF/SALES 2개 예제 보존. **전체 Native Node `npm run qa:release`/디스크 SHA·CSP/실 Chromium/Windows QA는 NOT_RUN**.
+5. **테스트 결함 교정:** backend에는 `reviewCsv`가 없고 frontend에서만 추가된 계약이다. 첫 backend 신규 회귀 테스트가 이 속성을 잘못 요구해 V8 실패한 것을 발견하고, backend는 자체 `rows` 중복사유 카운트로 검증하도록 수정. backend 제품 반환 계약 변경 없음.
+6. **남은 위험:** 추가 주문식별 열 없이 동일 날짜·채널·금액이 실제 서로 다른 거래인지 자동 확정 불가. 검토 CSV 원본 레코드/주문번호를 대조하는 사람의 최종 검토가 필수.
+7. **환경/보안:** 현재 실행 컨테이너 Node22/Chromium 설치되어 있으나 Private GitHub 전체 checkout DNS 실패; Actions 성공 기록 없음. 고객 자료/자격증명·외부 클라우드 전송/요금·배포·판매·main 병합·force push 없음.
+8. **다음 릴리스 게이트:** 동일 최신 `frontend` full checkout → `npm run qa:release` Node exit0·오프라인 HTML SHA/CSP → `npm run qa:browser:node` Chromium `file://` → Windows `QA_SELF_WINDOWS.cmd /edge`. 사용자 별도 승인 전 main 통합·공개/크몽 등록 금지.
+9. **프로젝트:** Private `hibi89/SMAX`; SELF 2종 로컬 CSV 실행 + 가이드 전용 8종. RAG Studio/SMAX/SOVIA 장기 통합 기획은 main 문서 별도, 이번 판매 범위 불변. 개발 목표 **2026-11-07**.
+10. **재개:** 다른 채팅 `[SMAX² 스총] GitHub hibi89/SMAX 최신 레포지토리 확인하고 총괄 작업 이어가셈` 또는 `ㄱ` → 실제 브랜치 HEAD 및 각 `STATUS.md`/`HANDOFF.md` 재조회 후 안전한 다음 P0 진행. 문서 마지막 커밋 뒤 HEAD 반드시 재확인.
