@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="SMAX — 누구나 스스로 시작하는 AX. 업무 자동화 템플릿을 찾고, 배우고, 직접 구현해보세요.">
+  <meta name="theme-color" content="#081423">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'none'">
+  <title>SMAX — 누구나 스스로 시작하는 AX</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <div class="site">
+    <header class="topbar" id="top">
+      <a class="brand" href="#top" aria-label="SMAX 첫 화면"><span class="brand-mark">S<span>×</span></span><span class="brand-word">SMAX<span class="brand-caption">SELF-MADE AX</span></span></a>
+      <nav class="desktop-nav" aria-label="메인 메뉴"><a href="#studio">템플릿 스튜디오</a><a href="#method">이용 방법</a><a href="#community">함께 만드는 AX</a></nav>
+      <a class="nav-pill" href="#studio">스튜디오 체험 <span aria-hidden="true">↗</span></a>
+    </header>
+    <main>
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-content">
+          <div class="eyebrow"><span class="eyedot"></span> 독립적인 업무 자동화의 시작</div>
+          <h1 id="hero-title">반복되는 일,<br><em>직접 바꿀 수 있도록.</em></h1>
+          <p class="hero-copy">전문가에게 맡기기 전에, 먼저 내가 이해하고 만들어보는 AX. 복잡한 업무를 템플릿으로 정리하고, AI와 함께 직접 자동화를 구축하는 방법을 배웁니다.</p>
+          <div class="hero-actions"><a class="button-primary" href="#studio">템플릿 둘러보기 <span aria-hidden="true">↗</span></a><a class="button-link" href="#method">SMAX가 하는 일 알아보기 <span aria-hidden="true">→</span></a></div>
+          <p class="hero-note">현재 기획·개발 초기 버전의 공개 시연 화면입니다. 실제 외부 업무 자동화 실행 서비스는 아닙니다.</p>
+        </div>
+        <div class="hero-visual" aria-label="업무 단계 예시">
+          <div class="visual-top"><span class="visual-dots"><i></i><i></i><i></i></span><span>SMAX / WORKFLOW MAP</span><span>EXAMPLE</span></div>
+          <div class="hero-diagram"><div class="diagram-node"><span class="node-num">01 / DEFINE</span><strong>내 업무 선택</strong><small>거래처별 엑셀 정리</small></div><div class="diagram-line"><span>↓</span></div><div class="diagram-node active"><span class="node-num">02 / STRUCTURE</span><strong>데이터 표준화</strong><small>열 이름 · 누락 항목 · 검토</small><span class="node-tag">LOCAL FIRST</span></div><div class="diagram-line"><span>↓</span></div><div class="diagram-node"><span class="node-num">03 / BUILD</span><strong>AI 구축 가이드</strong><small>설계서 · 질문 · 검증표</small></div></div>
+          <div class="visual-bottom"><span><span class="pulse"></span> 규칙 기반 가이드 예시</span><span>NO PAID AI API REQUIRED</span></div>
+        </div>
+      </section>
+      <section class="metrics shell" aria-label="제품 구조 요약"><div><strong>10<span>종</span></strong><span>초기 업무 템플릿</span></div><div><strong>2<span>패널</span></strong><span>탐색형 · 질문형</span></div><div><strong>0<span>원</span></strong><span>필수 유료 AI API 호출</span></div><div><strong>LOCAL</strong><span>내 파일은 내 PC에서</span></div></section>
+      <section id="studio" class="studio-section">
+        <div class="shell">
+          <div class="section-top"><div><div class="section-eyebrow">01 — THE STUDIO</div><h2>어떤 일을 바꾸고 싶으세요?</h2><p>템플릿을 찾아도 좋고, 잘 모르겠다면 질문부터 시작해도 좋습니다.</p></div><span class="section-count">INITIAL 10 TEMPLATES</span></div>
+          <div class="studio-window">
+            <div class="studio-toolbar"><div class="studio-title"><span class="studio-symbol">S<span>+</span></span><div><strong>SMAX Studio</strong><small>템플릿 탐색 · 업무 가이드</small></div></div><span class="offline-indicator"><i></i> 브라우저 내 처리</span></div>
+            <div class="tabbar" role="tablist" aria-label="SMAX 작업 방식"><button id="tab-templates" class="tab active" data-action="tab" data-tab="templates" type="button" role="tab" aria-selected="true">▦ <span>템플릿 패널</span></button><button id="tab-chat" class="tab" data-action="tab" data-tab="chat" type="button" role="tab" aria-selected="false">☰ <span>챗봇 패널</span></button><span class="tab-note">같은 템플릿 엔진을 공유합니다</span></div>
+            <div id="work-area" class="workspace" aria-live="polite"></div>
+          </div>
+          <p class="studio-footnote">* 현재 시연은 사전 정의된 규칙과 질문으로 작동합니다. 생성형 AI 챗봇이 아니며, 추천 결과는 사용자의 확인이 필요합니다. 선택한 CSV는 브라우저 안에서만 읽습니다.</p>
+        </div>
+      </section>
+      <section class="method-section shell" id="method">
+        <div class="section-top"><div><div class="section-eyebrow">02 — LEARN BY DOING</div><h2>자동화를 대신해 주기보다,<br>스스로 만들 수 있게.</h2></div></div>
+        <div class="method-grid"><article><span>01</span><h3>목적을 찾아요</h3><p>일상적인 말로 검색하거나 검증된 업무 유형을 선택합니다.</p></article><article><span>02</span><h3>자료를 정리해요</h3><p>필요한 항목을 확인하고 누락되거나 모호한 규칙을 직접 결정합니다.</p></article><article><span>03</span><h3>설계서를 받아요</h3><p>업무 구조, AI 구축 요청서, 단계별 주의사항과 검증표를 받습니다.</p></article><article><span>04</span><h3>직접 구현해요</h3><p>자신이 선택한 AI·외부 도구에서 안내대로 설정하고 테스트합니다.</p></article></div>
+      </section>
+      <section id="community" class="community-section"><div class="shell community-layout"><div><div class="section-eyebrow">03 — GROW TOGETHER</div><h2>필요한 자동화가 없다면,<br><em>함께 늘려가면 됩니다.</em></h2><p>사용자가 제안한 업무를 공통 템플릿으로 발전시키는 참여형 라이브러리를 준비하고 있습니다. 하나의 좋은 요청이 다른 사장님에게도 도움이 되도록요.</p><p class="subtle">제안 기능 준비 중 · 실제 회사 자료나 개인정보는 받지 않습니다 · 요청한 모든 기능의 개발을 보장하지 않습니다.</p></div><div class="community-flow"><div><span>REQUEST</span><strong>필요한 업무 제안</strong></div><div><span>REVIEW</span><strong>공통 적용 가능성 검토</strong></div><div><span>SHARE</span><strong>누구나 배우는 템플릿</strong></div></div></div></section>
+      <section class="product-section shell"><div><div class="section-eyebrow">04 — OUR OFFER</div><h2>도구 하나, 그리고 배울 수 있는 방법.</h2><p>첫 유료 상품을 준비 중입니다. 최종 제공 범위와 가격은 실제 등록 시 확정됩니다.</p></div><div class="price-grid"><article class="price-card"><span>SMAX SELF</span><strong>₩50,000 <small>예정</small></strong><p>로컬 업무 구조화 · 템플릿 가이드 · AX 설계 파일 · AI 구축 명령어</p><span class="price-state">상품 등록 준비 중</span></article><article class="price-card"><span>SMAX GUIDE / 선택</span><strong>+₩50,000 <small>예정</small></strong><p>직접 구축 중 막히는 지점에 대한 범위가 정해진 비동기 문자 학습 지원</p><span class="price-state">제공 조건 확정 전</span></article></div><p class="price-fine">계정 접속·자동화 구축 대행·전화·원격 제어·실제 회사 자료 수신은 제공하지 않습니다. 외부 AI·자동화 도구의 별도 요금이 발생할 수 있습니다.</p></section>
+    </main>
+    <footer class="footer shell"><div><a class="brand footer-brand" href="#top"><span class="brand-mark">S<span>×</span></span><span class="brand-word">SMAX<span class="brand-caption">SELF-MADE AX</span></span></a><p>배우고, 만들고, 함께 확장하는 자동화 라이브러리.</p></div><p>© 2026 SMAX · 초기 개발 시연 · 구매/문의 기능 미운영</p></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
