@@ -43,3 +43,9 @@
 - `tests/self-qa-integrity.test.mjs`에 **증빙 누락 거부 2건** 추가, 로컬 Node v22.16.0 실제 실행 **8 PASS / 0 FAIL**, 테스트/헬퍼 local Git hash-object = 원격 Git blob: `5e1f1112718e9753c2f3cb692a9b7e6d71f53001` / `804f744dc866e916fc8f86d43f972d1923e2b92e`.
 - 최신 `scripts/qa-release.mjs` Git blob `c8286e09da327876fcb34d84d310d585c4522517`, **V8 정적 문법 검사 PASS**. 최신 릴리스 매출 검증 블록을 원격 동일 `site/csv-transform.mjs`/ `site/sales-report.mjs`와 합성해 **V8 격리 실행 PASS**(2 포함/3 제외, 79.90원, CSV 2개 BOM, 3가지 오류 사유, 월별 합계). **V8 모의 실행은 전체 Node 릴리스 명령 실행 증거가 아님**.
 - 기존 매출 모듈 실제 Node v22.16.0 단위 테스트도 `7 PASS / 0 FAIL` 재확인. 변경 후 전체 최신 `npm run qa:release`와 실제 Chromium/Windows 실행은 **NOT_RUN**. 이 문서의 8/8 + 7/7은 각각 **격리 단위 테스트**이고 완성/판매 승인이 아님.
+
+## 동일 합성 데이터 고정 — 릴리스/Chromium 검증 (2026-10-25)
+- 신규 **`examples/SMAX_SALES_SAMPLE.csv`**는 실제 고객 정보가 없는 테스트 전용 5행 CSV. SHA(Git blob): `0bb5bbf5cefbcd9f9cab1f3081f2fa0d8f92ab28`. Windows 한글 확인용 예제로도 재사용 가능하나, **상품에 자동 동봉된 것은 아님**.
+- `scripts/qa-release.mjs`와 `scripts/qa_browser.mjs`는 **이 동일 파일을 읽어** 매출 잠정 집계 2행/제외3행/순액79.90원, `DUPLICATE`, `INVALID_DATE`, `FORMULA_PROTECTED`, 양쪽 UTF-8 BOM을 검사. 파일 누락 시 출고 검증 실패. 하드코딩 입력이 검사마다 별도로 달라지는 위험 감소.
+- `tests/sales-report.test.mjs`에 공용 예제 회귀 1건 추가. 원격/로컬 Git blob **`c78effcfb7d272d7f0aa7afca0e88c85f5f5e8eb` 일치**, 동일 원본 `csv-transform`/`sales-report`의 Node v22.16.0 **8 PASS / 0 FAIL**, QA 무결성 기존 테스트 **8 PASS / 0 FAIL**. 모든 수치는 **개별 Node 단위 테스트** 증거이며 변경 후 전체 frontend `npm run qa:release` 및 실제 Chromium/Windows E2E **NOT_RUN**.
+- 구현 커밋: 합성 예제 `8f3ba3f17150f8ff8162a65843e54cdeac717cad`, 릴리스 검사 파일 통합 `b51c2501e3ee9812bed5e5529a92a72094de4465`, Chromium 검사 파일 통합 `f01e498afb3b5dfc4364bc3175541931eff06c7e`, 단위 회귀 8건 `3688df8e2a8dc2c36af8209563d3e3c4d8f82462`.
