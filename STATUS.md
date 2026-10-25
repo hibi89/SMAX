@@ -408,3 +408,11 @@
 - **고객 안내:** `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`에 DEMO 설계서/AI 가이드도 고객 실제 데이터와 구분하도록 반영(commit `6c3eb3f8adb9f7a527dfc99e0655d352b75eb018`).
 - **현재 차단과 다음 P0:** Private 저장소 GitHub connector 원격 수정은 가능하나 Node 컨테이너 `github.com` DNS 미해결 및 전체 최신 checkout 부재. 한 번에 전체 remote fetch를 실행하는 connector orchestration도 도구 호출 제한으로 실패하여 전체 QA 수행 불가. 최신 frontend 전체 Node `npm run qa:release` 성공→실 디스크 SHA/CSP→동일 HTML Chromium file:// 및 Windows Edge E2E. 메모리 격리 검증 수치를 이 실검증과 섞지 않을 것.
 - **승인/보존:** `main`/`backend` 변경·강제 merge 없음, 상업 배포/Cloudflare/크몽 등록·과금/고객 비밀정보 업로드 없음. 2026-11-07 마감 유지, 최종 QA·상품 검수 후 사용자 승인.
+
+## 2026-10-26 KST — 스총: 2종 로컬 실행 / 8종 가이드 전용 UI 정확화
+- **문제:** SELF의 설계 가이드 전용 8개 템플릿에도 로컬 CSV 파일 선택/열 매핑 안내가 표시되어 실제 CSV 처리가 가능한 것으로 오해될 수 있었음. 오래된 `README_LOCAL.md`에는 매출 집계가 반영되지 않아 "실행 1종, 안내 9종"으로 잘못 설명된 구절도 남아 있었음.
+- **실제 제품 수정:** `frontend/site/app.mjs`의 `editorPanel`을 실행형 **`spreadsheet`·`sales`** 에만 파일 입력/합성 예제/수동 매핑을 노출하고, 나머지 8종은 "설계 가이드 전용이며 CSV 업로드/변환 불가" 명시 + 설계서 JSON·AI 구축 가이드 다운로드는 그대로 유지. 가짜 CSV 업로드나 수동 매핑 change 이벤트가 가이드형으로 전달돼도 사용자 파일을 읽거나 상태를 변경하지 않도록 이벤트 경계에서 막음. 코드 commit `52974df90fa9a2ba9fe15149442c812b6e2beb08`.
+- **회귀 테스트 소스:** 기존 `tests/offline-ui-smoke.test.mjs`에 10종 별 실제 입력창 유무/합성 예제 접근/가이드 다운로드/가짜 업로드 불읽기/가짜 매핑 무시를 검사하는 케이스 추가(commit `07d0d72dc41d1964ee51d612ea26e44e111c4f65`). `scripts/qa_browser.mjs`의 10종 가이드/다운로드 루프에도 두 실행형에서만 CSV 입력·샘플 버튼이 보이고 나머지 8종에 가이드 전용 안내가 표시되는지 실제 브라우저 단정 추가(commit `244a487cb90ae063a68accd234be576492ec3ef1`).
+- **실행 증거:** 원격 GitHub `frontend` 최신 모듈 5개를 실제 결합해 격리 V8 DOM에 실행, 10종×입력/다운로드/예제/가짜 이벤트 조건 **28/28 PASS**. GitHub 파일에 작성한 Node VM/Playwright 새 테스트의 최신 전체 `npm run qa:release` 및 실 Chromium/Windows Edge 실행은 **NOT_RUN**, V8만으로 브라우저 완료나 최종 판매 승인 주장하지 않음.
+- **고객 문서:** `README_LOCAL.md`의 오래된 "1종/9종" 서술을 2/8로 바로잡고 최신 사실 안내 추가(commit `ae55f1dcf6d669695299ef6e6454b5b1a4e80589`); `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`에도 2종 실행/8종 가이드 분리 추가(commit `079f8246f7cb140f24bb073acc87896ba5749a52`).
+- **다음 P0:** 원격 Private 전체 최신 checkout 가능한 Native Node≥20 환경에서 `npm run qa:release` 전체 PASS, 새 디스크 HTML SHA/CSP → 동일 HTML Chromium `file://` Playwright → Windows Edge 실PC → 분기된 `main`의 사업/스몽이 최신 결정 보존하는 승인된 수동 통합. 공개배포·판매/결제/유료 API·Git 강제 병합은 미실행. 2026-11-07 개발 마감 유지.
