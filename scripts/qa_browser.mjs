@@ -182,7 +182,7 @@ async function main() {
     console.log(JSON.stringify({
       status:'PASS', browser:channel, browserVersion:browser.version(),
       htmlSha256:artifactEvidence.sha256, releaseQaArtifactMatch:'PASS',
-      checks, syntheticFixture:true, guideDownloads:20,
+      checks, syntheticFixture:true, guideDownloads:20, salesCsvDownloads:2,
       outboundHttpRequests:0, browserErrors:0
     },null,2));
   } finally { await browser.close(); }
