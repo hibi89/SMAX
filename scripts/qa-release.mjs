@@ -17,7 +17,7 @@ const b64sha256 = text => createHash('sha256').update(text, 'utf8').digest('base
 function requireCheck(condition, description) {
   if (!condition) throw Error('RELEASE_QA_FAILED: ' + description);
 }
-function run(script, label) {
+function run(label) {
   const args = label === 'unit' ? ['--test'] : ['scripts/build-self.mjs'];
   const result = spawnSync(process.execPath, args, { cwd: root, stdio: 'inherit', shell: false });
   if (result.error) throw result.error;
@@ -26,8 +26,14 @@ function run(script, label) {
 
 try {
   // Test discovery is platform-independent, unlike "tests/*.test.mjs" via Windows cmd.
-  run(null, 'unit');
-  run(null, 'build');
+  for (const test of [
+    'core.test.mjs', 'csv-transform.test.mjs', 'csv-ui.test.mjs',
+    'public-boundary.test.mjs', 'offline-package.test.mjs'
+  ]) {
+    requireCheck(existsSync(join(root, 'tests', test)), 'expected test missing: ' + test);
+  }
+  run('unit');
+  run('build');
 
   requireCheck(existsSync(artifact), 'offline HTML was not generated');
   const html = readFileSync(artifact, 'utf8');
@@ -76,9 +82,13 @@ try {
   console.log(JSON.stringify({ ...result, report: 'dist/SELF_QA_REPORT.json' }, null, 2));
 } catch (error) {
   // Never allow a stale successful report to be confused with a failed run.
-  try { if (existsSync(report)) writeFileSync(report, JSON.stringify({
-    status: 'FAIL', reason: String(error?.message ?? error)
-  }, null, 2) + '\n'); } catch {}
+  try {
+    mkdirSync(dist, { recursive: true });
+    writeFileSync(report, JSON.stringify({
+      status: 'FAIL', reason: String(error?.message ?? error),
+      saleApproval: 'NOT_GRANTED'
+    }, null, 2) + '\n', 'utf8');
+  } catch {}
   console.error(error);
   process.exitCode = 1;
 }
