@@ -66,7 +66,6 @@ try {
     if ($actualBytes -ne [long]$report.bytes) {
         throw 'Offline HTML byte count does not match the QA report.'
     }
-    $ok = $true
     Write-Host ""
     Write-Host "[SMAX SELF] Node QA + build PASS. Offline HTML:"
     Write-Host "  $htmlPath"
@@ -85,6 +84,7 @@ try {
         Write-Host "[IMPORTANT] Windows Edge/Chrome file:// and CSV downloads NOT TESTED."
         Write-Host "To run real Edge automation: QA_SELF_WINDOWS.cmd /edge (developer Playwright required)."
     }
+    $ok = $true
     Write-Host "Release/sale approval: NOT GRANTED."
 } catch {
     Write-Error ("[SMAX SELF] BLOCKED/FAIL: " + $_.Exception.Message)
