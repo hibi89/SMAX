@@ -1,3 +1,5 @@
+> **최신 2026-10-26: 설계 가이드 항목명은 이제 명시적 미검증.** 8종 가이드에 직접 적은 이름이 입력됐다는 이유만으로 검증됐다고 판정되는 결함 수정: JSON `guideOnly:true`, `fieldVerification:UNVERIFIED_MANUAL_FIELD_NAME`, `needsReview:true`, `NEEDS_REVIEW` 유지; AI 구축 가이드에 현장 확인 경고. 실행형 2종의 수동 CSV 매핑 흐름은 보존. 실제 GitHub 코드 V8 18/18 PASS, Node·Playwright 회귀 소스 추가. **전체 최신 Native Node / 실 Chromium·Windows QA는 NOT_RUN**. 출시/병합/비용/외부 공개 미승인. 마감 11월 7일.
+
 > **최신 2026-10-26: 8종 가이드 맞춤 항목명 입력 구현.** 원래 모든 가이드가 공통 필드 목록만 내려받던 문제를 수정. 실행형 2종은 CSV 처리 유지, 가이드 8종은 각 항목명을 120자 이내 직접 적어 JSON 설계서·AI 구축 Markdown에 반영. 실제 고객 파일 처리/외부 자동화 아님. 원격 제품 5모듈 V8 UI 검증 **28/28 PASS**, Node VM·Playwright 신규 회귀 테스트 소스 GitHub 반영, **실제 전체 Node·Chromium/Windows 릴리스 검증 NOT_RUN**. `main`/`backend` 불변, 사용자 승인 없는 판매·배포·병합 금지.
 
 > **최신 2026-10-26 CSV 검토행 분리:** SELF 엑셀·CSV 실행형에 전체 `SMAX_STANDARDIZED.csv` 외 **검토 대상 행만 `SMAX_STANDARDIZED_REVIEW.csv`** 추가. 합성은 `SMAX_DEMO_STANDARDIZED_REVIEW.csv`, 검토0건은 버튼 숨김, 파일·매핑 변경시 이전 검토 결과 차단. 실제 원격 제품 코드 V8 UI/Blob **8/8 PASS**와 Node·Playwright·release gate 테스트 소스 GitHub 반영. **최신 Native 전체 릴리스/실 Chromium/Windows 테스트는 여전히 NOT_RUN**, `main`·`backend` 미변경·판매/병합 미승인. `STATUS.md`·`HANDOFF.md` 최신 섹션 참조.
