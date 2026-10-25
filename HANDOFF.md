@@ -269,3 +269,16 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **보안·원본·비용:** `site/` 유료 코어 PRIVATE 유지, `public-site/`만 공개 후보, dist는 Git 무시. 외부 배포/크몽 등록/고객 실데이터/자격증명 사용 없음. CI는 등록된 Private GitHub 리포에서 1회 시도; Actions 사용 제한/비용 상태 확인 전 자동 재시도 금지.
 9. **다음 우선 작업과 완료 기준:** (i) 승인된 로컬 Node 환경에서 frontend **전체** 테스트와 HTML 패키징 실생성 증빙 확보 (ii) Windows Edge/Chrome 실제 CSV 샘플 입력4행/검토2행/다운로드 BOM·외부 요청0 검수 (iii) 최신 main 브랜드/로고 변경과 안전 통합 (iv) 크몽 상품 상세·지원·환불 조건 최종 결정 및 명시적 등록 승인. 단계별 실패 시 이전 단계로 되돌림.
 10. **시각/검증 기준:** 2026-10-25 KST. GitHub branch SHA와 실제 Actions 결과, 원격 해시 일치 로컬 백엔드 Node 테스트, V8 모의 검증. 원격 Actions job 실패가 곧 소스 테스트 FAIL이라는 근거는 없음. 11/7 최종 상한 유지.
+
+
+## 2026-10-25 KST — 스총 실행 8 / CSV 실회귀 검증·현재 QA 차단 (최신 10항)
+1. **목표:** 1차 SELF의 고객 CSV 데이터 정합성/보안을 강화하면서 실제 테스트 병목 해결. 11/7 상한, 가능한 조기완료.
+2. **실제 구현:** `frontend`의 `site/csv-transform.mjs`를 `backend` 강화본과 동일 blob로 갱신. 연도 `0000`은 검토 필요, U+200B~200D/U+2060/U+FEFF/U+00AD 앞단 숨은 문자 뒤 수식형 문자열은 `FORMULA_PROTECTED`. `tests/csv-hardening.test.mjs`(독립 2건), `scripts/qa-release.mjs` 신규 필수 파일 목록 반영.
+3. **실 테스트 증거:** 실제 로컬 Node 22.16.0에서 원격 동일 blob 3개 파일만 추출해 테스트 **12/12 PASS**: `site/csv-transform.mjs` `2b004fb9474743a95294b42baf7f875602644a54`, `tests/csv-transform.test.mjs` `5f2dda8d096c4e9ffd38797471f81ad267dbd0bf`, `tests/csv-hardening.test.mjs` `9756435b6cdb0b3b968bd86339e83b7e63743948`. backend 동일 코어+추가 2 테스트로 14/14 PASS. **전체 frontend `npm test` PASSED가 아님**.
+4. **완료/보류/차단:** 코어 보강·실 Node CSV 검사 완료. Private 전체 코드 clone DNS/외부 브라우저 관리자 정책으로 전체 Node/UI/HTML 패키징/Windows E2E 미검증. 크몽 판매 게이트 미통과.
+5. **문제 원인·대안:** `dateISO`가 y=0을 허용했고 `excelSafe`가 흔한 비가시적 문자 뒤 수식형 입력을 탐지하지 못한 경우 수정. GitHub Actions 실패는 job steps/logs 없어 원인 `UNKNOWN`. 안전한 로컬 Windows 개발 환경에서 전 검사 스크립트 실행.
+6. **원격 작업·브랜치:** Private `hibi89/SMAX`, `frontend` 코어 커밋 `c5a5d8c8e66043457b2995f8b38bb82b78cd13c6`; 새 테스트 `af56baad9e4a19d2c3df55fb2483cd166bac85ae`; QA 매니페스트 `58253eb08620218e95af162ef06fe93658cf617a`. backend 안전성 테스트 추가만, main 미변경. 최신 HEAD 문서 커밋 후 재조회.
+7. **실행환경·URL:** Private 브랜치의 테스트만; Vercel/Cloudflare production 없음, 크몽 상품 게시/실결제 없음. 이 사용자에게 고객 Windows 설치가 필요 없는 `SMAX_SELF_OFFLINE.html`을 목표로 하는 개발자 QA 명령 `npm run qa:release`와 `QA_SELF_WINDOWS.cmd`는 기존 상태.
+8. **보안·비용·원본 보존:** 실제 고객 CSV/신원/키 수신 0. 합성 테스트 데이터. 공개 `public-site/`와 PRIVATE `site/` 분리 유지, dist git 제외. 비용 지출·외부 시스템 쓰기 없음.
+9. **다음 구체작업:** 승인된 환경에서 frontend 전체 `npm run qa:release` 실제 Node PASS 및 HTML SHA 확보 → Windows Edge/Chrome `file://`에서 CSV 다운로드·한글·오류 검토 E2E PASS → 정확한 판매 기능·지원 범위 확정 → 창업자 승인 후 main 안전 통합/크몽 등록. 환경 제약이면 허위 완료 대신 차단을 기록하고 가능한 소스 리뷰 및 추가 안전성 테스트 실시.
+10. **KST 일시·검증 범위:** 2026-10-25, 원격 파일 해시가 일치한 로컬 Node 테스트 12건/14건을 별도 실행 확인. 전체 제품 출시/실사용 QA는 아직 아님.
