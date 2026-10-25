@@ -1,3 +1,5 @@
+> **최신 2026-10-26 CSV 검토행 분리:** SELF 엑셀·CSV 실행형에 전체 `SMAX_STANDARDIZED.csv` 외 **검토 대상 행만 `SMAX_STANDARDIZED_REVIEW.csv`** 추가. 합성은 `SMAX_DEMO_STANDARDIZED_REVIEW.csv`, 검토0건은 버튼 숨김, 파일·매핑 변경시 이전 검토 결과 차단. 실제 원격 제품 코드 V8 UI/Blob **8/8 PASS**와 Node·Playwright·release gate 테스트 소스 GitHub 반영. **최신 Native 전체 릴리스/실 Chromium/Windows 테스트는 여전히 NOT_RUN**, `main`·`backend` 미변경·판매/병합 미승인. `STATUS.md`·`HANDOFF.md` 최신 섹션 참조.
+
 > **최신 2026-10-26 오프라인 사용자 훈련:** SELF의 2개 실행형 템플릿에 `연습용 원본 CSV 다운로드` 추가. `SMAX_DEMO_SPREADSHEET.csv` / `SMAX_DEMO_SALES.csv` (UTF-8 BOM, 저장소 고정 합성 fixture 원문 그대로). 사용자는 샘플 받아 재업로드/3열 수동매핑·로컬 실행을 연습 가능. 실제 GitHub 모듈 V8 Blob 7/7 PASS, Node/Playwright 회귀 소스 추가, 전체 릴리스/실 Chromium·Windows QA는 **NOT_RUN**. `main`·`backend` 병합/판매/배포 금지, 2026-11-07 개발 목표 유지.
 
 > **최신 2026-10-26 실행 범위 UX 정리:** 사장님 SELF 10종 중 로컬 CSV 업로드·변환·합성 예제가 실제 가능한 것은 **엑셀·CSV 통합, 매출 집계·보고서 2종만**. 나머지 **8종 가이드 전용**에서는 CSV 업로드/매핑 UI를 숨기고 안내 문구+JSON/AI 구축 가이드만 제공. GitHub 실제 제품 모듈의 격리 V8 28/28 PASS, Node VM·브라우저 회귀 소스 추가, README의 오래된 1/9 설명도 2/8로 수정. **최신 Native 전체 릴리스/실 Chromium·Windows Edge는 미실행**, 출고·판매/배포·main 병합 미승인.
