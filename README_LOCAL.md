@@ -30,6 +30,14 @@
 5. 합성 자료 `examples/SMAX_SELF_SAMPLE.csv`, 안내문 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`, 빌드 설명 `docs/OFFLINE_SELF_PACKAGE_20261025.md` 참고.
 6. HTML 안에는 실행 JS가 그대로 포함된다. 저작권/사용권 통제나 무단복제 방지는 현재 구현되지 않음. 공개용 Cloudflare에 이 패키지/유료 `site/`를 올리지 말 것.
 
+## 단일 명령 로컬 출고 점검 (Windows·macOS·Linux 개발자용)
+
+- **`npm run qa:release`** 한 명령으로 Node 전체 테스트(`node --test`) → `dist/SMAX_SELF_OFFLINE.html` 오프라인 HTML 생성 → SHA-256 CSP·공개/유료 경계·합성 CSV 4행/검토 2행 확인.
+- 결과물: `dist/SELF_QA_REPORT.json`. 검사 실패 시 `status: FAIL`로 기록하며 명령 종료 코드가 1이 된다. `LOCAL_NODE_PASS_BROWSER_NOT_TESTED` 상태도 **Windows·실브라우저 검증 및 판매 승인과는 별개**다.
+- Windows 경로에 `/`을 강제하던 기존 문제를 고쳐 `dirname(out)`으로 검사한다. 전체 테스트도 Windows 셸 와일드카드에 의존하지 않고 `node --test` 자동 검색을 사용한다.
+- 실제 고객 판매 전에는 추가로 `npm run qa:browser` 또는 Windows Edge `python scripts/qa_browser.py --channel msedge` 실검증 기록이 있어야 한다. 전산 정책이 브라우저 실행을 차단하면 `BLOCKED`로 처리하고 완료라고 표시하지 않는다.
+- `dist/`는 비공개 개발 산출물로 GitHub와 Cloudflare 공개 위치에 올리지 않는다. 자동 검사 결과는 판매 승인·라이선스·고객 지원 조건을 대신하지 않는다.
+
 ## 실제 Chromium/Edge 오프라인 E2E — 개발자 전용 검수
 
 - 필수 선수조건: `npm test && npm run build:self`; 생성 산출물은 Private 로컬에서만 다룬다.
