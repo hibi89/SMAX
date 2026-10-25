@@ -8,3 +8,21 @@ test('no results on unrelated input',()=>{assert.equal(searchTemplates('외계�
 test('quote and multiline CSV parsing',()=>{assert.deepEqual(parseCsv('이름,설명\n"하나,둘","줄1\n줄2"').rows[0],['하나,둘','줄1\n줄2']);assert.throws(()=>parseCsv('x\n"a'))});
 test('field mapping only clear exact aliases',()=>{const m=suggestFieldMap(['거래날짜','상품명','금액'],templates[0]);assert.equal(m.date.selected,'거래날짜');assert.equal(m.item.selected,'상품명');assert.equal(m.amount.selected,'금액')});
 test('unanswered questions block completion',()=>{const b=buildBlueprint(templates[0]);assert.equal(b.state,'NEEDS_REVIEW');assert.ok(buildHandoff(templates[0],b).includes('미확정'))});
+
+test('CSV upload inspection rejects malformed syntax, duplicate headers and wrong record widths before mapping',()=>{
+  for(const [source, reason] of [
+    ['날짜,품목,금액\n2026-01-01,볼"펜,100', /따옴표/],
+    ['날짜,품목,금액\n2026-01-01,"볼펜"잔여,100', /닫힌 따옴표/],
+    ['날짜,품목,금액\n2026-01-01,볼펜', /열 개수/],
+    ['날짜,날짜,금액\n2026-01-01,볼펜,100', /중복된 CSV 열/],
+    ['날짜,,금액\n2026-01-01,볼펜,100', /빈 열/],
+    ['날짜,품목,금액\n2026-01-01,볼펜,100\n\n', /열 개수/]
+  ]) assert.throws(()=>parseCsv(source),reason);
+});
+test('CSV upload inspection preserves BOM, CRLF, empty field records and multiline quoted cells',()=>{
+  const parsed=parseCsv('\uFEFF날짜,품목,금액\r\n2026-01-01,"세트, A",100\r\n,,\r\n2026-01-02,"줄1\n줄2",200\r\n');
+  assert.deepEqual(parsed.headers,['날짜','품목','금액']);
+  assert.equal(parsed.rows.length,3,'must not silently discard an empty-valued source record');
+  assert.deepEqual(parsed.rows[1],['','','']);
+  assert.equal(parsed.rows[2][1],'줄1\n줄2');
+});
