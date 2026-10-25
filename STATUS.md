@@ -53,3 +53,10 @@
 - 디자인 스킬 후보: `frontend-design` / `web-design-guidelines` / `design.md`, 애니메이션 Motion/Aceternity 참고. 교사에게 배운 정확한 이름은 미확인.
 - Vercel Hobby는 개인·비상업용으로 공식 판매/마케팅 배포 불가. **Vercel Pro(유료, 미승인)** 혹은 **Cloudflare 무료 정적 사이트(상업용 가능성·이용약관 별도 점검)** 비교.
 - `SMAX`가 GitHub 기준 이름. 사용자의 구술 `SMEX`는 브랜드 변경 확정으로 해석하지 않음. 현재 홈페이지/도메인/이메일/마켓/영상/공개 배포/결제 **모두 미구현**, 사용자 승인 대기.
+
+## 2026-10-25 KST — 브랜치 2개 신설·Cloudflare 선택 확인
+- **원격 GitHub에서 확인:** `main`(기존), `backend`(신설), `frontend`(신설). 생성 시 둘 다 `main@6562f8e20594ee031a4b06bf6f55019abd57cfc2`에서 출발했으며 각 헤드 조회 확인. Private.
+- **분담 확정:** SMAX 사용자+GPT-6 공동 총괄. GPT-6가 백엔드 로컬 엔진 담당, 프론트/쇼룸은 사용자 디자인 주도+GPT-6 구현 협업.
+- **Cloudflare 확정:** 공식 브랜드 쇼룸의 정적 호스팅으로 선택. 계정/프로젝트/실제 Production 생성·배포 **미실행**, 공개 승인·도메인·금전 집행 승인과는 구분.
+- 백엔드 예상 **집중 4~6일**, 3개 해커톤과 같은 날 병행 시 **달력 7~10일 가설**. 테스트, API 비용, 데이터/고객, 출시, 라이선스는 미검증. **개발 코드 착수는 아직 하지 않았고 14일 제한 시작일 미확정**.
+- 기획 상세: [docs/BRANCH_AND_BACKEND_PLAN_20261025.md](docs/BRANCH_AND_BACKEND_PLAN_20261025.md).
