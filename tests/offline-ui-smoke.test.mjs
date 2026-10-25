@@ -13,7 +13,7 @@ function offlineFixture() {
   const html=bundleOfflineSelf({
     html:read('index.html'),
     css:read('styles.css'),
-    modules:['templates.mjs','core.mjs','csv-transform.mjs','app.mjs'].map(read)
+    modules:['templates.mjs','core.mjs','csv-transform.mjs','sales-report.mjs','app.mjs'].map(read)
   });
   const script=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script,'offline bundle must contain inline JavaScript');
