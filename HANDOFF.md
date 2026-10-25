@@ -282,3 +282,16 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **보안·비용·원본 보존:** 실제 고객 CSV/신원/키 수신 0. 합성 테스트 데이터. 공개 `public-site/`와 PRIVATE `site/` 분리 유지, dist git 제외. 비용 지출·외부 시스템 쓰기 없음.
 9. **다음 구체작업:** 승인된 환경에서 frontend 전체 `npm run qa:release` 실제 Node PASS 및 HTML SHA 확보 → Windows Edge/Chrome `file://`에서 CSV 다운로드·한글·오류 검토 E2E PASS → 정확한 판매 기능·지원 범위 확정 → 창업자 승인 후 main 안전 통합/크몽 등록. 환경 제약이면 허위 완료 대신 차단을 기록하고 가능한 소스 리뷰 및 추가 안전성 테스트 실시.
 10. **KST 일시·검증 범위:** 2026-10-25, 원격 파일 해시가 일치한 로컬 Node 테스트 12건/14건을 별도 실행 확인. 전체 제품 출시/실사용 QA는 아직 아님.
+
+
+## 2026-10-25 KST — 스총 실행 9 / 합쳐진 HTML 프로그램 통합 회귀 추가 (최신 10항)
+1. **목표:** 1차 사장님 SELF 출시 전 검증 게이트. 11월 7일은 마감 상한으로 빠르면 조기완료.
+2. **변경:** `tests/offline-ui-smoke.test.mjs` 신규 Node VM smoke 4검사, `scripts/qa-release.mjs` 필수 파일 등록. 기존 `tests/csv-ui.test.mjs`는 원래 app ESM UI 검사이고 신규 smoke는 **최종 단일 HTML에 번들된 실제 앱 코드**를 대상으로 한다.
+3. **테스트 근거:** 실제 GitHub 소스를 V8 isolate의 모의 Node/DOM 함수에 주입해 4/4 로직 PASS. 원격 smoke test 최종 Git blob `0289beb9f77d2ae8416cdda7f4a6226317cbe69e`. 최초 window 미정의 에러는 테스트 fixture 누락으로 판별·수정. 별도 실제 로컬 Node 22.16.0 실행으로 GitHub 블롭 일치 CSV 13/13 PASS. 신규 smoke `node --test` 실실행 및 전체 frontend native Node QA는 아직 미검증.
+4. **완료/미완:** offline JS 패키지 생성 함수·실행 통합 시나리오 4종 코드 작성과 V8 모의 검증 완료. 실제 고객 HTML 산출물과 Windows Edge/Chrome file:// QA/크몽 판매 승인 미완.
+5. **차단/오류:** Private GitHub 직접 clone DNS/가상 Chrome 관리자차단, GitHub Actions 1회 job steps 없는 failure. 동일 실패 방식 반복 금지, 실제 접근 가능한 Windows 환경에서 `QA_SELF_WINDOWS.cmd` 실행이 대안.
+6. **저장소/커밋:** Private `hibi89/SMAX` `frontend`. smoke 최초 `5c5b753f1706eeddeaa60cfb17b456ec457fb074`, fixture window 수리 `55299c41623e68e9c81215b7aee1302bc263770b`, 추가 race/formula 테스트 `06dd18fe518e95590c3e593feeb456748aeb083d`, release 필수 테스트 추가 `b77cc9298f7e5a386b3f22929848af673dd4d9ac`. 최신 HEAD는 이 HANDOFF 커밋 뒤 원격 재조회.
+7. **Production/명령:** Production URL/Cloudflare 공개/크몽 상품 없음. `npm run qa:release`는 Node 전체 테스트+생성+SHA/CSP 샘플검사. `python scripts/qa_browser.py --channel msedge`는 Windows 개발자 QA. 구매자 Node/Playwright 설치 미요구가 목표.
+8. **보안/원본/비용:** 기존 브랜치 보호, Git SHA 기반 이력, `public-site/`만 공개 후보, `site/` PRIVATE, `dist/` Git 무시. 실제 계정/PII 사용·전송 없음, 비용 지출/강제 푸시 없음.
+9. **다음 1순위:** 최신 Private frontend의 전체 native `npm test`/실 `npm run build:self` 실행 환경 확보·실 SHA/파일 크기/로그 증빙 → Windows Edge 실기기 파일입력·다운로드·네트워크 검증 → 상품 설명/지원/환불 확정·창업자 승인 후 main 안전통합/크몽 등록.
+10. **기준:** 2026-10-25 KST, remote GitHub source + V8 모의 Node 통합 4개/실 CSV Node 13개. 출시 승인/판매 가능 판정 전.
