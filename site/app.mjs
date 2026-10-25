@@ -5,13 +5,13 @@ import {buildSalesReport} from "./sales-report.mjs";
 const root=document.getElementById("work-area");
 const $=sel=>document.querySelector(sel);
 const categories=["전체",...new Set(templates.map(t=>t.category))];
-const state={tab:"templates",category:"전체",query:"",selected:null,answers:{},headers:[],mappings:{},searchTerm:"",fileMessage:"",csvSource:null,csvName:"",csvPreview:null,csvError:"",salesPreview:null,salesError:"",salesPeriod:"daily",csvGeneration:0};
+const state={tab:"templates",category:"전체",query:"",selected:null,answers:{},headers:[],mappings:{},searchTerm:"",fileMessage:"",csvSource:null,csvName:"",csvPreview:null,csvError:"",salesPreview:null,salesError:"",salesPeriod:"daily",csvGeneration:0,demoMode:false};
 const sampleCsvByTemplate={"spreadsheet":{"name":"SMAX_DEMO_SPREADSHEET.csv","source":"거래날짜,품목,결제금액\n2026/10/24,연필,\"₩1,200원\"\n2026-10-25,공책,3500\n2026-10-25,공책,3500\n2026-02-30,리필,미확인\n","mapping":{"date":"거래날짜","item":"품목","amount":"결제금액"}},"sales":{"name":"SMAX_DEMO_SALES.csv","source":"판매일,판매처,판매액\r\n2026-10-01,온라인,100\r\n2026-10-01,온라인,100\r\n2026-10-02,매장,-20.10\r\n2026-02-30,매장,9\r\n2026-10-03,=1+1,4\r\n","mapping":{"date":"판매일","channel":"판매처","amount":"판매액"}}};
 const icons={spreadsheet:"↗",inventory:"◫",faq:"◇",sales:"▥",email:"✉",rag:"▤",quote:"▧",booking:"◷",web:"◎",reviews:"♡"};
 const h=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const getTemplate=()=>templates.find(t=>t.id===state.selected);
 const toast=msg=>{const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__smaxToast);window.__smaxToast=setTimeout(()=>t.classList.remove("show"),2800)};
-function forgetCsv({preservePeriod=false}={}){state.csvGeneration++;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";if(!preservePeriod)state.salesPeriod="daily";state.headers=[];state.mappings={};state.fileMessage=""}
+function forgetCsv({preservePeriod=false}={}){state.csvGeneration++;state.demoMode=false;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";if(!preservePeriod)state.salesPeriod="daily";state.headers=[];state.mappings={};state.fileMessage=""}
 function updateSalesPeriodFromAnswer(answer){
   if(answer!=="일별"&&answer!=="월별")return false;
   state.salesPeriod=answer==="월별"?"monthly":"daily";
@@ -85,7 +85,7 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
   forgetCsv({preservePeriod:true});
   try{
     const csv=parseCsv(sample.source);
-    state.csvSource=sample.source;state.csvName=sample.name;state.headers=csv.headers;
+    state.csvSource=sample.source;state.csvName=sample.name;state.headers=csv.headers;state.demoMode=true;
     state.mappings={...sample.mapping}; // Preset mappings apply ONLY to synthetic demo data.
     if(t.id==="spreadsheet")state.csvPreview=normalizeSpreadsheetCsv(sample.source,state.mappings);
     else state.salesPreview=buildSalesReport(sample.source,state.mappings,{period:state.salesPeriod});
@@ -102,7 +102,7 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
   render();
 }else if(action==="download-csv"){
   if(getTemplate()?.id!=="spreadsheet"||!state.csvPreview)return;
-  download("SMAX_STANDARDIZED.csv",state.csvPreview.csv,"text/csv;charset=utf-8");
+  download(state.demoMode?"SMAX_DEMO_STANDARDIZED.csv":"SMAX_STANDARDIZED.csv",state.csvPreview.csv,"text/csv;charset=utf-8");
 }else if(action==="run-sales"){
   if(getTemplate()?.id!=="sales")return;
   state.salesPreview=null;state.salesError="";
@@ -113,10 +113,10 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
   render();
 }else if(action==="download-sales-report"){
   if(getTemplate()?.id!=="sales"||!state.salesPreview)return;
-  download("SMAX_SALES_REPORT.csv",state.salesPreview.reportCsv,"text/csv;charset=utf-8");
+  download(state.demoMode?"SMAX_DEMO_SALES_REPORT.csv":"SMAX_SALES_REPORT.csv",state.salesPreview.reportCsv,"text/csv;charset=utf-8");
 }else if(action==="download-sales-review"){
   if(getTemplate()?.id!=="sales"||!state.salesPreview)return;
-  download("SMAX_SALES_REVIEW_ROWS.csv",state.salesPreview.reviewCsv,"text/csv;charset=utf-8");
+  download(state.demoMode?"SMAX_DEMO_SALES_REVIEW_ROWS.csv":"SMAX_SALES_REVIEW_ROWS.csv",state.salesPreview.reviewCsv,"text/csv;charset=utf-8");
 }else if(action==="download-json"||action==="download-guide"){const t=getTemplate();if(!t)return;const b=buildBlueprint(t,state.answers,state.mappings);if(action==="download-json")download("AX_BLUEPRINT_"+t.id+".json",JSON.stringify(b,null,2),"application/json;charset=utf-8");else download("AI_BUILD_PROMPT_"+t.id+".md",buildHandoff(t,b),"text/markdown;charset=utf-8")}});
 function sendChat(){const input=$("#chat-input");const msg=input&&input.value.trim();if(!msg)return;if(!state.selected){state.searchTerm=msg.slice(0,280)}else{const t=getTemplate(),next=t.questions.find(q=>!state.answers[q.key]);if(next){if(t.id==="sales"&&next.key==="period"&&!updateSalesPeriodFromAnswer(msg)){toast("매출 집계는 일별 또는 월별만 지원합니다.");return;}state.answers[next.key]=msg.slice(0,280);}else{toast("기본 질문은 완료됐습니다. 다른 업무는 '다른 작업'을 선택하세요.");return}}render()}
 document.addEventListener("input",event=>{if(event.target.id==="template-search"){const pos=event.target.selectionStart;state.query=event.target.value.slice(0,120);render();const box=$("#template-search");if(box){box.focus();box.setSelectionRange(pos,pos)}}});
