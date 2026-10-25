@@ -10,3 +10,7 @@
 .csv-table th,.csv-table td{padding:10px 9px;border-bottom:1px solid var(--stroke);vertical-align:top;max-width:220px;overflow-wrap:anywhere;white-space:pre-wrap}
 .csv-table th{position:sticky;top:0;background:var(--panel);color:var(--lime);font-weight:700}
 .csv-table tr:last-child td{border-bottom:0}
+
+/* Three-line logo lockup from verified main branch. */
+.brand-subname{display:block;margin-top:3px;color:var(--mint);font-size:10px;font-weight:800;letter-spacing:2px;line-height:1.4}
+.brand-tagline{display:block;margin-top:1px;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.15px;line-height:1.45}
