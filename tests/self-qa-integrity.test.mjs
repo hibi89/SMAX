@@ -16,7 +16,7 @@ function fixture(overrides={}, body='<html>synthetic offline fixture</html>') {
     status:'LOCAL_NODE_PASS_BROWSER_NOT_TESTED',
     sha256:createHash('sha256').update(buffer).digest('hex'),
     bytes:buffer.length,
-    verification:{allNodeTests:'PASS', offlineBuild:'PASS', publicPrivateBoundary:'PASS', cssAndScriptCsp:'PASS'},
+    verification:{allNodeTests:'PASS', offlineBuild:'PASS', publicPrivateBoundary:'PASS', cssAndScriptCsp:'PASS', syntheticCsv4Rows2Review:'PASS', syntheticSales5Rows3Review:'PASS'},
     ...overrides
   };
   writeFileSync(report, JSON.stringify(data), 'utf8');
@@ -60,4 +60,16 @@ test('missing or corrupt report cannot pass',()=>{
     writeFileSync(f.report,'{broken');
     assert.throws(()=>verifySelfQaArtifact(f.html,f.report),SyntaxError);
   }finally{f.close();}
+});
+
+test('older QA report without sales fixture proof cannot reach browser PASS',()=>{
+  const f=fixture({verification:{allNodeTests:'PASS',offlineBuild:'PASS',publicPrivateBoundary:'PASS',cssAndScriptCsp:'PASS',syntheticCsv4Rows2Review:'PASS'}});
+  try{assert.throws(()=>verifySelfQaArtifact(f.html,f.report),/not a passing/);}
+  finally{f.close();}
+});
+
+test('older QA report without original CSV fixture proof is also rejected',()=>{
+  const f=fixture({verification:{allNodeTests:'PASS',offlineBuild:'PASS',publicPrivateBoundary:'PASS',cssAndScriptCsp:'PASS',syntheticSales5Rows3Review:'PASS'}});
+  try{assert.throws(()=>verifySelfQaArtifact(f.html,f.report),/not a passing/);}
+  finally{f.close();}
 });
