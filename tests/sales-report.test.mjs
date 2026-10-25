@@ -69,3 +69,18 @@ test('no input mutation and no implicit deduplication of different amounts',()=>
  assert.equal(r.summary.netAmount,'3.00');
  assert.deepEqual(m,mapping);
 });
+
+test('two distinct order IDs with the same amount are both included; exact repetition is reviewed', () => {
+  const source = '판매일,판매처,판매액,주문번호\n'
+    + '2026-10-01,온라인,100,ORDER-A\n'
+    + '2026-10-01,온라인,100,ORDER-B\n'
+    + '2026-10-01,온라인,100,ORDER-B';
+  const r = buildSalesReport(source, mapping, {period:'daily'});
+  assert.equal(r.summary.sourceRows, 3);
+  assert.equal(r.summary.includedRows, 2);
+  assert.equal(r.summary.excludedRows, 1);
+  assert.equal(r.summary.netAmount, '200.00');
+  assert.deepEqual(r.excluded, [{sourceRecord:'4', reason:'DUPLICATE'}]);
+  assert.equal(r.groups.length, 1);
+  assert.equal(r.groups[0].rows, 2);
+});
