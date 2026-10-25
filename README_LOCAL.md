@@ -1,3 +1,5 @@
+> **최신 QA 판정 (2026-10-25 KST):** GitHub `frontend` 원격 SHA 확인본 20파일을 격리 Linux Node 22.23.4에서 직접 `node --test` → **33 PASS/0 FAIL**, `npm run qa:release` → **exit 0**. 생성 HTML은 **73,341 bytes / SHA-256 `093d1c8bff820369b664007fbecdd252a387b6cf354398247c754fb59b680563`**이며 재빌드 결과 동일. 상세 증거 `docs/QA_FULL_NODE_AND_OFFLINE_BUILD_20261025.md`. 이 문서 아래에 과거 '전체 Node 미검증' 문구가 있더라도 현재는 이 결과가 우선함. **Windows Edge/Chrome 실기기 E2E 및 판매 승인만 미완료**.
+
 # SMAX D1 — local-first prototype
 
 2026-10-25 첫 구현. 개발 상한: 2026-11-07.
