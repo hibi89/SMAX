@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {templates} from '../site/templates.mjs';
+import {searchTemplates,parseCsv,buildBlueprint,buildHandoff,suggestFieldMap} from '../site/core.mjs';
+test('catalog has 10 distinct templates',()=>{assert.equal(templates.length,10);assert.equal(new Set(templates.map(x=>x.id)).size,10)});
+test('colloquial Korean matching',()=>{for(const [s,id] of [['메일로 엑셀 오면 자동 폴더 저장','email'],['손님 질문이 매일 비슷해서 귀찮아','faq'],['매일 재고와 발주 수량 확인','inventory'],['우리회사 규정 물어보면 답해줘','rag']])assert.equal(searchTemplates(s,templates)[0].template.id,id,s)});
+test('no results on unrelated input',()=>{assert.equal(searchTemplates('외계선박 추진연구',templates).length,0)});
+test('quote and multiline CSV parsing',()=>{assert.deepEqual(parseCsv('이름,설명\n"하나,둘","줄1\n줄2"').rows[0],['하나,둘','줄1\n줄2']);assert.throws(()=>parseCsv('x\n"a'))});
+test('field mapping only clear exact aliases',()=>{const m=suggestFieldMap(['거래날짜','상품명','금액'],templates[0]);assert.equal(m.date.selected,'거래날짜');assert.equal(m.item.selected,'상품명');assert.equal(m.amount.selected,'금액')});
+test('unanswered questions block completion',()=>{const b=buildBlueprint(templates[0]);assert.equal(b.state,'NEEDS_REVIEW');assert.ok(buildHandoff(templates[0],b).includes('미확정'))});
