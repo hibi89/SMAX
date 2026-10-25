@@ -615,3 +615,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **다음 릴리스 게이트:** 동일 최신 `frontend` full checkout → `npm run qa:release` Node exit0·오프라인 HTML SHA/CSP → `npm run qa:browser:node` Chromium `file://` → Windows `QA_SELF_WINDOWS.cmd /edge`. 사용자 별도 승인 전 main 통합·공개/크몽 등록 금지.
 9. **프로젝트:** Private `hibi89/SMAX`; SELF 2종 로컬 CSV 실행 + 가이드 전용 8종. RAG Studio/SMAX/SOVIA 장기 통합 기획은 main 문서 별도, 이번 판매 범위 불변. 개발 목표 **2026-11-07**.
 10. **재개:** 다른 채팅 `[SMAX² 스총] GitHub hibi89/SMAX 최신 레포지토리 확인하고 총괄 작업 이어가셈` 또는 `ㄱ` → 실제 브랜치 HEAD 및 각 `STATUS.md`/`HANDOFF.md` 재조회 후 안전한 다음 P0 진행. 문서 마지막 커밋 뒤 HEAD 반드시 재확인.
+
+## 2026-10-26 KST — 스총 최신 인계: 사용자 Windows QA 로그 기반 EOL 테스트 수정
+1. **현재 목적:** user `ㄱ` 실행 흐름에서 첫 **실제 사용자 PC `npm run qa:release`** 로그가 첨부됨. GitHub private `frontend` 클론 후 Node 전체 테스트: 86건 중 84건 PASS/2건 FAIL; exit1. 최초 Windows 릴리스 검증 근거를 앞선 격리 V8과 구분할 것.
+2. **실패 두 개·원인:** `tests/demo-fixture-contract.test.mjs` 및 `tests/offline-ui-smoke.test.mjs`. Embedded `spreadsheet` CSV 원문 LF와 Windows Git checkout된 `examples/SMAX_SELF_SAMPLE.csv` CRLF 비교 불일치. 같은 샘플의 두 검사이므로 두 개의 독립 제품 결함이 아니다. 제품 CSV/매출 변환 테스트는 로그상 PASS.
+3. **실제 수정:** `frontend/tests/demo-fixture-contract.test.mjs` 양쪽 CSV 문자열에서 `\r\n`만 `\n`으로 변환한 후 전체 비교(commit `b9715c79b8355b8977f795374224c1b17d490db1`); `frontend/tests/offline-ui-smoke.test.mjs` BOM 포함 실 다운로드/기준파일 동일 방식 적용(commit `36d9a73f215fd15517c40a89bc41c46e509b0489`). 테스트는 여전히 필드/레코드/내용 drift를 실패 처리한다. 제품 `site/` 및 원본 fixture 파일 **전혀 수정하지 않음**.
+4. **검증 범위:** 최신 GitHub 변경 테스트 코드를 다시 읽은 뒤 실제 embedded demo와 Git blob LF 및 **시뮬레이션된 Windows CRLF**의 비교, BOM 포함 다운로드, 금액 등 내용 수정/행 삭제 차단 확인 **10/10 V8 PASS**. 최신 전체 Native Node 테스트 86/86, 실제 새 HTML SHA/CSP, 브라우저 검사는 수정 후 재실행 전이므로 **미검증**.
+5. **사용자 PC 동작:** 사용자 현재 `C:\Users\haein\OneDrive\Desktop\SMAX_SELF_QA`의 PowerShell에서 `git pull --ff-only origin frontend` 다음 `npm run qa:release`만. 새로운 clone이나 `npm install`, 외부 배포/유료 API 작업 불필요. 명령 실패 시 출력 전문을 받고 원인 수정할 것.
+6. **출고 차단:** 84/86 실행은 fail이므로 성공으로 보고하거나 14일 프로젝트 종료로 처리 금지. release QA 통과 뒤 `dist/SMAX_SELF_OFFLINE.html` / `dist/SELF_QA_REPORT.json` 검증 후 `npm run qa:browser:node` 로 Chromium `file://` 검수; Windows Edge는 별도.
+7. **저장소 복구:** private `hibi89/SMAX`의 `frontend`만 2개 테스트·STATUS·HANDOFF 커밋. `main`, `backend` 무변경, 병합/리셋/force push 없음. 소스는 각 Git blob·기록으로 복구 가능.
+8. **프로젝트·실사용:** SELF 실행형 로컬 CSV 2종, 가이드 전용 8종. 출시 전 확인. UI 안내·원본주문 구분·화폐포맷 중복 보정은 앞선 인계대로 유지; 이번에 코어 변경 없음. 별도 RAG/SMAX 사업 main 전략/업무 자동화 범위를 확대하지 않음.
+9. **보안·비용/배포:** 실제 고객 CSV, 비밀키·토큰·결제/광고/Cloudflare/외부 통신 사용·금전 지출 없음. GitHub는 private, `public-site` 이외 소스 외부 공개 금지. 사용자 승인 전 상품 게시·배포·main 통합 금지.
+10. **기준·재개:** 2026-10-26 KST. 이 HANDOFF 커밋 직후 GitHub `frontend` 최신 HEAD를 조회. 개발 마감 **2026-11-07** 유지. 사용자가 새 실행 로그를 전달하면 현재 status와 이전 실제 Windows QA 증거를 비교 후 다음 게이트 수행.
