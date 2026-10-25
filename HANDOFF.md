@@ -675,3 +675,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **GitHub:** Private `hibi89/SMAX`; `frontend` 전용 수정, `main`/`backend` 무변경, 강제 push/merge/배포 없음. `STATUS.md` 최신 2026-10-26 전체 HTML LF 정규화 항목 포함. GitHub 이력/해시로 복구 가능.
 9. **데이터·비용·사용자 역할:** 고객 CSV/비밀키·고객 데이터 외부 전송/유료 API·Cloudflare 공개·상품 등록/과금 없음. 사용자가 반복 실PC 명령을 지시받은 것에 불편을 표명함; 총괄이 가능한 테스트/수정 먼저 진행하고, 마지막 수동 실기기 게이트에서만 1회 협조 요청. 지금 당장 사용자 작업 없음. SMAX² SELF 2 실행 템플릿 + 8 가이드, 출시 기준 유지. 개발 기한 **2026-11-07**.
 10. **새 채팅 재개:** `[SMAX² 스총] GitHub hibi89/SMAX 최신 레포지토리 확인하고 총괄 작업 이어가셈` 또는 `ㄱ`에서 실제 branch HEAD 및 `frontend/STATUS.md`/`frontend/HANDOFF.md`를 읽고 최신 테스트 경계 재확인. Native Node/Edge를 실행할 수 없으면 테스트 미실행 표기하고, 반복 사용자 시험 요구 없이 다른 독립적 코드·QA 작업으로 진행.
+
+## 2026-10-26 KST — 스총 인수: 매출 제외 거래 로컬 미리보기 5건 구현
+1. **이번 목표:** 이전 Windows Edge CSP/CSV fixture EOL 오류 수정·정규화 빌더가 현재 frontend에 유지되는지 HEAD 확인. 사용자에게 PC 명령을 반복 요구하지 않고 다음 유용한 P0를 수행: **매출 잠정 집계에서 제외된 거래의 원본번호/사유를 화면에 바로 노출**.
+2. **왜 필요한가:** 기존 `salesResultPanel`은 제외/검토 N건만 보여줘 사용자가 보고서 CSV를 내려받기 전에는 어떤 주문이 제외됐는지 확인 불가능. 별개 주문이 중복 의심으로 잠정 합계에서 빠질 수 있으므로 화면 설명이 중요.
+3. **구현:** `frontend/site/app.mjs` `salesResultPanel()`의 기존 `result.excluded`를 사용, 원본레코드·제외사유 최대5건만 `<table class="csv-table" aria-label="잠정 매출 제외 거래 검토">`로 표시. 출력에 `h()` escape 적용, 제외 0건이면 없음. 매출/CSV 코어 및 원본 자료 불변. commit `c3403ba3b08c3f18585f39502ea073fafb1460ee`.
+4. **전체 제외 CSV 보존:** 화면 미리보기는 5건 제한이나 기존 `download-sales-review`가 `SMAX_SALES_REVIEW_ROWS.csv`에 모든 제외 행과 원본 번호·사유를 그대로 기록. 문서에도 partial preview 주의 표시.
+5. **회귀:** `frontend/tests/offline-ui-smoke.test.mjs` 신규 정확한 테스트에서 합성 제외 3건 (원본번호3 DUPLICATE/5 INVALID_DATE/6 FORMULA_PROTECTED), 별도 8건 동일 주문 중 제외7건 ⇒ 화면5건/검토 CSV7건, 정상 2주문 제외0건 ⇒ 미리보기 없음, 잘못된 remapping ⇒ 이전 결과 제거 확인. Commit `0748e692427930a1324df7ee3e4d4fc3046f015d`.
+6. **실행 범위:** 최신 private GitHub 5개 생산 원문을 합친 V8 fake DOM/Blob에서 **신규 테스트 함수 원문을 실행해 PASS**. 이는 실제 Native Node `npm run qa:release`, Chromium/Windows Edge 실행 PASS가 아님.
+7. **실브라우저 검증 코드 추가:** `frontend/scripts/qa_browser.mjs`에 실 Edge 화면에서 합성 제외3건 및 사유3종을 직접 검사하는 단계 삽입(commit `0b089ea999bbbaca378e33d7796ac363033e45f7`). 자동 브라우저 전체를 실행한 건 아님. 고객 가이드 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` 5건 미리보기·전체 리뷰 CSV 안내(commit `9f53491eb2dca23d5f71f13e76ca48e59f13a5b7`).
+8. **현재 미해결:** latest full Windows Native Node 릴리스 QA/실 SHA+CSP/Edge `file://` E2E/수동 사용성/판매·배포 승인 미실행. 이전 Windows 86/86 PASS 및 Edge FAIL은 패치 적용 전 근거로만 보존. 보안정책 CSP `unsafe-inline` 열지 말 것. 사업 범위 SELF 실행 2종/가이드 8종 유지.
+9. **브랜치·비용:** Private `hibi89/SMAX` `frontend`의 코드·회귀·브라우저 QA·문서만. `main`과 `backend` 불변, 무단 병합·배포/결제·실고객 자료/외부 API 없음. 사용자에게 추가 Windows 명령 반복 요청하지 말 것. 마감 **2026-11-07**.
+10. **다음 `ㄱ`:** 세 브랜치 최신 HEAD 및 STATUS/HANDOFF 실제 조회. 코드 자체 결함·UI/안정성 보완을 우선. 최종 Windows Edge 실기기 QA가 불가피할 때까지 총괄이 가능한 독립 검증 진행. 실 브라우저 QA가 없다면 출고 PASS라고 하지 말 것.
