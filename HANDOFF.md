@@ -663,3 +663,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **GitHub:** Private `hibi89/SMAX`. `frontend` 코드+테스트+STATUS/HANDOFF만. `main`/ `backend` 불변, force push/병합 없음. `STATUS.md` 최신 섹션도 읽을 것. Git history로 복원 가능.
 9. **보안·사업:** SELF는 오프라인 CSV 2종 실행/8종 구축가이드 설계이며 외부 고객 데이터/키/API/공개 호스팅/결제/판매 없음. 개발 목표일 **2026-11-07**, 별도 고객인도/외부 공개 승인 여전히 NOT_GRANTED.
 10. **다음 `ㄱ`:** GitHub 3개 브랜치 HEAD 및 `frontend/STATUS.md`, `frontend/HANDOFF.md` 재조회. 가능하면 owner 실PC 불필요한 오프라인/격리 QA를 더 진행하고, 추가 결함을 코드·검사까지 수정. 환경상 Native Edge 불가 시 제한 고지. 실 PC 마지막 1회만 협력 요청하되 사용자가 실기기 테스트를 대신 반복하는 상태를 만들지 말 것.
+
+## 2026-10-26 KST — 스총 인수: 전체 오프라인 HTML LF 정규화·운영체제별 SHA 일치
+1. **실제 작업:** 최신 private GitHub `frontend`의 `scripts/build-self.mjs`, `site/index.html`, CSS, production JS 5개를 확인. 같은 소스라도 Windows CRLF 체크아웃에서는 HTML shell에 CR가 남아 Windows/Linux 오프라인 파일 bytes/SHA가 달라지는 문제를 격리 V8에서 재현했다. CSS·JS 이전 수정만으로는 전체 HTML 바이트 결정성이 보장되지 않았음.
+2. **설계·범위:** HTML shell도 `html.replace(/\\r\\n?/g,'\\n')`을 거쳐 인라인 CSS/JS와 같은 LF로 표준화. 실행 기능·UI·비즈니스 로직·보안 정책은 동일, 빌드 산출 bytes와 release SHA만 일관화. 신규 bundle 코드 커밋 `0bc57daa6aac25436dae7e7987b3643e5ec7e2a4`.
+3. **테스트:** `tests/offline-package.test.mjs` 신규 함수는 `site` 전체 HTML/CSS/5모듈을 원본 LF와 모의 Windows CRLF로 변환해 byte-identical output + digest equality + literal CR 0 + strict network CSP 확인. 커밋 `0fa03ac852ffab917b60a074663ca45bd10c0c66`.
+4. **출고 가드:** `scripts/qa-release.mjs`에 built HTML 전체 literal CR 거부 추가, SHA 보고서 생성 전에 `RELEASE_QA_FAILED` 처리. 커밋 `b9a840bc1b6ecb885500aeb340d0585432a91fa0`. `tests/windows-qa-contract.test.mjs`에서 source gate 필수 검사 `cc4f9cdf09194e2b7628e028e4056917f8c16750`. 기존 CSP CSS/JS CR 차단 및 SHA 비교 보존.
+5. **실제 확인 결과:** GitHub 최신 프로덕션 원문+빌더 V8 격리실행에서 LF checkout와 전체 CRLF checkout이 **동일 HTML 79,914문자, literal CR 0**. 방금 저장된 cross-platform test 본문 V8 PASS, release source gate 본문 V8 PASS. V8 해시는 deterministic adapter라 이 증거만으로 Native Node SHA/브라우저 실검수 통과를 주장하지 말 것.
+6. **이전 실패 맥락:** 실 Windows Node 86/86 PASS (이전 checkout) 및 Windows Edge FAIL (합성 다운로드 CSV EOL mismatch, CSS inline hash CRLF mismatch). 전 턴에 두 원인 및 browser computedStyle gate/회귀를 수정. 이번에는 Windows/Linux **외부 HTML 셸**까지 추가 정규화. 원래 HTML 92,076B SHA `884f004f45c5bbd7cafdaf744f1dfa8d6c7970e94a8bc31a4ecaa94a0b91227c`는 이전 빌드로, 신규 build SHA 아님.
+7. **현재 상태:** 최신 `frontend` Node 전체 `npm run qa:release`/real SHA/CSP/Windows Edge `QA_SELF_WINDOWS.cmd /edge`/Windows 수동 사용성 **NOT_RUN**. HTML 빌드·Edge 최종 QA/판매 승인 보류. 단순 V8 시험을 전체 배포 PASS와 혼동하지 않음.
+8. **GitHub:** Private `hibi89/SMAX`; `frontend` 전용 수정, `main`/`backend` 무변경, 강제 push/merge/배포 없음. `STATUS.md` 최신 2026-10-26 전체 HTML LF 정규화 항목 포함. GitHub 이력/해시로 복구 가능.
+9. **데이터·비용·사용자 역할:** 고객 CSV/비밀키·고객 데이터 외부 전송/유료 API·Cloudflare 공개·상품 등록/과금 없음. 사용자가 반복 실PC 명령을 지시받은 것에 불편을 표명함; 총괄이 가능한 테스트/수정 먼저 진행하고, 마지막 수동 실기기 게이트에서만 1회 협조 요청. 지금 당장 사용자 작업 없음. SMAX² SELF 2 실행 템플릿 + 8 가이드, 출시 기준 유지. 개발 기한 **2026-11-07**.
+10. **새 채팅 재개:** `[SMAX² 스총] GitHub hibi89/SMAX 최신 레포지토리 확인하고 총괄 작업 이어가셈` 또는 `ㄱ`에서 실제 branch HEAD 및 `frontend/STATUS.md`/`frontend/HANDOFF.md`를 읽고 최신 테스트 경계 재확인. Native Node/Edge를 실행할 수 없으면 테스트 미실행 표기하고, 반복 사용자 시험 요구 없이 다른 독립적 코드·QA 작업으로 진행.
