@@ -70,14 +70,14 @@ try {
     '2026-10-02,매장,-20.10',
     '2026-02-30,매장,9',
     '2026-10-03,=1+1,4'
-  ].join('\\r\\n');
+  ].join('\r\n');
   const sales = buildSalesReport(salesSample,
     {date:'판매일', channel:'판매처', amount:'판매액'}, {period:'daily'});
   requireCheck(sales.summary.sourceRows === 5 && sales.summary.includedRows === 2 &&
     sales.summary.excludedRows === 3, 'Sales release fixture inclusion/exclusion changed');
   requireCheck(sales.summary.netAmount === '79.90', 'Sales release fixture net amount changed');
-  requireCheck(sales.reportCsv.startsWith('\\uFEFF기간,') &&
-    sales.reviewCsv.startsWith('\\uFEFF원본레코드,'), 'Sales release fixture BOM missing');
+  requireCheck(sales.reportCsv.startsWith('\uFEFF기간,') &&
+    sales.reviewCsv.startsWith('\uFEFF원본레코드,'), 'Sales release fixture BOM missing');
   for (const flag of ['DUPLICATE','INVALID_DATE','FORMULA_PROTECTED']) {
     requireCheck(sales.reviewCsv.includes(flag), 'Sales release fixture lost review flag: '+flag);
   }
