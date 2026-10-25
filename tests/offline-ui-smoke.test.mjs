@@ -593,8 +593,13 @@ test('eight guide-only templates accept local field-name annotations in blueprin
     env.click('download-json');
     let blueprint=JSON.parse(env.blobs.at(-1).parts[0]);
     assert.equal(blueprint.fields.find(f=>f.standardField===field)?.sourceColumn,custom,id);
+    assert.equal(blueprint.guideOnly,true,id);
+    assert.equal(blueprint.state,'NEEDS_REVIEW',id);
+    assert.equal(blueprint.fields.find(f=>f.standardField===field)?.needsReview,true,id);
+    assert.equal(blueprint.fields.find(f=>f.standardField===field)?.fieldVerification,'UNVERIFIED_MANUAL_FIELD_NAME',id);
     env.click('download-guide');
     assert.match(env.blobs.at(-1).parts[0],new RegExp(custom));
+    assert.match(env.blobs.at(-1).parts[0],/미검증 설계 항목명/);
   }
   // XSS-like labels must not be interpreted as HTML; no persistent cross-template fields.
   env.click('select',{id:'faq'});
