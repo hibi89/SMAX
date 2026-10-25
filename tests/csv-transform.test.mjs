@@ -135,7 +135,7 @@ test('monetarily equivalent representations share a duplicate key without alteri
   assert.deepEqual(r.rows.map(row=>row[2]),[
     '100','100.00','0100','100','100.01','0','-0.00'
   ],'currency display representation is never rewritten just for duplicate checks');
-  assert.match(r.reviewCsv,/DUPLICATE/);
+  assert.equal(r.rows.filter(row=>row[5].includes('DUPLICATE')).length,4);
 });
 
 test('different order IDs preserve separate valid transactions even for equivalent money',()=>{
