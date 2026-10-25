@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="SMAX² Square 사장님 광장 — 쉬운 AX 템플릿과 업무 자동화 학습. 제품 준비 중.">
+<meta name="theme-color" content="#071625">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'none'; script-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>SMAX² SQUARE | 함께 만드는 AX광장</title>
+<style>
+:root{color-scheme:dark;--bg:#071625;--panel:#102538;--stroke:#284051;--ink:#ebf6f3;--muted:#a2bac2;--accent:#b6ec98;--aqua:#81d8c8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);background:radial-gradient(ellipse at 80% 5%,#1c3c48 0,transparent 37%),var(--bg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.65}
+a{color:inherit}a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.shell{width:min(1140px,calc(100% - 40px));margin:auto}
+header{padding:22px 0;display:flex;justify-content:space-between;align-items:center;gap:20px;border-bottom:1px solid var(--stroke)}
+.brand{text-decoration:none;display:inline-grid;line-height:1.12;gap:5px}.mark{font-size:30px;letter-spacing:-1.4px;font-weight:900;color:var(--accent)}.brand strong{font-size:12px;letter-spacing:1.5px}.brand small{font-size:11px;color:var(--muted)}
+nav{display:flex;align-items:center;gap:22px}nav a{font-size:13px;text-decoration:none;color:#d5e6e9}nav a:hover{color:var(--accent)}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:45px;padding:92px 0 86px}
+.eyebrow{font-size:12px;letter-spacing:2px;font-weight:750;color:var(--aqua)}
+h1{font-size:clamp(37px,4.3vw,66px);line-height:1.22;letter-spacing:-2.5px;margin:25px 0 23px}
+h1 em{font-style:normal;color:var(--accent)}
+.lead{color:#bfced3;font-size:15px;max-width:570px;line-height:1.95}
+.button{display:inline-block;margin-top:20px;padding:14px 20px;background:var(--accent);border-radius:10px;color:#123020;font-size:13px;font-weight:900;text-decoration:none}
+.fine{font-size:12px;color:var(--muted);margin-top:20px}
+.visual{padding:25px;border:1px solid #365768;background:linear-gradient(145deg,#153344,#102637);border-radius:22px;box-shadow:0 25px 70px #0005}
+.visual-head{display:flex;justify-content:space-between;color:var(--aqua);font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:25px}
+.step{border:1px solid #38576a;border-radius:12px;padding:17px 18px;margin:10px 0;background:#112b3c}
+.step b{color:var(--accent);font-size:11px;margin-right:12px}
+.step span{font-size:14px;font-weight:750}.step small{display:block;color:var(--muted);font-size:11px;margin-left:36px}
+.line{text-align:center;color:var(--aqua);line-height:1}
+.foot{font-size:10px;color:var(--muted);margin-top:18px}
+section.catalog{padding:80px 0;border-top:1px solid var(--stroke)}
+.kicker{color:var(--aqua);letter-spacing:2px;font-size:11px;font-weight:900}
+h2{font-size:clamp(26px,3vw,38px);margin:10px 0 12px;line-height:1.3;letter-spacing:-.8px}
+.section-note{color:var(--muted);font-size:13px;max-width:740px}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-top:32px}
+.card{border:1px solid var(--stroke);border-radius:14px;background:var(--panel);padding:21px 17px;min-height:165px}
+.card .no{font-size:11px;font-weight:800;color:var(--aqua)}
+.card h3{font-size:15px;line-height:1.45;margin:16px 0 11px}
+.card p{font-size:11px;color:var(--muted);margin:0}
+.section-band{border-top:1px solid var(--stroke);padding:75px 0}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.feature{padding:25px;border:1px solid var(--stroke);border-radius:15px;background:#102535}
+.feature b{font-size:14px}.feature p{font-size:12px;color:var(--muted)}
+.notice{margin:28px 0 0;padding:21px 24px;border-left:3px solid var(--accent);background:#143028}
+.notice b{font-size:14px}.notice p{font-size:12px;color:#bfd4c7;margin-bottom:0}
+footer{padding:25px 0 36px;border-top:1px solid var(--stroke);display:flex;justify-content:space-between;gap:20px;font-size:11px;color:var(--muted)}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(3,1fr)}.hero{gap:30px}}
+@media(max-width:700px){header{align-items:flex-start}nav{flex-wrap:wrap;justify-content:end;gap:10px}.hero{grid-template-columns:1fr;padding:55px 0}.cards{grid-template-columns:repeat(2,1fr)}.features{grid-template-columns:1fr}h1{letter-spacing:-1.4px}}
+@media(max-width:390px){.cards{grid-template-columns:1fr}.visual{padding:17px}nav{font-size:11px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+<a href="#top" class="brand" aria-label="SMAX Square 첫 화면"><span class="mark">SMAX²</span><strong>SMAX SQUARE</strong><small>함께 만드는 AX광장</small></a>
+<nav aria-label="메인 메뉴"><a href="#templates">템플릿</a><a href="#method">이용 방법</a><a href="#product">상품 안내</a></nav>
+</header>
+<main id="top">
+<section class="hero" aria-labelledby="hero-title">
+<div><span class="eyebrow">SMAX² · 사장님 광장</span><h1 id="hero-title">어려웠던 업무 자동화,<br><em>내 손으로 시작합니다.</em></h1><p class="lead">반복 업무를 정리하고, 필요한 절차를 직접 이해해 보세요. SMAX² Square는 소상공인도 부담을 줄이며 AX를 배우고 활용할 수 있도록 준비하는 셀프형 도구입니다.</p><a class="button" href="#templates">10종 템플릿 살펴보기</a><p class="fine">현재 개발·검증 중인 프로젝트입니다. 이 페이지에서 구매·회원가입·파일 업로드는 제공하지 않습니다.</p></div>
+<div class="visual" aria-label="업무 안내 단계 예시"><div class="visual-head"><span>SMAX · WORKFLOW</span><span>PREVIEW ONLY</span></div><div class="step"><b>01</b><span>업무 선택</span><small>필요한 반복 작업 찾기</small></div><div class="line" aria-hidden="true">↓</div><div class="step"><b>02</b><span>자료와 규칙 확인</span><small>열 이름 · 누락값 · 검토 대상</small></div><div class="line" aria-hidden="true">↓</div><div class="step"><b>03</b><span>내 PC에서 직접 활용</span><small>설계 가이드 · 검증된 일부 로컬 기능</small></div><p class="foot">콘셉트 소개용 도식 · 실제 유료 제품 화면 아님</p></div>
+</section>
+<section class="catalog" id="templates" aria-labelledby="catalog-title"><span class="kicker">01 · TEMPLATE LIBRARY</span><h2 id="catalog-title">사장님 업무에서 시작한 10종 템플릿</h2><p class="section-note">10종은 업무 구조화·교육용 설계 템플릿입니다. 모든 항목이 자동으로 업무를 끝내주는 완성형 프로그램은 아닙니다. CSV 변환 1종은 로컬 실동작 검증 중입니다.</p>
+<div class="cards">
+<article class="card"><span class="no">01 / 데이터</span><h3>엑셀·CSV 통합</h3><p>열 구조 확인 · 표준화 설계</p></article>
+<article class="card"><span class="no">02 / 운영</span><h3>주문·발주·재고</h3><p>처리 흐름과 점검 기준</p></article>
+<article class="card"><span class="no">03 / 고객</span><h3>고객 문의·FAQ</h3><p>질문 분류와 안내 설계</p></article>
+<article class="card"><span class="no">04 / 데이터</span><h3>매출 집계·보고서</h3><p>필요 항목과 집계 규칙</p></article>
+<article class="card"><span class="no">05 / 운영</span><h3>이메일 첨부파일 정리</h3><p>자동화 과정 설계</p></article>
+<article class="card"><span class="no">06 / 지식</span><h3>사내 문서 검색·RAG 설계</h3><p>문서 권한·답변 검증 단계</p></article>
+<article class="card"><span class="no">07 / 운영</span><h3>견적서·문서 작성</h3><p>필수 항목과 검토 과정</p></article>
+<article class="card"><span class="no">08 / 고객</span><h3>예약·알림</h3><p>일정·발송 절차 설계</p></article>
+<article class="card"><span class="no">09 / 데이터</span><h3>공개 웹자료 변화 감지</h3><p>변경·알림 조건 정리</p></article>
+<article class="card"><span class="no">10 / 고객</span><h3>리뷰·마케팅 초안</h3><p>분류·콘텐츠 검토 단계</p></article>
+</div></section>
+<section class="section-band" id="method" aria-labelledby="method-title"><span class="kicker">02 · HOW IT WORKS</span><h2 id="method-title">직접 배우는 AX, 단계별로.</h2><div class="features"><article class="feature"><b>찾기</b><p>업무 유형과 관련 템플릿을 찾고 필요한 자료를 확인합니다.</p></article><article class="feature"><b>질문·구조화</b><p>누락된 규칙과 예외를 사람이 확인하고 설계서 초안을 작성합니다.</p></article><article class="feature"><b>직접 처리·구축</b><p>검증된 일부 기능은 로컬에서 직접 처리하고, 나머지는 AI 구축 가이드를 참고합니다.</p></article></div></section>
+<section class="section-band" id="product" aria-labelledby="product-title"><span class="kicker">03 · PRODUCT STATUS</span><h2 id="product-title">SMAX² SELF 출시 준비 중</h2><p class="section-note">고객 자료를 자신의 PC에서 우선 처리하도록 설계한 제품입니다. 실제 제공 기능·지원 범위·가격·이용 조건은 테스트 후 확정합니다. 학생·학부모 배움의 광장과 유료 WEB 자동화는 후속 계획입니다.</p><aside class="notice"><b>현재 구매할 수 없습니다.</b><p>크몽 상품 등록·심사가 완료되지 않았습니다. 이 홈페이지는 자체 결제나 회원가입을 제공하지 않으며 크몽 거래를 외부로 유도하지 않습니다.</p></aside></section>
+</main>
+<footer><span>© 2026 SMAX² Square</span><span>함께 만드는 AX광장 · 개발 중 · 판매 전</span></footer>
+</div>
+</body>
+</html>
