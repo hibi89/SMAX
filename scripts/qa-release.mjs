@@ -43,6 +43,10 @@ try {
   requireCheck(script.length === 1 && style.length === 1, 'expected exactly one inline script and stylesheet');
   const js = script[0].slice('<script>'.length, -'</script>'.length);
   const css = style[0].slice('<style>'.length, -'</style>'.length);
+  // HTML parsers normalize literal CRLF/CR in inline text before CSP hashing.
+  // Detect that browser-only failure in the Node release gate, not at customer delivery.
+  requireCheck(!js.includes('\r'), 'inline script has noncanonical CR newline (browser CSP risk)');
+  requireCheck(!css.includes('\r'), 'inline stylesheet has noncanonical CR newline (browser CSP risk)');
   requireCheck(html.includes("script-src 'sha256-" + b64sha256(js) + "'"), 'inline script CSP hash mismatch');
   requireCheck(html.includes("style-src 'sha256-" + b64sha256(css) + "'"), 'inline stylesheet CSP hash mismatch');
   requireCheck(html.includes("connect-src 'none'"), 'offline network CSP missing');
