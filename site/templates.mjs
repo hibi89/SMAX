@@ -309,7 +309,6 @@ export const templates = [
         "prompt": "집계 주기는?",
         "options": [
           "일별",
-          "주별",
           "월별"
         ]
       },
