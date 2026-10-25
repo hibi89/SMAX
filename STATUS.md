@@ -236,3 +236,8 @@
 - 변경 `frontend` `site/csv-transform.mjs`를 `backend`와 동일 Git blob로 동기화; `tests/csv-hardening.test.mjs` 별도 생성, `scripts/qa-release.mjs` 필수 테스트 파일 검사 명단에도 추가. `main` 미변경.
 - Private Github을 로컬 컨테이너에서 직접 clone하는 것은 DNS 실패로 막혀 있음. 따라서 전체 UI/패키징 Node suite, 단일 HTML 실제 빌드, Windows 브라우저 E2E는 **여전히 미검증**. 기존 GitHub Actions 1회는 단계 로그 없는 failure이며 재시도하지 않음.
 - 앞으로 테스트에 사용하는 코드가 원격 소스 SHA와 일치하는지 확인 후 실패/성공 근거를 기록하고, 안전한 Windows QA 환경에서 `QA_SELF_WINDOWS.cmd` 및 Edge 실기기 점검 진행. 상용 판매/Cloudflare 공개/고객 데이터 수신/비용 지출 없음. 11월 7일 개발 상한 유지.
+
+## 2026-10-25 KST — CSV 합성 데이터 속성 테스트 영구 회귀화
+- `tests/csv-property.test.mjs`를 backend와 동일 Git blob으로 추가. 256개 deterministic 합성 CSV를 매 실행에 생성하고 원본 행수/검토상태/UTF-8 BOM/같은 입력 결과 일치를 확인.
+- 로컬 Node v22.16.0 실제 `node --test tests/*.test.mjs` **CSV 한정 13/13 PASS** (원격 해시 동일 4개 파일: site/csv-transform.mjs, tests/csv-transform.test.mjs, csv-hardening.test.mjs, csv-property.test.mjs). 별도 랜덤 입력 1,600건도 누락 행 0건.
+- `scripts/qa-release.mjs`의 필수 테스트 목록에 `csv-property.test.mjs` 추가. 실제 전체 `frontend npm run qa:release`, 단일 HTML 생성, Windows Chrome/Edge E2E 및 사용자 판매 승인 미완. 로컬 사용자 권한/환경 제약 우회나 제품 외부 공개 없음.
