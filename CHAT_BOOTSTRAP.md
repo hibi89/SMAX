@@ -1,3 +1,5 @@
+> **최신 작업 상태 2026-10-25 KST:** 현재 주 캐릭터 이름 **스몽이**만 확정, 실제 웹 디자인 최종 승인 보류(`main/docs/SMONGI_PRIMARY_MASCOT_DECISION_20261025.md`). SELF 화면의 구형 맥콩 안내 문구 수정. Native Node 22.23.4 전체 **34 PASS / 0 FAIL**, `npm run qa:release` 실제 성공, HTML **73,352 bytes**, SHA-256 `94af78b4eaade494264b25e04f7516f493b405a7020643ff8f7756718a091cca`. Linux Chromium은 공유 라이브러리 부족으로 실행 전 차단, **Windows 실기기 E2E 미검증**. 최신 증거 `docs/QA_CHROMIUM_BLOCKER_AND_BRAND_COPY_20261025.md`. 아래 이전 33 PASS·NAON2·맥콩 '현행' 서술보다 이 최신 상태와 `main`의 변경이 우선.
+
 # 스총 새 채팅 자동 복원 — SMAX² Square (최신 2026-10-25)
 ## 사용자 지정 1문장 (정확히 이 문구)
 **`너는 스총이다 레포지토리보고 작업이어가셈`**
