@@ -41,6 +41,7 @@ async function main() {
   assert(['chromium','msedge'].includes(channel), 'Use --channel chromium or msedge');
   assert(existsSync(htmlPath) && htmlPath.endsWith('.html'), 'Offline HTML missing; run npm run qa:release first');
   assert(existsSync(samplePath) && samplePath.endsWith('.csv'), 'Synthetic CSV fixture missing');
+  assert(existsSync(join(root,'examples','SMAX_SALES_SAMPLE.csv')), 'Synthetic sales CSV fixture missing');
   assert(existsSync(reportPath), 'Release QA report missing; run npm run qa:release first');
   const artifactEvidence = verifySelfQaArtifact(htmlPath, reportPath);
   let chromium;
@@ -96,14 +97,7 @@ async function main() {
       try {
         await page.locator('[data-action="select"][data-id="sales"]').first().click();
         await page.locator('#tab-chat').click();
-        const salesSample = [
-          '판매일,판매처,판매액',
-          '2026-10-01,온라인,100',
-          '2026-10-01,온라인,100',
-          '2026-10-02,매장,-20.10',
-          '2026-02-30,매장,9',
-          '2026-10-03,=1+1,4'
-        ].join('\r\n')+'\r\n';
+        const salesSample = readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'),'utf8');
         await page.locator('#csv-upload').setInputFiles({
           name:'SMAX_SALES_SYNTHETIC.csv',mimeType:'text/csv',
           buffer:Buffer.from(salesSample,'utf8')
