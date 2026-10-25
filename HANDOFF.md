@@ -403,3 +403,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **Next priority:** actual `npm run qa:release` on complete checked-out private frontend, then exact artifact SHA plus actual Chromium E2E and Windows Edge test. Existing `QA_SELF_WINDOWS.cmd /edge` should be used on owner's Windows only when Playwright is prepared.
 9. **Future work:** after quality gate, finish UX/스몽이/marketing/support/legal terms; maintain 10 guidance templates / **2 actual offline local tools**, don't imply all 10 are deployed integrations.
 10. **Target:** 2026-11-07 upper deadline, sooner after verified quality. Buyer delivery/sale/Cloudflare/Kmong require explicit owner approval.
+
+## 2026-10-25 KST — 스총 이어받기: 업로드 CSV 사전검사 수정 (10항)
+1. **목표·기술:** 2026-11-07 마감의 사장님 SELF, 고객 PC 로컬 JS/단일 HTML 패키지. CSV 업로드 사전구조 판정을 실제 CSV 표준화/매출 집계 엔진과 일치시키는 범위만 처리.
+2. **실제 변경·판단:** `site/core.mjs`의 허술한 CSV 프리뷰 파서를 BOM/CRLF/quoted multiline/escaped quotes/헤더 중복·공백/레코드 폭/빈값 행 보존을 확인하는 strict parser로 대체. A안(잘못된 행을 건너뜀)보다 B안(변환기 동일 구조로 초기에 거부) 선택. `tests/core.test.mjs`에 회귀 2건 추가. 매출 집계, 원본 고객자료, 템플릿 10종, 유료 코어 경계 등 기존 작동 코드는 수정하지 않음.
+3. **검증·미검증:** GitHub에서 다시 내려받은 원격 실파일의 `parseCsv`와 기존 `normalizeSpreadsheetCsv`를 V8에서 동일 합성 CSV 11종으로 평가해 **11/11 구조 수용/거부와 행수 일치**. 첫 패치 스모크 8/8. 신규 Node 테스트 **작성만 했고 Native 실행 NOT_RUN**, 전체 `npm test`, `npm run qa:release`, SHA256+CSP 실제 생성, Chromium/Windows Edge **NOT_RUN**. 출고 QA 통과 주장 금지.
+4. **상태/중단점:** 소스 최소 수정+회귀테스트+GitHub 반영 완료. 실제 전체 프런트 Node 릴리스/브라우저/Windows 검사 및 출시 승인은 **대기**, 실고객 0·판매 0·배포 없음.
+5. **오류 증거·중단 대안:** 구형 사전 파서는 quote 중간 삽입/중복 헤더/열 개수 오류를 허용하고 `,,` 빈값 행을 생략함. 기존 실제 변환기는 거부/보존. GitHub private `git clone`은 현 도구 컨테이너 DNS/네트워크 차단(과거 관측); 현재도 전체 checkout 불가. 같은 차단방식과 로그 없는 Actions 실패의 무의미한 반복 금지. 승인된 개발자 Node 환경의 정식 전체 QA로 전환.
+6. **저장소/브랜치/SHA:** Private `hibi89/SMAX`, 수정 **`frontend`만**. 파일 `site/core.mjs` 커밋 `cfb109ea2a971d741c8464abaff7517ad9cb8286`, `tests/core.test.mjs` 커밋 `13eb963b96e833b1675ab9a098c9508c1efd42a1`. 수정 직후 frontend HEAD `13eb963b96e833b1675ab9a098c9508c1efd42a1`. 최종 문서 커밋 SHA는 원격 HEAD를 별도 재조회, `main`·`backend` 강제 병합 금지.
+7. **Production/환경:** Cloudflare Production URL 없음, Vercel 미적용, 크몽 등록/결제/로그인 미적용. 개발자 명령 `npm run qa:release` → 동일 SHA/리포트 `npm run qa:browser:node` → Windows `QA_SELF_WINDOWS.cmd /edge`; 고객 목표는 Node 미설치 단일 `dist/SMAX_SELF_OFFLINE.html`.
+8. **원본/백업/보안:** 앞 원격 커밋 `1e0f7ba632f83b264a7123e7add7c11b3c06a343` 복구 기준, 전체 Git 이력 보존. `public-site/` 소개용만; `site/` 로컬 유료 엔진 Public 게시 금지. 개인정보/기업 실자료/토큰/결제 계정·API 전송·실비 지출 0.
+9. **다음 1작업·완료 기준:** Private `frontend` 전체 Node suite+release QA 실제 exit0 및 새 HTML SHA256·bytes/CSP·두 합성 fixture PASS 확인, 동일 해시 실제 Playwright `file://` 검수 10항과 Windows Edge. 이후 디자인/사용성/상품 이용권·환불 조건 점검 및 사용자 출시 별도 승인. 현재 사용자 로컬 작업을 요구하지 않음; 기한 2026-11-07 자동 연장 불가.
+10. **갱신·증거 범위:** 2026-10-25 KST, 연결 GitHub 최신 브랜치와 파일 재조회, V8 11/11 조건 검사 및 실제 remote commit 증빙. 문서 자체 기록은 Native Node/브라우저/서비스 정상의 증거가 아님.
