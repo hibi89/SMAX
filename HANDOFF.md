@@ -229,3 +229,10 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본 위치/백업/인증·금지:** `backend/site/csv-transform.mjs` 원본 blob 재사용·불변. 기존 Git history가 복원 기준, force push/임의 병합 없음. 합성 테스트만 사용, 고객 개인정보·API 토큰·결제 정보 없음. `site/` 유료 코어는 Private, `public-site/` 공개 후보만 유지.
 9. **다음 우선·절차·완료기준·승인:** `frontend` 최신 SHA 먼저 확인 → sales 탭의 CSV 업로드·판매일/채널/금액 수동 매핑 → 일/월 주기와 검토 제외 건수 표시 → 보고/검토 두 CSV 다운로드 → 번들러 import 및 UI/Node/Chromium 회귀 → Linux/Windows 차이 별도 기록. 이후 main 안전 병합·Cloudflare/크몽 게시에는 창업자 사전 승인. WEB/학생/자체결제 확장 금지.
 10. **기준 시각·원천:** 2026-10-25 KST. 원격 SHA 확인 및 로컬 Node 7개 실행 결과/계약 문서로 한정. 이 문서의 기준 HEAD는 업데이트 후 재조회; 상품 완성/상용 실행/Windows E2E 검증으로 확대 해석 금지.
+
+## 2026-10-25 — serializer isolation after frontend inline integration
+1. **Goal:** avoid declaration collision after private frontend bundles spreadsheet and sales modules into a single offline script.
+2. **Changed:** `backend/site/sales-report.mjs`: rename internal `toCsv` to `toSalesReportCsv`, preserve `buildSalesReport` signature, rows, BOM, review behavior.
+3. **Evidence:** actual Node v22.16.0 8/8 PASS on matched remote blob `17796cd0e44095512b61303045dffa582fe06162`; unchanged `site/csv-transform.mjs` blob `2b004fb9474743a95294b42baf7f875602644a54`.
+4. **Frontend sync:** identical engine blob on `frontend`; UI/period sync work lives only there. `main` unchanged, no exports or deploys.
+5. **Next:** full frontend Node release suite + exact SHA HTML + actual offline Chromium/Windows Edge. Tests on partial backend do not establish entire SELF release readiness. Source commit `6e57867f0b5f16f8a5422e436e5431568f1ceab1`.
