@@ -72,6 +72,7 @@ function editorPanel(t){
   const inputPanel=executable
     ? '<label class="upload-label" for="csv-upload">CSV 자료 선택 (로컬 처리)</label><input type="file" id="csv-upload" accept=".csv,text/csv" aria-label="CSV 파일 선택">'+
       '<button type="button" class="button-outline" data-action="try-sample">합성 예제 바로 체험</button>'+
+      '<button type="button" class="button-outline" data-action="download-sample-input">연습용 원본 CSV 다운로드 ↓</button>'+
       '<p class="tiny">예제에만 자동 매핑을 적용합니다. 실제 거래·매출 데이터가 아니며 내 파일은 직접 열을 확인해야 합니다.</p>'+
       '<p class="tiny">'+h(state.fileMessage||"CSV만 지원하는 초기 버전 · XLSX 파일은 아직 지원하지 않음")+'</p>'+maps
     : '<p class="tiny" role="status">이 템플릿은 설계 가이드 전용입니다. 실제 CSV 변환·업로드 기능은 제공하지 않습니다. 실행하려면 엑셀·CSV 통합 또는 매출 집계·보고서를 선택하세요.</p>';
@@ -98,7 +99,11 @@ async function readUtf8Csv(file) {
   return text;
 }
 function download(filename,data,mime){const blob=new Blob([data],{type:mime});const url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),3000);toast("파일을 준비했습니다. 미확정 항목을 확인하세요.")}
-document.addEventListener("click",event=>{const el=event.target.closest("[data-action]");if(!el)return;const action=el.dataset.action;if(action==="tab"){state.tab=el.dataset.tab;render()}else if(action==="category"){state.category=el.dataset.name;render()}else if(action==="select"){selectTemplate(el.dataset.id)}else if(action==="try-sample"){
+document.addEventListener("click",event=>{const el=event.target.closest("[data-action]");if(!el)return;const action=el.dataset.action;if(action==="tab"){state.tab=el.dataset.tab;render()}else if(action==="category"){state.category=el.dataset.name;render()}else if(action==="select"){selectTemplate(el.dataset.id)}else if(action==="download-sample-input"){
+  const t=getTemplate(),sample=sampleCsvByTemplate[t?.id];
+  if(!sample)return;
+  download(sample.name,"\uFEFF"+sample.source,"text/csv;charset=utf-8");
+}else if(action==="try-sample"){
   const t=getTemplate(), sample=sampleCsvByTemplate[t?.id];if(!sample)return;
   forgetCsv({preservePeriod:true});
   try{
