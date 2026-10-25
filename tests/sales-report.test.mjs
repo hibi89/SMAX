@@ -102,3 +102,23 @@ test('two distinct order IDs with the same amount are both included; exact repet
   assert.equal(r.groups.length, 1);
   assert.equal(r.groups[0].rows, 2);
 });
+
+test('equal monetary values in different CSV formats cannot inflate preliminary revenue',()=>{
+ const input='판매일,판매처,판매액,주문번호\n'
+  +'2026-10-01,온라인,100,ORDER-A\n'
+  +'2026-10-01,온라인,100.00,ORDER-A\n'
+  +'2026-10-01,온라인,0100,ORDER-A\n'
+  +'2026-10-01,온라인,"₩100원",ORDER-B\n'
+  +'2026-10-01,온라인,100.01,ORDER-C';
+ const r=buildSalesReport(input,mapping,{period:'daily'});
+ assert.equal(r.summary.sourceRows,5);
+ assert.equal(r.summary.includedRows,3);
+ assert.equal(r.summary.excludedRows,2);
+ assert.equal(r.summary.netAmount,'300.01');
+ assert.deepEqual(r.excluded,[
+   {sourceRecord:'3',reason:'DUPLICATE'},
+   {sourceRecord:'4',reason:'DUPLICATE'}
+ ]);
+ assert.equal(r.groups[0].rows,3);
+ assert.match(r.reviewCsv,/DUPLICATE/);
+});
