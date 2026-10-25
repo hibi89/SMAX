@@ -61,6 +61,7 @@ test('Edge offline CSV download comparison respects Windows EOL without masking 
 
 test('Node release QA blocks unnormalized inline CSS and script before any browser approval',()=>{
   const release=readFileSync(new URL('../scripts/qa-release.mjs',import.meta.url),'utf8');
+  assert.match(release,/requireCheck\(!html\.includes\('\\r'\)/);
   assert.match(release,/requireCheck\(!js\.includes\('\\r'\)/);
   assert.match(release,/requireCheck\(!css\.includes\('\\r'\)/);
   assert.match(release,/b64sha256\(js\)/);
