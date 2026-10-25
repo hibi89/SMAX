@@ -100,3 +100,20 @@ test('pure and repeatable: no input mutation or persistence', () => {
   assert.deepEqual(convert(source, m), first);
   assert.deepEqual(m, mapping);
 });
+
+test('unmapped order IDs distinguish transactions with identical mapped dates, items and amounts', () => {
+  const source = '거래날짜,품목,결제금액,주문번호\n'
+    + '2026/10/01,연필,100,ORDER-A\n'
+    + '2026-10-01,연필,100,ORDER-B\n'
+    + '2026-10-01,연필,100,ORDER-B';
+  const r = convert(source);
+  assert.equal(r.summary.inputRows, 3);
+  assert.equal(r.summary.outputRows, 3, 'all original records must survive standardization');
+  assert.equal(r.summary.duplicateRows, 1, 'only the third row repeats the same full source identity');
+  assert.deepEqual(r.rows.map(row => row[4]), [
+    'READY_FOR_HUMAN_REVIEW', 'READY_FOR_HUMAN_REVIEW', 'NEEDS_REVIEW'
+  ]);
+  assert.equal(r.rows[2][5], 'DUPLICATE');
+  const threeColumn = convert('거래날짜,품목,결제금액\n2026/10/01,연필,100\n2026-10-01,연필,100');
+  assert.equal(threeColumn.summary.duplicateRows, 1, 'the old 3-column normalized duplicate contract remains intact');
+});
