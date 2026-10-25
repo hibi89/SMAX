@@ -1,0 +1,44 @@
+# SMAX² SELF — code-only verification, no deployment and no customer data.
+name: SELF local verification
+on:
+  push:
+    branches: [frontend]
+    paths:
+      - 'site/**'
+      - 'public-site/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'examples/**'
+      - 'package.json'
+      - 'wrangler.jsonc'
+      - '.github/workflows/self-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: smax-self-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  local-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout private source read-only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check whole-suite Node tests, offline bundle and public boundary
+        run: npm run qa:release
+      - name: Validate offline build report but never publish artifact
+        shell: bash
+        run: |
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync('dist/SELF_QA_REPORT.json','utf8'));
+            if(r.status!=='LOCAL_NODE_PASS_BROWSER_NOT_TESTED') throw Error('QA report did not pass');
+            console.log(JSON.stringify({sha256:r.sha256,bytes:r.bytes,status:r.status}));
+          "
