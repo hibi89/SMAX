@@ -21,6 +21,17 @@ const checks = [], errors = [], requests = [];
 const fail = message => { throw new Error(message); };
 const assert = (condition, message) => { if (!condition) fail(message); };
 
+// Compare UTF-8 training fixtures across Git's Windows CRLF and embedded LF,
+// while still requiring a real UTF-8 BOM and identical field content/order.
+function assertTrainingCsvDownload(bytes, fixtureBytes, label) {
+  assert(bytes.subarray(0,3).equals(Buffer.from([239,187,191])),
+    label+' training CSV UTF-8 BOM missing');
+  const decode = data => new TextDecoder('utf-8', {fatal:true}).decode(data);
+  const canonical = str => str.replace(/\r\n/g,'\n');
+  assert(canonical(decode(bytes.subarray(3)))===canonical(decode(fixtureBytes)),
+    'Downloaded '+label+' training CSV differs from the repository fixture');
+}
+
 function observe(page) {
   page.on('pageerror', error => errors.push(String(error)));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -77,9 +88,8 @@ async function main() {
       ]);
       assert(trainingCsv.suggestedFilename()==='SMAX_DEMO_SPREADSHEET.csv',
         'Wrong synthetic training CSV filename');
-      const expectedTrainingCsv=Buffer.concat([Buffer.from([239,187,191]),readFileSync(samplePath)]);
-      assert(readFileSync(await trainingCsv.path()).equals(expectedTrainingCsv),
-        'Downloaded spreadsheet training CSV differs from the repository fixture');
+      assertTrainingCsvDownload(
+        readFileSync(await trainingCsv.path()),readFileSync(samplePath),'spreadsheet');
       // Fail closed: invalid UTF-8 may silently corrupt Korean business CSV.
       await page.locator('#csv-upload').setInputFiles({
         name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
@@ -154,9 +164,8 @@ async function main() {
         assert(trainingSales.suggestedFilename()==='SMAX_DEMO_SALES.csv',
           'Wrong synthetic sales training CSV filename');
         const originalSalesFixture=readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'));
-        assert(readFileSync(await trainingSales.path()).equals(
-          Buffer.concat([Buffer.from([239,187,191]),originalSalesFixture])
-        ),'Downloaded sales training CSV differs from repository fixture');
+        assertTrainingCsvDownload(
+          readFileSync(await trainingSales.path()),originalSalesFixture,'sales');
         await page.locator('#csv-upload').setInputFiles({
           name:'LEGACY_CP949_INVALID.csv',mimeType:'text/csv',
           buffer:Buffer.from([0xbe,0xc8,0xb3,0xe7])
