@@ -651,3 +651,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **소스·데이터·비용:** Test only 합성 CSV/HTML. 고객 원문, 토큰, 개인정보, 유료 API·외부 공개 호스팅 없음. CSP `unsafe-inline` 미허용 및 네트워크 `connect-src 'none'` 유지; backend/private 코어 public-site 유출 없음. QA FAIL 시 fail closed. 비용 0원.
 9. **다음 단계:** 새 GitHub frontend HEAD를 재조회하고, 적절한 안전 환경에서 전체 Native Node `npm run qa:release` 및 Windows Edge `QA_SELF_WINDOWS.cmd /edge` 재검증. 해당 기능이 통과해야 다음 Windows 수동 QA와 출고 승인 논의. **사용자는 반복적인 수동 명령 요청에 불편 표명**했으므로 지금 추가 명령 요구하지 말고, 총괄이 수행 가능한 코딩·정적/격리 검사를 먼저 수행. 실제 PC가 불가피한 마지막 단계에서만 1회 사용자 요청.
 10. **기한/인수:** 2026-10-26 KST, 개발 마감 2026-11-07 유지. `[SMAX² 스총] GitHub hibi89/SMAX 최신 레포지토리 확인하고 총괄 작업 이어가셈` 또는 `ㄱ`은 최신 `frontend`·STATUS·HANDOFF 우선 재조회하여 안전하게 다음 P0 진행. 문서 커밋 직후 HEAD 재확인.
+
+## 2026-10-26 KST — 스총 인계: Windows CSS CSP 회귀 검사 수복·출고 Node 게이트 강화
+1. **현상·목표:** 사용자 실제 Windows Edge E2E FAIL 로그의 CSP/style CRLF·합성 CSV fixture CRLF 두 원인은 전 턴 코드 수정 완료. 이번에는 그 수정 때문에 **기존 Node 테스트가 Windows CSS 원본 CRLF SHA를 계속 기대하는 새 회귀**를 탐지·수정하고, 미래 재발 시 브라우저 실행 전에 실패하도록 강화했다.
+2. **발견한 테스트 버그:** `tests/offline-package.test.mjs` 초기 테스트는 `digest(input().css)`의 raw Windows CRLF 해시를 검증함. 새 빌더의 `inlineCss` LF 해시와 불일치하므로, 이전 E2E 수정을 적용한 뒤에도 Windows Node QA가 fail 가능한 상태. 실제 HTML `<style>`을 추출하여 `digest(css)` 검증하도록 교정. 최종 commit `705aa585cad5ebdaf7343ff50367e98d336b9b6e`.
+3. **재발 방지 릴리스 게이트:** `scripts/qa-release.mjs`가 inline script/style에 literal CR가 남으면 즉시 `RELEASE_QA_FAILED`로 차단. 이후 실제 추출된 HTML 내 CSS/JS의 CSP SHA256와 비교. commit `fc761a43787b8f9a35b18f4548dcefeae902c102`. CSP `unsafe-inline` 허용 금지·`connect-src 'none'` 유지.
+4. **게이트 회귀:** `tests/windows-qa-contract.test.mjs`는 Node 릴리스 게이트에 인라인 CR 금지/해시 검증이 있는지 검사. commit `1bd2224def89949b21e9834a61592023d0b14891`; 기존 BOM/fatal UTF8/CRLF fixture 비교 테스트 보존.
+5. **원격 자체 실행:** 최신 private GitHub 생산 5모듈과 실제 `build-self.mjs`를 V8에 주입하여 LF/CRLF CSS 경로 확인. 실제 checked-in `offline-package` 테스트 **두 함수 본문** 실행 2/2 PASS (SHA 의존성은 stub adapter), 신규 `windows-qa-contract` Node release 게이트 체크 1/1 PASS. 정확한 테스트 원문 V8 syntax PASS. 이는 **실제 native `node --test`, real CSS SHA/CSP binary, Edge 10템플릿 E2E 최종 PASS 증거가 아님**.
+6. **보존해야 할 선행 근거:** 사용자 PC 실제 Windows Node 86/86 PASS는 EOL/CSP 패치 전 빌드, HTML 92,076 bytes / SHA `884f004f45c5bbd7cafdaf744f1dfa8d6c7970e94a8bc31a4ecaa94a0b91227c`. 이후 Edge E2E 첫 다운로드 CSV 불일치 및 CSP 차단으로 FAIL. 이 이전 SHA를 신규 빌드로 재사용/출고 승인 금지.
+7. **현재 남은 게이트:** 최신 전체 `frontend` Node `npm run qa:release`, 생성 HTML SHA/CSP/bytes 보고서, Windows Edge `.\\QA_SELF_WINDOWS.cmd /edge`의 실제 `file://` 전체 통과, Windows 수동 사용성, 사업·판매 승인. 이 턴에는 full native 실행 및 외부 배포 미실행. 사용자에게 즉시 명령 반복 요구 금지.
+8. **GitHub:** Private `hibi89/SMAX`. `frontend` 코드+테스트+STATUS/HANDOFF만. `main`/ `backend` 불변, force push/병합 없음. `STATUS.md` 최신 섹션도 읽을 것. Git history로 복원 가능.
+9. **보안·사업:** SELF는 오프라인 CSV 2종 실행/8종 구축가이드 설계이며 외부 고객 데이터/키/API/공개 호스팅/결제/판매 없음. 개발 목표일 **2026-11-07**, 별도 고객인도/외부 공개 승인 여전히 NOT_GRANTED.
+10. **다음 `ㄱ`:** GitHub 3개 브랜치 HEAD 및 `frontend/STATUS.md`, `frontend/HANDOFF.md` 재조회. 가능하면 owner 실PC 불필요한 오프라인/격리 QA를 더 진행하고, 추가 결함을 코드·검사까지 수정. 환경상 Native Edge 불가 시 제한 고지. 실 PC 마지막 1회만 협력 요청하되 사용자가 실기기 테스트를 대신 반복하는 상태를 만들지 말 것.
