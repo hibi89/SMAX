@@ -561,3 +561,9 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **릴리스 다음 순서:** 승인된 최신 Native Node≥20 풀 체크아웃에서 `npm run qa:release` 실행→생성 디스크 HTML SHA/CSP/CSV/매출 검증→Chromium `file://` E2E→Windows Edge/Chrome 실기기. 네트워크·private Git clone 제한 시 V8만으로 출고 성공 주장 금지.
 9. **출시/사업:** 크몽 상품 등록·Cloudflare 공개·결제/유료 API·고객 데이터 처리 미실행. 실제 유료 판매는 사용자 별도 승인 필요.
 10. **기한:** 2026-11-07 목표, 사용자는 `ㄱ` 입력만으로 GitHub 최신 `frontend`·`STATUS.md`·`HANDOFF.md` 참조해 다음 작업 진행. 완료 후 HEAD 재조회.
+
+## 2026-10-26 KST — 스총 최신 인계: 미검증 설계 필드 표시 강화
+- **발견·구현:** 가이드 8종 수동 항목명 입력의 `needsReview:false`/READY_FOR_HUMAN_REVIEW 허위 상태 결함을 발견. `site/core.mjs`에 `guideOnly:true` 상태 및 `fieldVerification:UNVERIFIED_MANUAL_FIELD_NAME`, 모든 guide field `needsReview:true` 및 가이드 전체 `NEEDS_REVIEW` 강제. `buildHandoff`에도 미검증/현장확인 경고. `site/app.mjs` 두 buildBlueprint 호출에서 가이드/실행형 자동 판별하여 전달. 기존 실행 2종 CSV 매핑·로컬 집계 동작 보존. 커밋 `ecf3687c...`·`96428322...`.
+- **직접 검사:** 실제 원격 제품 5모듈 V8 실행 **18/18 PASS**(가이드8×2, 실행2×1). 신규 Native 테스트 소스 `tests/core.test.mjs` commit `64243b7c...`, 오프라인 UI `65c060de...`, Playwright 가이드 JSON/MD 판정 `1e0094fd...`. 이 테스트들의 전체 최신 Node/Chromium 실행은 NOT_RUN. 이전 출고 hash/크기는 현 HEAD에 해당하지 않음.
+- **문서·사용자 경계:** README `839e3360...`, SELF 고객 퀵스타트 `6a5228bb...`에 항목명은 설계 입력일 뿐 원본 CSV/외부 서비스가 검증된 상태가 아님을 표시. 가이드형 8개는 실제 자동 실행되지 않음. 실행형 2개만 오프라인 CSV 정리·잠정 매출 집계.
+- **다음 순서:** Private `frontend` 전체 checkout Node≥20 → `npm run qa:release` 실제 exit0 및 새 HTML SHA/CSP → `npm run qa:browser:node` Chromium `file://` → `QA_SELF_WINDOWS.cmd /edge` → 사용자 승인 후에만 `main`의 최신 사업 결정 보존해 안전 통합/출시. 컨테이너 github.com DNS 실패가 주 차단이며, 연결 Github 도구로 소스 코드 수리는 가능. `main`/`backend` 미수정·유료 API/고객파일/판매·배포 무실행. 2026-11-07 마감 유지.
