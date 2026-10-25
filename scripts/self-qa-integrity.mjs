@@ -9,7 +9,9 @@ export function verifySelfQaArtifact(htmlPath, reportPath) {
       report.verification?.allNodeTests !== 'PASS' ||
       report.verification?.offlineBuild !== 'PASS' ||
       report.verification?.publicPrivateBoundary !== 'PASS' ||
-      report.verification?.cssAndScriptCsp !== 'PASS') {
+      report.verification?.cssAndScriptCsp !== 'PASS' ||
+      report.verification?.syntheticCsv4Rows2Review !== 'PASS' ||
+      report.verification?.syntheticSales5Rows3Review !== 'PASS') {
     throw new Error('SELF release QA report is not a passing local build');
   }
   const html = readFileSync(htmlPath);
