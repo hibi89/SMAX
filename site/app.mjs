@@ -56,7 +56,8 @@ function csvResultPanel(t){
     (state.csvError?'<p class="csv-error" role="alert">'+h(state.csvError)+'</p>':'')+
     (result?'<p class="tiny" role="status">원본 '+result.summary.inputRows+'행 → 결과 '+result.summary.outputRows+'행 · 검토 필요 '+result.summary.reviewRows+'행 · 중복 '+result.summary.duplicateRows+'행</p>'+
       '<p class="tiny">처음 5행 미리보기 · NEEDS_REVIEW 행은 삭제되지 않으며 검토 사유가 함께 저장됩니다.</p>'+preview+
-      '<button type="button" class="button-outline" data-action="download-csv">결과 CSV 다운로드 ↓</button>':
+      '<button type="button" class="button-outline" data-action="download-csv">전체 결과 CSV 다운로드 ↓</button>'+
+      (result.summary.reviewRows?'<button type="button" class="button-outline" data-action="download-csv-review">검토 필요 행만 CSV 다운로드 ↓</button>':''):
       '<p class="tiny">파일 선택과 원본 열 매핑을 마친 후 실행할 수 있습니다. CSV 최대 2MB, XLSX 직접 입력 미지원.</p>')+
     '</section>';
 }
@@ -126,6 +127,9 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
 }else if(action==="download-csv"){
   if(getTemplate()?.id!=="spreadsheet"||!state.csvPreview)return;
   download(state.demoMode?"SMAX_DEMO_STANDARDIZED.csv":"SMAX_STANDARDIZED.csv",state.csvPreview.csv,"text/csv;charset=utf-8");
+}else if(action==="download-csv-review"){
+  if(getTemplate()?.id!=="spreadsheet"||!state.csvPreview?.summary.reviewRows)return;
+  download(state.demoMode?"SMAX_DEMO_STANDARDIZED_REVIEW.csv":"SMAX_STANDARDIZED_REVIEW.csv",state.csvPreview.reviewCsv,"text/csv;charset=utf-8");
 }else if(action==="run-sales"){
   if(getTemplate()?.id!=="sales")return;
   state.salesPreview=null;state.salesError="";
