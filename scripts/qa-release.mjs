@@ -63,14 +63,7 @@ try {
 
   // A successful shipping QA must also cover the executable second tool (sales).
   // Synthetic-only, exact mapping, review rows retained separately; no external data.
-  const salesSample = [
-    '판매일,판매처,판매액',
-    '2026-10-01,온라인,100',
-    '2026-10-01,온라인,100',
-    '2026-10-02,매장,-20.10',
-    '2026-02-30,매장,9',
-    '2026-10-03,=1+1,4'
-  ].join('\r\n');
+  const salesSample = readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'),'utf8');
   const sales = buildSalesReport(salesSample,
     {date:'판매일', channel:'판매처', amount:'판매액'}, {period:'daily'});
   requireCheck(sales.summary.sourceRows === 5 && sales.summary.includedRows === 2 &&
