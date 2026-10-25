@@ -72,7 +72,10 @@ export function bundleOfflineSelf({html, css, modules}) {
   const csp = "default-src 'none'; script-src 'sha256-"+hash(bundled)+
     "'; style-src 'sha256-"+hash(inlineCss)+
     "'; img-src 'self' data:; connect-src 'none'; form-action 'none'; object-src 'none'; base-uri 'none'";
-  let result = html;
+  // Git for Windows can also rewrite the outer HTML file to CRLF.
+  // Canonicalize the shell so identical private source produces identical
+  // offline HTML bytes and SHA-256 regardless of the checkout platform.
+  let result = html.replace(/\r\n?/g, '\n');
   result = exactlyOnce(result,stylesheetTag,'stylesheet').join('<style>'+inlineCss+'</style>');
   result = exactlyOnce(result,scriptTag,'module entrypoint').join('<script>'+bundled+'</script>');
   const current = result.match(/<meta http-equiv="Content-Security-Policy" content="[^"]*">/g);
