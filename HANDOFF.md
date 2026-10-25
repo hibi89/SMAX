@@ -475,3 +475,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **권한/보존:** 모든 기존 브랜치·제품 소스 보존, Git 강제 병합/태그·외부 게시·Cloudflare/Vercel 배포/크몽 판매·개인정보/자격증명/고객 계정 업로드·유료 API 호출·지출 없음. 내부 고정 합성 fixture만 사용.
 9. **다음 작업/완료 기준:** 첫 순서 최신 checkout에서 실제 `npm run qa:release` exit0 + SHA/bytes + Node 전체 suite. SHA 다르면 동일 blob/인코딩/함수 환경 다시 교차확인 후 원인 해소. 이후 실제 브라우저 `file://` 10항·Windows Edge 실PC 검증, 지원·라이선스·환불 조건 사용자의 출시 승인.
 10. **기준 시각/출시 상태:** 2026-10-25 KST, 인메모리 후보 구조 **검증 완료**, 실제 disk/Native QA **NOT_RUN**, 상용화 **미승인**. 새 대화 `ㄱ`는 반복 V8보다 Native/browser 진척을 우선한다.
+
+## 2026-10-25 KST — 스총 최신 인계: main/frontend 분기 안전 통합 (10항)
+1. **지향:** SMAX² SELF 사장님용 로컬 CSV 2종 + 10종 설계 템플릿을 11월 7일 내 검증하되 `main` 브랜드/사업 결정을 덮어쓰지 않고 제품 `frontend` 보존.
+2. **실제 조사:** 공통 조상 `989cec1497e530f5547346bc341e7e92373f9910`, main `952bc586c132066d84e5a29e5b10254120b35f14`, frontend 단위 작업 전 `1a5ed2a788b4a04788ad30d46d0b45992f91004c`; compare API ahead 194/behind 43 (새 3개 코드 커밋 후). Git blob tree 기준 변경 교집합 5개(`CHAT_BOOTSTRAP,STATUS,HANDOFF,site/index.html,site/styles.css`), `main` 전용 문서 7개. Git 병합 실제 충돌 확정 아님.
+3. **결정/코드:** `scripts/qa-branch-reconcile.mjs`를 읽기 전용 Git ref 검수기로 구현, `tests/qa-branch-reconcile.test.mjs`에서 독립 main/frontend/경합·stale SHA 조건 3개 검사, `scripts/qa-release.mjs` test 파일 필수 등록. Github 원본 main/frontend 내용 리셋/병합 금지.
+4. **증빙:** **실제 Node v22.16.0 `node --test tests/qa-branch-reconcile.test.mjs` 3/3 PASS** (임시 합성 Git 저장소; 제품 전체 QA 아님). 로컬 git hash-object ↔ GitHub blob 실제 일치(script `8f1cd8428881118d93b6bd55685efbb83654b8ad`, test `0379a92e3e30dcbcf1f6c6fe1ed2845e1b24092b`). 전제품 `npm run qa:release`/실 Chromium/Windows/최신 디스크 파일 SHA **NOT_RUN**.
+5. **변경/커밋:** `frontend`만 script `1d1afd6157bd52b8fd4b1a4683993617093288a0`, test `c1d2a7e2f335fd649804c99665666ea9699d41a3`, release 명세 `b42a785b0b20163a7154f65248a351a0fd0f4984`, 정책 정본 `docs/SAFE_MAIN_FRONTEND_INTEGRATION_20261025.md` 커밋 `a8cbdeaadbdb59287efde0d8152644171c05c677`.
+6. **문제·전환:** Private repo 코드 실행 컨테이너의 네트워크 DNS 차단으로 전체 checkout 불가, 무의미한 기존 GitHub Actions 수동 재실행 금지. 대신 연결 GitHub tree와 격리 로컬 Git fixture로 통합 위험 확인. 별도 Cloudflare/판매/비용/비밀계정 사용 없음.
+7. **원본/백업:** `main` 사업성 검증 부족·스몽이 이름만 확정·최종 디자인 보류 최신 기록, `frontend` 실제 코어와 제품 QA를 동시에 살릴 것. main-only 7개 문서와 5개 양쪽 변경 파일 목록은 새 정본 문서 참조.
+8. **사용 명령/판정:** 최신 refs를 갖춘 승인 개발환경에서 `node scripts/qa-branch-reconcile.mjs --main origin/main --frontend origin/frontend`: `REVIEW_REQUIRED` exit2=내용 대조 필수, `NO_SHARED_CHANGE_REVIEW` exit0=여전히 승인 전, `BLOCKED` exit3=ref/SHA 확인 실패. 이 검사기는 Git 저장소를 변경하지 않음.
+9. **다음 한 단계:** `frontend` 실제 checkout Node 전체 `npm run qa:release`와 실 디스크 SHA/실 Playwright file:// 검증, Windows Edge 실PC. QA 후 검토 브랜치에서 양쪽 최신 정보를 통합(사용자 승인 전 실제 병합 없음). 상품 등록/Cloudflare 공개와 크몽 판매는 별도 승인.
+10. **기준·목표:** 2026-10-25 KST, Native Git fixture 3/3만 성공, 실고객/수익/상용 출시 ZERO, 2026-11-07 마감 유지. 원격 최종 HEAD는 문서 커밋 후 다시 조회.
