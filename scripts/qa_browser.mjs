@@ -160,6 +160,11 @@ async function main() {
         assert(demoSalesPreview.includes('원본 5행') && demoSalesPreview.includes('잠정 반영 2행') &&
           demoSalesPreview.includes('제외/검토 3행') && demoSalesPreview.includes('79.90원'),
           'Built-in sales demo did not produce its declared preliminary total');
+        const reviewPreview=await page.locator('table[aria-label="잠정 매출 제외 거래 검토"] tbody tr').allTextContents();
+        assert(reviewPreview.length===3 &&
+          ['DUPLICATE','INVALID_DATE','FORMULA_PROTECTED'].every(reason=>reviewPreview.some(line=>line.includes(reason))),
+          'Local sales review preview must show all three synthetic exclusion reasons');
+        checks.push('Sales exclusion source rows and reasons visible without a download');
         assert((await page.locator('.editor-panel').innerText()).includes('합성 예제 체험 중'),
           'Built-in sales demo was not visibly labeled synthetic');
         const [trainingSales] = await Promise.all([
