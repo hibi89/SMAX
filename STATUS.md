@@ -484,3 +484,10 @@
 - **직접 재검증:** GitHub 신규 test 파일을 재조회하고 **LF Git 원문 및 모의 Windows CRLF**에서 embedded spreadsheet/sales fixture 및 BOM download 동등성을 검사. 금액·날짜 등 임의 내용 변경 및 기록 삭제가 여전히 불일치로 감지되는지까지 **10/10 PASS**. 단, 현재 채팅 컨테이너에서는 해당 전체 private checkout을 통한 실제 Node 릴리스 QA는 수행하지 못했으며 **86/86 PASS 미확인**.
 - **형의 다음 동작:** 같은 기존 `SMAX_SELF_QA` PowerShell 폴더에서 `git pull --ff-only origin frontend` 후 `npm run qa:release` 재실행, 마지막 summary/오류 복사. 통과 후 산출 `dist/SMAX_SELF_OFFLINE.html` 및 `dist/SELF_QA_REPORT.json` 신규 검증. Chromium `file://`, Windows Edge는 별도 게이트.
 - **영향·승인:** main/backend 무변경, force push/무단 병합 없음, 외부 배포/크몽 판매/유료 API/실고객 파일·비용 없음. 개발 마감 **2026-11-07** 유지.
+
+## 2026-10-26 KST — 스총: 사용자 실Windows Node 릴리스 게이트 86/86 PASS
+- **실PC 최신 재검증 완료(사용자 제공 PowerShell 원문 로그):** 앞선 Win Git LF/CRLF 문제를 수정한 후 `frontend` local checkout에서 `npm run qa:release` 재실행. **86 tests / 86 pass / 0 fail**, Node `v24.21.0`, 실제 Windows 경로의 오프라인 HTML `dist/SMAX_SELF_OFFLINE.html` 정상 생성. 해당 로그 기준 테스트 소요 약 6.13초. 오류/스킵 0. 해당 검증은 **사용자 PC 실행 로그**이며 이 채팅 컨테이너에서 같은 SHA를 독립 재실행하지는 않음.
+- **빌드 산출 증거:** `OFFLINE_SELF_BUILT` 92,076 bytes; HTML SHA-256 `884f004f45c5bbd7cafdaf744f1dfa8d6c7970e94a8bc31a4ecaa94a0b91227c`. JSON `dist/SELF_QA_REPORT.json` status `LOCAL_NODE_PASS_BROWSER_NOT_TESTED`. `verification`: `allNodeTests`, `offlineBuild`, `cssAndScriptCsp`, `publicPrivateBoundary`, `syntheticCsv4Rows2Review`, `syntheticSales5Rows3Review` 6항목 **PASS**.
+- **미실행 게이트:** `chromiumEdgeFileProtocol: NOT_RUN`, `windowsManualQA: NOT_RUN`, `saleApproval: NOT_GRANTED`. Chromium/Edge 실제 `file://` 및 CSV 다운로드 테스트·수동 Windows 사용성 검사가 남아 있어 **출고/판매 승인 불가**. Release HTML 직접 수정하거나 public-site에 복제하지 않음.
+- **다음 지시:** 같은 Windows 체크아웃에서 브라우저 개발 의존성 Playwright가 설치된 경우 `.\QA_SELF_WINDOWS.cmd /edge` 실행. 미설치라면 일회성 개발용 `npm install --no-save --no-package-lock playwright` 필요할 수 있음(실 Edge 설치 필요). 이 CMD는 Node release를 다시 확인하고 HTML의 SHA/크기가 JSON과 일치한 뒤 실제 `msedge` 오프라인 E2E를 수행, 실패 시 fail-closed. 사용자 로그 수신 후 별도로 최종 수동 QA 계획.
+- **Git/안전:** 이번 기록은 테스트 통과 **근거 갱신만**이며 코어/CSV/브라우저·테스트 소스 무변경. `main`, `backend` 병합/배포/판매/고객자료/API 요금 없음. 개발 마감 **2026-11-07** 유지.
