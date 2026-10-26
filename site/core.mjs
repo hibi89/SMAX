@@ -77,6 +77,9 @@ function handoffLiteral(value){
   return String(value ?? '')
     .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g,' ')
     .replace(/[\u202a-\u202e\u2066-\u2069]/g,'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
     .replace(/\\/g,'\\\\')
     .replace(/([`*_{}\[\]()#+.!|>~-])/g,'\\$1')
     .trim();
