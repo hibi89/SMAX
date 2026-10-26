@@ -16,6 +16,8 @@ function fixture(overrides={}, body='<html>synthetic offline fixture</html>') {
     status:'LOCAL_NODE_PASS_BROWSER_NOT_TESTED',
     sha256:createHash('sha256').update(buffer).digest('hex'),
     bytes:buffer.length,
+    sourceSnapshotSha256:'a'.repeat(64),
+    sourceFileCount:16,
     verification:{allNodeTests:'PASS', offlineBuild:'PASS', publicPrivateBoundary:'PASS', cssAndScriptCsp:'PASS', syntheticCsv4Rows2Review:'PASS', syntheticSales5Rows3Review:'PASS'},
     ...overrides
   };
@@ -72,4 +74,20 @@ test('older QA report without original CSV fixture proof is also rejected',()=>{
   const f=fixture({verification:{allNodeTests:'PASS',offlineBuild:'PASS',publicPrivateBoundary:'PASS',cssAndScriptCsp:'PASS',syntheticSales5Rows3Review:'PASS'}});
   try{assert.throws(()=>verifySelfQaArtifact(f.html,f.report),/not a passing/);}
   finally{f.close();}
+});
+
+test('old, missing, or malformed source snapshot cannot qualify for browser E2E',()=>{
+  for(const bad of [undefined,'not-a-sha','F'.repeat(64),'a'.repeat(63)]){
+    const f=fixture({sourceSnapshotSha256:bad});
+    try{assert.throws(()=>verifySelfQaArtifact(f.html,f.report),/source snapshot/);}
+    finally{f.close();}
+  }
+});
+
+test('source file count must be a positive integer',()=>{
+  for(const invalid of [0,-1,'16',null,0.5]){
+    const f=fixture({sourceFileCount:invalid});
+    try{assert.throws(()=>verifySelfQaArtifact(f.html,f.report),/source snapshot/);}
+    finally{f.close();}
+  }
 });
