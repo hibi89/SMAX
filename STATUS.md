@@ -548,3 +548,10 @@
 - **원격 소스 변경:** 제품/테스트 소스 자체 수정 **없음**. 근거/인수 문서만 `frontend` 갱신. 상세 파일 `docs/QA_OFFLINE_SELF_V8_20261026.md` (실제 입력 blob 지문, 절차·한계 포함).
 - **불가 사유:** 검수 컨테이너에는 Node 22가 있지만 private repo clone에 필요한 `github.com` DNS 네트워크 연결이 없어 최신 checkout을 파일로 얻지 못함. GitHub connector는 별도로 소스 텍스트 읽기 가능하나 Native Node checkout과는 다름. **실제 `npm run qa:release`/최신 디스크 SHA+CSP / Windows Edge `file://` E2E / 실 Windows UX는 여전히 NOT_RUN**, 기존 과거 86/86 Node PASS·Edge FAIL을 최근 코드로 승격하지 않음.
 - **범위/출시:** 제품은 SELF 로컬 CSV 실행 2종+설계 전용 8종. `main`/`backend` 소스 불변, Cloudflare/Vercel/크몽 판매·고객자료 이동·비용·공개 배포 없음; 판매 승인 NOT_GRANTED. 2026-11-07 개발 마감 유지. 사용자의 반복 수동 QA를 요구하지 않으며, Native 실행 가능한 개발 환경/실 Windows Edge 1회 검증은 최종 게이트로 대기.
+
+## 2026-10-26 KST — 스총: 원본 CSV 앞 3행 확인형 로컬 매핑 미리보기
+- **확인한 사용성 빈틈:** 기존 고객 CSV 업로드 후 헤더 드롭다운만 출력되어, 필드에 실제 날짜·상품·금액 형식이 들어 있는지 매핑 전에 확인하기 어려웠다. 신규 자동 추론을 추가하지 않고 **원본 값의 유한한 로컬 화면 미리보기**를 제공해 잘못된 열 선택 위험을 줄임.
+- **구현:** `frontend/site/app.mjs` 로컬 상태 `csvRowsSample`에 원본 최대 3행×12열 보관, 실행 2개 템플릿(엑셀·CSV 통합/매출 집계)에서 업로드 시 확인. 렌더링은 셀당 앞 80자만(제어문자/Bidi 제거 후 기존 `h()` HTML escape) 출력, 첫 12개 헤더, 처음 3개 데이터 행. 외부 전송·자체 저장·실행·자동 열 매핑 없음. 합성 샘플에도 표시; 파일 재선택/템플릿 전환/실패 시 상태 초기화. **원본 CSV 본문과 실제 결과/다운로드는 1글자도 자르지 않음**. 코드 commit `e00236eb0f146c919d0f2bb3d2267f37b068f6b6`.
+- **회귀:** 실제 `tests/offline-ui-smoke.test.mjs` 신규 독립 테스트로 14개 헤더 중 앞 12개, 원본 4행 중 미리보기 3행, HTML 문자열 `<img>` escape, 80자 축약, 4개 원본 결과 행/100자 전체 CSV 보존, 매핑 전 변환 버튼 없는 상태, 데모 매출 표시/템플릿 간 잔존 데이터 없음 확인. Test commit `6661bad8b86a302b62f8d2cfc0867b9f16549dad`. **체크인된 정확한 async 테스트 콜백 + 최신 생산 5모듈을 fake DOM에서 결합해 V8 직접 실행 1/1 PASS**. Native Node/실 Windows Edge 테스트가 아님.
+- **사용 안내:** `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` 매핑 전에 원본값 확인, 앞부분만 시각적 축약/실제 파일 전체 보존 설명 추가 (commit `40283bfaa6899541c2763e560c1c4b5331246e0f`).
+- **변경범위/남은 관문:** Private `frontend`의 `site/app.mjs`, 회귀 테스트, 설명/인수인계만. `main`/`backend` 변경/merge 없음. 유료 API, 비밀 데이터, 배포, 고객 실사용/크몽 결제 없음. 이전 인메모리 37/37 코어 검사·93,387B SHA는 **수정 전 소스 지문에 대한 이력 증거**이므로 변경 후 최신 산출물 통과라고 재사용하지 말 것. 최신 Native `npm run qa:release`, Windows Edge `file://` E2E, 출시 승인 **NOT_RUN/NOT_GRANTED**. 개발 마감 2026-11-07 유지.
