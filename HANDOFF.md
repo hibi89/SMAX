@@ -296,3 +296,16 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **생산환경:** SMAX Cloudflare/Vercel Production 미적용; 상품 등록·실거래 시작 금지(명시 승인 필요). 사용자 Windows PC 반복 테스트 금지.
 9. **다음 안전 작업:** 최신 frontend, backend GitHub HEAD 및 STATUS/HANDOFF 확인; 개발자 측 검증 가능한 실패부터 패치. 실제 Native 환경/Windows Edge의 최종 관문만 사용자 1회 도움 요청 가능.
 10. **시점/근거:** 2026-10-27 KST private GH source 및 V8 adapter 테스트. 문서 반영 후 HEAD 재조회.
+
+## 2026-10-27 KST — 스총 인계: CSV 숨김문자·호환동형 헤더 안전성
+1. **목표·범위:** SMAX² SELF (사장님 존 로컬 CSV 실동작 2종 + 가이드 8종), 고객 수동 열 매핑을 안전하게 유지. 출고 전 안전성 회귀이며 별도 WEB/RAG/결제 기능 개발 아님.
+2. **구현/근거:** `거래날짜,금액,금\u200B액,품목` 실제 입력을 기존 모듈이 수락해 잘못 선택된 `999`값을 변환하는 오류 재현. frontend/backend 각각 `site/core.mjs`, `site/csv-transform.mjs`에 숨김/제어문자 거부 및 NFKC로 시각 동일 열 중복 차단. 기존 row 내용 및 결과 CSV, 수동 승인 조건 변경 없음.
+3. **테스트·성공/실패:** `node --test`, `npm run qa:release`, `npm run qa:browser:node`, Windows `QA_SELF_WINDOWS.cmd /edge`이 정식 검증 명령. 이번 실행은 GitHub 체크인 원본 모듈/테스트 콜백을 JS V8 격리 adapter로 실행한 범위에서 frontend 21/21, backend 23/23, 합계 **44/44 PASS / 0 FAIL**. 6/6 신규 사전 경계 케이스. **Native Node 전체/디스크·실 브라우저·Windows 미검증**.
+4. **상태:** 수정 코드·회귀 GitHub 반영 완료, 출고 환경 통합 QA는 대기, 실제 Production·판매 미착수/미승인. 제품 2실행+8가이드 정확히 구분.
+5. **오류·중단 이유:** 숨김문자와 NFKC 호환표기가 헤더 구조검사에서 누락됨. 구 시스템은 원문 열을 그대로 선택하도록 했지만 눈에 구분 불가능한 열을 허용. 검증 컨테이너에 Node 22 설치돼도 private GitHub DNS가 실패해 Native 전체 checkout 불가능; 똑같이 반복 다운로드 시도 금지, 조달 가능한 실제 로컬 checkout에서 한 차례 출고 QA.
+6. **저장소·브랜치·코드 SHA:** Private `hibi89/SMAX` main 무변경. frontend core `3b817b8`, transform `da644bd`, 신규 regression `293f509`; backend core `7398e43`, transform `21cf2a4`, regression `125536c`. 정확한 branch 최종 HEAD는 최신 원격 조회 결과로 확인.
+7. **환경/Production:** Node >=20, `npm run qa:release`와 `QA_SELF_WINDOWS.cmd /edge`. 라이브 Cloudflare/Vercel Production **없음/미적용**; URL/배포 SHA 해당 없음. 유료 API·대외 전송 없음.
+8. **원본·백업·보안:** 사용자 CSV는 메모리 로컬 처리만, 원본 덮어쓰기/고객자료 전송 없음. GitHub 개별 코드 SHA가 복구 지점; force push/무단 병합 금지. Private SELF 코어를 공개 `public-site`에 복사 금지.
+9. **다음 행동·완료 기준·승인:** Native 최신 전체 checkout→`npm run qa:release` PASS 및 disk SHA/CSP→Chromium file:// E2E→Windows Edge 한 차례 최종 QA→main/front/backend 충돌 검토·승인 후 안전 병합/출시 판정. 공개·판매·가격·계정/유료 서비스는 사용자 별도 승인 전 금지.
+10. **갱신/기준:** 2026-10-27 KST. 확인은 현재 private GitHub branch 실제 파일·테스트 콜백 실행 범위이며, Node/실 PC 성공으로 확대하지 않는다. 문서 커밋 이후 최신 Git HEAD 재조회; 개발 hard stop 2026-11-07.
+
