@@ -272,3 +272,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **현재 제품 경계:** SMAX² SELF 오프라인 CSV 실제 실행 2종 + 가이드 전용 8종. 잠정 매출은 세무/회계 확정 아님; 검토/제외 원본 번호와 이유는 화면 최대5건, 검토 CSV 전체 보존. 사용자 원본 파일, 결제, 업로드, 외부 에이전트 실행 없음.
 9. **미완료 릴리스 검증:** 변경 후 Native Node `npm run qa:release`, SHA/CSP, Windows Edge E2E, 수동 Windows UX **NOT_RUN**, saleApproval **NOT_GRANTED**. 이전 사용자 Windows 86/86 PASS는 코드 변경 이전 버전에만 적용. 사용자가 반복 실PC 수동 작업을 원치 않으므로 개발자 자체 코드/격리 QA를 먼저 진행.
 10. **다음 `ㄱ`:** 최신 GitHub 각 브랜치 HEAD·`STATUS.md`/`HANDOFF.md` 읽고 결함 수정/회귀 우선. 실기기 검증 없이 배포 PASS 주장 금지. 외부 발송/돈/유료 API/합병 승인 없음. 마감 **2026-11-07** 유지.
+
+## 2026-10-26 KST — backend 스총 인수: Unicode 수식 보호 경계
+1. **업무 목표:** SELF CSV 로컬 파서의 Unicode 숨김 접두어가 `=+@-` 수식 의심 표시를 우회하는 문제 대응. 현재 실행 2종+가이드 8종, 마감 2026-11-07.
+2. **관측:** 생산 backend/프론트 변환기에서 U+200E/200F/202E/2066/2069/034F 등은 `FORMULA_PROTECTED` 미표시, CSV output apostrophe 미삽입. 해당 문자만으로 실제 Excel 수식 실행이 입증된 것은 아님.
+3. **코드/설계:** `site/csv-transform.mjs` Regex에 Unicode Default_Ignorable 접두어 포함, 검토 apostrophe + 플래그 처리, 진짜 음수 금액/원본 번호/필드 값 보존. Backend `64e16ee`, frontend `8aed84d`; preexisting backend `reviewCsv` 반환 구조 차이는 무수정.
+4. **테스트 성공/미검증:** 회귀 `csv-hardening` backend `2e805ce`, `sales-report` `1a23012`, frontend 대응 동등 테스트. 실제 production+checked-in `transform`, `hardening`, `sales` 29/29 PASS **각 브랜치** (V8 isolated adapter, Native Node 아님). Sales 정상1·의심2집계 분리 확인. Native 릴리스/실 Edge 수동 E2E 미실행.
+5. **오류/재시도/대안:** 원인은 이전 excelSafe 시작 문자의 좁은 whitelist. Regex Unicode property escape는 현대 엔진에서 지원되지만 actual Windows Edge 검증되지 않음. 무단 스프레드시트 실행/외부 API/고객 파일 사용 금지.
+6. **저장소/브랜치/경로:** Private `hibi89/SMAX`. Backend 제품 `site/csv-transform.mjs`; `tests/csv-hardening.test.mjs`, `tests/sales-report.test.mjs`; `STATUS.md`/`HANDOFF.md` 갱신. Frontend 대응 및 고객 퀵스타트 별도 반영. Main 불변, 병합 없음.
+7. **런타임/출고:** 실제 `npm run qa:release` 및 Edge `QA_SELF_WINDOWS.cmd /edge` 아직 안 했음. Cloudflare/Vercel Production 미적용, Kmong 판매 미승인.
+8. **민감정보/자산:** Synthetic CSV만 테스트, 실제 파일·토큰·키 없이 실행, GitHub SHA로 복원 가능. CSV 입력 원본 불변, 검토 플래그+기록 유지. 위험한 외부 쓰기 작업 별도 승인.
+9. **다음 작업:** frontend HEAD 기준 총괄 이어가기. 전체 Native Node QA 및 Edge offline 브라우저 1회 최종 게이트 필요; 사용자에게 반복 PC 명령 요청하지 않음. 검증 전 판매 PASS 금지.
+10. **일시/증거:** 2026-10-26 KST, private GitHub fetched source 및 V8 callback 검증 기준. 문서 작성 후 브랜치 최종 HEAD 별도 재확인.
