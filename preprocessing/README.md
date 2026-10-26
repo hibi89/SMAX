@@ -31,3 +31,30 @@ npm run test:preprocessing
 해커톤 Public 저장소에 SMAX Private 소스·사업 문서·고객 자료를 직접 복사하지 않는다. 공개 가능한 최소 모듈/계약을 분리할지 사용자 승인 후 결정한다. 별도 대회 코드는 스키마 어댑터와 합성 데이터 검증부터 시작한다.
 
 상세 분업과 다음 단계: docs/PREPROCESSING_BRANCH_PLAN_20261027.md
+## 2026-10-27 — 공통 N필드 CSV 엔진 추가
+
+전처리 담당자가 관리하는 새 범용 엔진:
+
+- `preprocessing/generic-csv.mjs`: `preprocessGenericCsv(source,{columns})`, `validateGenericCsvPackage(pkg)`, `serializeGenericCsvPackage(pkg)`
+- `preprocessing/SMAX_PREPROCESS_GENERIC_CSV_V1.schema.json`: 언어 간 공통 구조 확인용 JSON Schema Draft 2020-12
+- `tests/preprocessing-generic.test.mjs`, `tests/preprocessing-generic-schema.test.mjs`: 8+2개 신규 테스트
+- 내부 CSV 파서는 `site/csv-transform.mjs`에서 `parseCsvRecords`를 새로 export하여 기존 검증을 그대로 재사용. 기존 3필드 정제/매출 결과는 변경하지 않음.
+
+**사용법 예시 (메모리 API, 대회별 연동 아님)**
+
+```js
+import {preprocessGenericCsv} from './preprocessing/generic-csv.mjs';
+const csv='제목,수량,메모\n예제,20,정상';
+const result=preprocessGenericCsv(csv,{columns:[
+  {key:'title',source:'제목',type:'text',required:true},
+  {key:'quantity',source:'수량',type:'integer',required:true},
+  {key:'note',source:'메모',type:'text',required:false}
+]});
+```
+
+명시적으로 1~64개 필드를 매핑한다. 타입은 `text`, `integer`, `decimal`, `date`, `boolean`. 원본의 **모든 열 값과 원본 행 번호**를 JSON 안에 포함하므로 개인정보/기밀 자료 처리 시 결과물도 원본과 동일하게 보호해야 한다. 원본 중복은 모든 열이 정확히 일치할 때만 표시하고 원본 행을 삭제하지 않는다. 데이터 검토는 자동 승인하지 않는다. 자유 텍스트·문서·LLM·벡터·범용 파일 CLI는 아직 미구현이다.
+
+**실행 명령**: `npm run test:preprocessing` (기존 V0 테스트 + 신규 V1 10건).
+현 도구에서 V8로 기존 CSV 파서+실제 체크인된 Generic 테스트 콜백 **8/8 PASS**, 변조된 필드값 검사 1건 별도 PASS. SHA는 해당 런에서 **모의 구현**. *전체 Native Node, JSON Schema의 독립 검증 라이브러리 구동, 실제 브라우저·Windows는 미실행*.
+
+**역할:** 전처리 총괄은 공통 전처리 엔진만 완성한다. 해커톤별 코드 가져오기·변형·연동·제출 및 각 레포의 공개/비공개 판단은 해커톤 총괄/해총이 담당한다.
