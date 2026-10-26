@@ -794,3 +794,60 @@ test('offline sales panel includes zero-padded small amounts without weakening a
  assert.match(env.blobs.at(-1).parts[0],/2026-10-01,온라인,2,2.20,0.00,2.20/);
  assert.match(env.blobs.at(-1).parts[0],/2026-10-01,매장,1,0.00,2.00,-2.00/);
 });
+
+
+test('local raw CSV mapping preview is bounded, escaped and display-only for both executable templates',async()=>{
+  const env=offlineFixture();
+  env.click('select',{id:'spreadsheet'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/aria-label="원본 CSV 값 미리보기"/);
+  const headers=['거래날짜','품목','결제금액',...Array.from({length:11},(_,i)=>'추가'+(i+1))];
+  const suffix=Array.from({length:11},(_,i)=>'참조'+(i+1)).join(',');
+  const longItem='길이확인'+('가'.repeat(100));
+  const source=[headers.join(','),
+    '2026-10-01,"<img src=x onerror=alert(1)>",100,'+suffix,
+    '2026-10-02,"'+longItem+'",200,'+suffix,
+    '2026-10-03,볼펜,300,'+suffix,
+    '2026-10-04,공책,400,'+suffix
+  ].join('\n');
+  await env.change({id:'csv-upload',dataset:{},files:[{
+    name:'mapping-owner.csv',size:Buffer.byteLength(source,'utf8'),text:async()=>source
+  }]});
+  const html=env.rootNode.innerHTML;
+  assert.match(html,/mapping-owner\.csv/);
+  assert.match(html,/최대 3행\/12열\/셀 80자/);
+  const preview=html.match(/<table class="csv-table" aria-label="원본 CSV 값 미리보기">([\s\S]*?)<\/table>/)?.[1];
+  assert.ok(preview,'original value preview must be available before manual mapping');
+  assert.equal((preview.match(/<th>/g)||[]).length,12);
+  assert.equal((preview.match(/<tr><td>/g)||[]).length,3);
+  assert.equal((preview.match(/<td>/g)||[]).length,36);
+  assert.match(preview,/&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.doesNotMatch(preview,/<img src=x/,'untrusted CSV must never create markup');
+  assert.doesNotMatch(preview,/2026-10-04/,'fourth source row must be omitted');
+  assert.doesNotMatch(preview,/추가11/,'thirteenth+ header must be omitted');
+  assert.doesNotMatch(preview,/가{81}/,'raw long cell must be truncated in preview');
+  assert.doesNotMatch(html,/data-action="download-csv"/,
+    'preview alone must never authorize a conversion or downloadable result');
+
+  for(const [field,value] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})){
+    await env.change({dataset:{action:'map',field},value});
+  }
+  env.click('run-csv');
+  assert.match(env.rootNode.innerHTML,/원본 4행 → 결과 4행/);
+  env.click('download-csv');
+  const exported=env.blobs.at(-1).parts[0];
+  assert.match(exported,/가{100}/,'preview truncation must not modify exported source cell');
+  assert.match(exported,/2026-10-04,공책,400/,'all records must still be included');
+
+  env.click('select',{id:'sales'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/mapping-owner\.csv/,
+    'old source preview must not persist across templates');
+  env.click('try-sample');
+  assert.match(env.rootNode.innerHTML,/aria-label="원본 CSV 값 미리보기"/,
+    'sales demo must also show sample values');
+  env.click('select',{id:'faq'});
+  env.click('tab',{tab:'chat'});
+  assert.doesNotMatch(env.rootNode.innerHTML,/aria-label="원본 CSV 값 미리보기"/,
+    'guide-only templates must never show a stale CSV preview');
+});
