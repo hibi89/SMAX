@@ -14,11 +14,11 @@
 
 ## 기본 실행법
 
-node preprocessing/cli.mjs --input input.csv --output result.json --date 거래날짜 --item 품목 --amount 결제금액
+node preprocessing/cli.mjs --input preprocessing/examples/synthetic-orders.csv --output result.json --date 거래날짜 --item 품목 --amount 결제금액
 
 node --test tests/preprocessing-package.test.mjs tests/preprocessing-cli.test.mjs
 
-위 input.csv는 사용자가 승인한 로컬 UTF-8 파일을 의미한다. CLI는 입력을 수정하지 않으며 출력 JSON이 이미 있으면 실패한다. 자동 파일 업로드나 HTTP 요청은 없다.
+위 예제는 합성 데이터만 포함한다. 실고객 파일은 사전 허가된 로컬 위치에서만 사용한다. CLI는 입력을 수정하지 않으며 출력 JSON이 이미 있으면 실패한다. 자동 파일 업로드나 HTTP 요청은 없다.
 
 ## 역할·미지원
 
