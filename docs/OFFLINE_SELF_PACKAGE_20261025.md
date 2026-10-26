@@ -27,3 +27,11 @@
 2. 실제 Edge/Chrome에서 이 HTML을 직접 열어 '템플릿 → 챗봇 패널 → CSV 선택 → 원본 열 매핑 → 변환 → 검토 → 다운로드' 수행, CSV 결과 내용/한글 BOM·중복·결측 확인. 오류 발생 시 브라우저 Console/Network 증거로 대응.
 3. 고객용 짧은 README·합성 CSV 예제 및 안전/사용권·업데이트 안내. 확정된 브랜드 최신 로고/마스코트 원본 자산 검증.
 4. 충분한 검증을 거친 뒤 `main` 비파괴적 통합 및 크몽 상품 조건/상품 게시 별도 승인. **2026-11-07은 최종 상한이며 목표 소요시간을 채울 필요 없음.**
+
+## 2026-10-27 KST — 최신 패키징 안전 게이트 (위 초기 문서보다 우선)
+- **현재 구성:** SELF 오프라인 번들 모듈은 **5개**(`templates.mjs`, `core.mjs`, `csv-transform.mjs`, `sales-report.mjs`, `app.mjs`). 위 2026-10-25의 '4개' 표기는 이전 단계 기록이다. `scripts/build-self.mjs`로 생산한다.
+- **실제 결함 재현:** 최신 원격 모듈·HTML/CSS를 번들러에 넣고 네트워크 생성자를 추가하면 기존 가드는 `fetch()`/ `sendBeacon()`만 감지하고 `new WebSocket(...)`, `new EventSource(...)`, `new WebTransport(...)`, `new RTCPeerConnection()`를 허용했다. 특히 WebRTC는 CSP `connect-src`만으로 완전히 통제한다고 단정할 수 없다.
+- **수정:** `scripts/build-self.mjs` 코드에 WebSocket/EventSource/WebTransport/RTCPeerConnection/WebKit 변형/XMLHttpRequest 생성자·직접 호출, `window['WebSocket']`, `globalThis['fetch']` 등의 정적 거부 규칙을 추가. 의도는 의심스러운 통신 기능을 추가한 SELF 빌드가 성공하지 못하게 만드는 **보수적 방어 심층화**다. 임의로 구성한 변수명·문자열 이어붙이기·동적 실행 등 모든 JS 우회 경로를 형식적으로 증명하는 정적 보안 감사가 아니므로 **완벽한 네트워크 차단 보장 아님**. `connect-src 'none'`와 고객 파일 로컬 처리 원칙 병행.
+- **커밋:** 코드 `2538cebd9ed2b5d4b53e28a110f597f9103d8635`, `tests/offline-package.test.mjs` 회귀 `ea0721681f1089206f4aa02e23287fbd6f554b85`.
+- **검증 경계:** 최신 원격 실제 HTML/CSS+5모듈을 같은 번들 함수에 결합한 격리 V8 예비검사에서 **기존 정상 출력 동등**, 이전에 허용되던 위험 호출/생성자 포함 8개의 검증 대상 전부 차단. GitHub에 반영된 새 회귀의 정확한 테스트 콜백을 인메모리 V8 fake hash/filesystem과 연결해 **1/1 PASS**. 실제 Node `npm run qa:release`, 디스크 생성 HTML SHA/CSP, Chromium/Windows Edge `file://` 실행, 실제 OS 수준 네트워크 차단 검증은 **NOT_RUN**. 암호학적 실 SHA를 fake digest로 검증했다고 주장하지 않음.
+- **다음:** 최신 파일 전체 checkout 가능 환경에서 실제 Node 릴리스→CSP/디스크 SHA 기록→실 Chromium/Windows Edge 네트워크 요청·다운로드/권한 검증. 제품 코드·배포·계정·Cloudflare·유료 API/지출/고객자료·사업범위 변경 없이 Private `frontend` 빌드 가드·테스트만 강화함. 출시 승인/판매는 여전히 미획득, 마감 2026-11-07 유지.
