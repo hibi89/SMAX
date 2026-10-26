@@ -14,6 +14,11 @@ export function verifySelfQaArtifact(htmlPath, reportPath) {
       report.verification?.syntheticSales5Rows3Review !== 'PASS') {
     throw new Error('SELF release QA report is not a passing local build');
   }
+  // Older reports cannot validate a build produced without the source-lock QA gate.
+  if (!/^[a-f0-9]{64}$/.test(report.sourceSnapshotSha256 ?? '') ||
+      !Number.isSafeInteger(report.sourceFileCount) || report.sourceFileCount < 1) {
+    throw new Error('SELF release QA report lacks a valid source snapshot');
+  }
   const html = readFileSync(htmlPath);
   const sha256 = createHash('sha256').update(html).digest('hex');
   if (report.sha256 !== sha256 || report.bytes !== html.length) {
