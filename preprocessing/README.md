@@ -1,4 +1,8 @@
-# SMAX² PREPROCESSING — Private reusable data layer
+# SMAX² PREPROCESSING — Private reusable data layer 
+
+## 최신 작업 분담 (2026-10-27)
+
+**전처리 총괄 책임은 범용 엔진 자체를 완성하는 것뿐이다.** 타 프로젝트가 이 저장소의 코드를 가져가 수정·연동하는 행위는 해당 해커톤 총괄/해총의 업무다. 전처리 총괄은 대회별 어댑터, 공모전 제출, 타 레포 연동을 담당하지 않는다. Public 제출용 소스 추출 시 사용자는 공개 범위·권리·대회 규칙을 별도로 판단한다.
 
 이 디렉터리는 SMAX 기존 CSV 엔진을 해커톤과 후속 프로젝트에서 재사용하는 별도 계층이다. GitHub 비공개 preprocessing 브랜치에서 관리한다. 기존 main / frontend / backend 브랜치는 건드리지 않는다.
 
