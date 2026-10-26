@@ -246,3 +246,11 @@
 - **남은 관문:** 정확한 최신 소스 checkout의 `npm run qa:release`/실 디스크 HTML SHA·CSP/Chromium `file://`/Windows Edge 및 수동 UX **NOT_RUN**. Node v22.16.0 존재하지만 컨테이너 `github.com` DNS 실패로 private 전체 checkout 불가; 기존 실패 형태 반복·GitHub Actions 무단 재실행 금지.
 - **보존/사업:** Private `hibi89/SMAX` frontend/backend만 수정, main 소스/분기 이력/기존 고객데이터/대외 배포/크몽 판매/유료 AI/비용 변경 없음. 1차 SELF 2종 로컬 실행+8종 설계 가이드, 출시 미승인, 2026-11-07 하드마감 유지.
 
+## 2026-10-27 — PREPROCESSING 독립 브랜치 생성·V0 공통 엔진
+
+- **사용자 신규 결정:** SMAX 전처리를 해커톤에서 재사용하기 위해 Private `hibi89/SMAX`에 **preprocessing** 브랜치를 신규 생성. 원본 backend commit `5ec4a526b8d1ca90f7e2e4f846cee8cab6a7c868`. main/frontend/backend 변경·병합/배포 없음.
+- **구현 코드:** `preprocessing/index.mjs`의 규칙형 CSV 표준화→Strict JSON 패키지(원본 SHA256/바이트·원본행 번호·품질수치·review_queue·사람 승인 미부여); `preprocessing/cli.mjs`의 로컬 파일 CSV→JSON 실행. 각각 최초 커밋 `38120cf4`, `cd799cd6`. 기반 `site/csv-transform.mjs`은 원본 유지.
+- **검증 계약/테스트:** `preprocessing/SMAX_PREPROCESS_CSV_V0.schema.json` 및 테스트 `tests/preprocessing-package.test.mjs` 5개, `tests/preprocessing-cli.test.mjs` 3개, `tests/preprocessing-schema.test.mjs` 2개. `package.json`에 전용 `npm run test:preprocessing` 추가. 합성 입력 `preprocessing/examples/synthetic-orders.csv`만 사용.
+- **실행 증거:** 실제 authenticated GitHub 백엔드 CSV 생산 원문+신규 package 테스트 callbacks를 V8 격리 환경에서 연결해 **5/5 PASS**; SHA256 표준 벡터 3/3 PASS. 코드 구문 파싱 PASS, Node v22 TextDecoder UTF-8 fatal/BOM 동작 확인. **Native `npm run test:preprocessing` 전체 10건, 실제 CLI 파일 출력 E2E, 실제 해커톤 통합은 NOT_RUN**. 수치 10건은 작성된 테스트 건수일 뿐 통과 주장 아님.
+- **전용 문서:** `preprocessing/README.md`, `docs/PREPROCESSING_BRANCH_PLAN_20261027.md`, `PREPROCESSING_HANDOFF.md`; `AGENTS.md` 상단 최신 브랜치 정책 추가. 해커톤 Public 저장소에 Private SMAX 소스 무단 복사·유료 리소스·개인정보 취급/출시 불허.
+- **범위:** 현재 UTF-8 CSV 최대 2MiB·날짜/항목/금액 3필드 명시 매핑만 동작. PDF/DOCX/XLSX, FastAPI/Pydantic, Local LLM, n8n, 벡터/RAG는 **아직 설계 단계**. 차기 작업은 Native 10 테스트/CLI 스모크 후 Generic N필드 CSV→문서 입력 순서. 기존 SMAX SELF 2026-11-07 일정 무변경.
