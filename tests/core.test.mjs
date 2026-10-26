@@ -72,3 +72,18 @@ test('handoff preserves source data but cannot promote CSV headings or answers i
   const plain=buildHandoff(t,buildBlueprint(t,answers,Object.fromEntries(t.fields.map(f=>[f.key,'이름'])),{guideOnly:true}));
   assert.match(plain,/\- [^\n]+: 이름 \(현장 확인 필요\)/,'ordinary Korean names stay legible');
 });
+
+test('handoff HTML-like input is rendered as data, never embedded markup',()=>{
+  const t=templates.find(item=>item.id==='faq');
+  const value='<script>alert("X")</script> & <img src=x onerror=alert(1)>';
+  const fields=Object.fromEntries(t.fields.map(field=>[field.key,value]));
+  const answers=Object.fromEntries(t.questions.map(q=>[q.key,value]));
+  const bp=buildBlueprint(t,answers,fields,{guideOnly:true});
+  const markdown=buildHandoff(t,bp);
+  assert.equal(bp.fields[0].sourceColumn,value,'JSON input must stay available for human inspection');
+  assert.equal(bp.questions[0].answer,value);
+  assert.doesNotMatch(markdown,/<script|<img/i,'the handoff must not contain raw HTML markup from source');
+  assert.match(markdown,/&lt;script/);
+  assert.match(markdown,/&amp;/);
+  assert.match(markdown,/NEEDS_REVIEW/);
+});
