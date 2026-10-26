@@ -284,3 +284,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **민감정보/자산:** Synthetic CSV만 테스트, 실제 파일·토큰·키 없이 실행, GitHub SHA로 복원 가능. CSV 입력 원본 불변, 검토 플래그+기록 유지. 위험한 외부 쓰기 작업 별도 승인.
 9. **다음 작업:** frontend HEAD 기준 총괄 이어가기. 전체 Native Node QA 및 Edge offline 브라우저 1회 최종 게이트 필요; 사용자에게 반복 PC 명령 요청하지 않음. 검증 전 판매 PASS 금지.
 10. **일시/증거:** 2026-10-26 KST, private GitHub fetched source 및 V8 callback 검증 기준. 문서 작성 후 브랜치 최종 HEAD 별도 재확인.
+
+## 2026-10-27 KST — backend 인수: 검토 CSV 출력 계약 누락 해소
+1. **목표:** SMAX² SELF 오프라인 CSV 실제 실행 2종+가이드 8종. backend가 frontend의 reviewCsv 출력 계약을 누락해 검토 대상 별도 추출 불가, 안전한 후속 연동 위해 수정.
+2. **재현/원인:** backend `normalizeSpreadsheetCsv`에서 3원본 행 중 2건 검토 필요라도 반환 키는 `csv,rows,summary,state,mapping`뿐. frontend은 `reviewCsv` 포함. 브랜치 코드 드리프트였음.
+3. **구현:** backend `site/csv-transform.mjs`에 검토 전용 CSV 포함, 전체 CSV/원본 번호/표시 금액 불변. 코드 commit `3e6a2e0`→frontend와 byte-identical 정렬 `37b1f1b`; 파일 SHA 양 브랜치 **`43c26279c1bca9064d0d41df44abf837b11f3603`**.
+4. **검증:** backend `tests/csv-transform.test.mjs`의 신규 flagged2/full4/headerOnly test `69e1344`; 실제 체크인 CSV/hardening/sales test callbacks V8 adapter **backend 30/30**, frontend **29/29 PASS**. Native Node 릴리스/실 Windows Edge/전체 E2E 수행 아님.
+5. **상태/이슈:** 2026-11-07 마감 유지. 최신 Node `npm run qa:release`, Windows `QA_SELF_WINDOWS.cmd /edge`, 디스크 SHA/CSP/판매승인 **NOT_RUN/NOT_GRANTED**. 이전 역사적 Node 86/86 PASS는 현재 제품 출고근거로 사용 금지.
+6. **브랜치/복원:** Private `hibi89/SMAX`, 이번 백엔드 코드/테스트/문서만. frontend 제품/ main 무변경, 배포·병합·force push 없음. GitHub SHA가 백업/재개 기준.
+7. **보안·데이터:** 합성 CSV만 검증; 실고객 자료/자격증명/유료 API/외부전송 없음. 리뷰 출력에 원본 레코드 번호 포함, 처리 자동확정 없음.
+8. **생산환경:** SMAX Cloudflare/Vercel Production 미적용; 상품 등록·실거래 시작 금지(명시 승인 필요). 사용자 Windows PC 반복 테스트 금지.
+9. **다음 안전 작업:** 최신 frontend, backend GitHub HEAD 및 STATUS/HANDOFF 확인; 개발자 측 검증 가능한 실패부터 패치. 실제 Native 환경/Windows Edge의 최종 관문만 사용자 1회 도움 요청 가능.
+10. **시점/근거:** 2026-10-27 KST private GH source 및 V8 adapter 테스트. 문서 반영 후 HEAD 재조회.
