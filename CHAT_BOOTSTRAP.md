@@ -1,3 +1,5 @@
+> **최신 2026-10-26 — 스총 CSV Unicode 숨김 접두어 수식 검토:** 실제 `site/csv-transform.mjs`의 `excelSafe`가 U+200E/200F/202E/2066/2069/034F/180E 등의 보이지 않는 문자 뒤 수식 시작 `= + @ -`를 `FORMULA_PROTECTED` 없이 통과시키는 것을 재현. 기존 whitespace/0-width 일부만 감지했으므로 `\\p{Default_Ignorable_Code_Point}` Unicode regex 추가, 검토 상태+apostrophe 보호, 정상 음수 금액·원본 행 보존. Private `frontend` production commit `8aed84d`, `backend` `64e16ee`; 양쪽 hardening 테스트 frontend `a1cf7f4`/backend `2e805ce`, sales 회귀 frontend `77663c1`/backend `1a23012`. 양 브랜치 체크인 CSV+매출 테스트 각각 **V8 격리 29/29 PASS** 및 Sales 3건 중 1건 잠정 반영, 의심 2건 검토 CSV 확인. **Native Node `npm run qa:release`/최신 실 디스크 SHA·CSP/실 Windows Edge `file://` E2E·Windows 사용성은 여전히 NOT_RUN**, 판매승인 미획득. `main` 불변, 무료 로컬 SELF 실행 2종+가이드 8종, 비밀 자료 전송·배포·돈 지출 없음. `STATUS.md`·`HANDOFF.md` 최신 추가 항목 참조, 다음 `ㄱ`은 최신 HEAD에서 계속. **2026-11-07 마감**, 사용자 반복 Windows 명령 금지.
+
 # 스총 새 채팅 자동 복원 — SMAX² Square (최신 2026-10-25)
 ## 사용자 지정 1문장 (정확히 이 문구)
 **`너는 스총이다 레포지토리보고 작업이어가셈`**
