@@ -784,3 +784,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 9. **다음 행동·완료 기준·승인:** Native 최신 전체 checkout→`npm run qa:release` PASS 및 disk SHA/CSP→Chromium file:// E2E→Windows Edge 한 차례 최종 QA→main/front/backend 충돌 검토·승인 후 안전 병합/출시 판정. 공개·판매·가격·계정/유료 서비스는 사용자 별도 승인 전 금지.
 10. **갱신/기준:** 2026-10-27 KST. 확인은 현재 private GitHub branch 실제 파일·테스트 콜백 실행 범위이며, Node/실 PC 성공으로 확대하지 않는다. 문서 커밋 이후 최신 Git HEAD 재조회; 개발 hard stop 2026-11-07.
 
+## 2026-10-27 KST — 스총 인계: 릴리스 QA 매니페스트·오프라인 브라우저 입력 검증
+1. **목표·용도·기술:** Private `hibi89/SMAX` SELF 고객PC 로컬 오프라인 HTML/규칙 엔진, CSV 표준화 및 잠정 매출 집계 2실행형+8가이드. 신규 CSV 헤더 회귀가 실제 출시 QA/브라우저 테스트 경계에서 누락되는 일을 막고 안전한 입력 거부를 E2E로 점검한다.
+2. **완료 기능·근거:** frontend `scripts/qa-release.mjs` 필수 테스트 목록 15종/실제 15종 정확 일치 및 추가/삭제/중복 시 fail-closed 검증. `scripts/qa_browser.mjs`에 U+200B 숨김 헤더와 전각/ASCII NFKC 동일 헤더 두 파일 업로드 E2E assertion 추가. `tests/windows-qa-contract.test.mjs` 자기 점검 및 회귀 2종 추가. 사용자 퀵스타트에 안전한 파일 복사·헤더 수정 안내. 제품 사이트/코어와 backend/main 무수정.
+3. **검증 명령·결과·미검증:** 출시 명령 `npm run qa:release`, 실 브라우저 `npm run qa:browser:node`, Windows `QA_SELF_WINDOWS.cmd /edge`. 이번 대화에서 인증된 GitHub 원문 대상으로 목록 **15/15**, inventory gate 정상/추가/누락 **3/3 V8 PASS**, 원격 실제 parseCsv/normalizeSpreadsheetCsv 악성 합성 브라우저 fixture **2/2 거부**, 체크인된 신규 계약 테스트 **2/2 V8 PASS**. 기타 QA 소스 V8 구문 통과. 최신 온디스크 Node 전체, 파일 SHA/CSP, Chromium/Edge file://, Windows 수동 UX **모두 미실행**; 이것을 출고 QA PASS로 승격 금지.
+4. **상태·중단점:** 기능/QA 코드·회귀·고객 안내 완료, Native 전체/실 브라우저 게이트 대기, 출시·실판매 미승인. 2026-11-07 1차 14일 개발 하드마감 유지.
+5. **오류·시도·전환:** 초기에는 `csv-header-safety.test.mjs`만 repo에 있고 명시 QA 목록에서 빠져 있었음. 필수 목록 추가 후 변경 시 자동 불일치 검사를 도입. 새 계약 테스트의 잘못된 selector 정규식은 즉시 재현하고 정확한 문자열 체크로 한 번 수정(최종 V8 PASS). 도구 컨테이너는 private GitHub full checkout 네트워크 접근이 막혀 있어 Native 릴리스 실행을 할 수 없음. 동일 네트워크 다운로드 방식 반복·구형 빌드 결과 재사용 금지; 실제 checkout 가능한 승인된 Node 환경에서 최종 QA.
+6. **저장소·브랜치·경로:** private `hibi89/SMAX` 오직 frontend 변경. 주요 커밋 QA 요구 `7746a501`/목록 fail-closed `f56c41d3`, browser `1bcd032e`, 계약 초기 `0f09e38` → 수정 `a7f97bb` → 확장 `3301e0e`, 고객 안내 `4599247c`. `STATUS.md` 및 이 `HANDOFF.md` 후속 문서 커밋 기준 최신 frontend SHA 재확인. main `3ec3698551686b0ddee8e4e5ac217517a6b1f7ed` 및 backend `5ec4a526b8d1ca90f7e2e4f846cee8cab6a7c868`는 시작 시 HEAD, 변경하지 않음.
+7. **Production/환경:** Node>=20, `scripts/build-self.mjs`, release report `dist/SELF_QA_REPORT.json`, offline HTML `dist/SMAX_SELF_OFFLINE.html`, 브라우저 Playwright 선택. Cloudflare/Vercel Production 없음/미적용, SHA 대응 URL 없음, 크몽 판매 없음.
+8. **원본·보안·백업:** 원격 GitHub Private branch와 선행 커밋으로 변경 전 버전 복원 가능. force push/분기 병합/기존 데이터 덮어쓰기·실고객 자료 업로드/토큰/금전 지출/공개 호스팅 없음. 공개 쇼룸의 `public-site`에 private 코어 포함 금지; 샘플 합성 입력만 QA에 사용.
+9. **다음 작업·승인:** Private 전체 checkout 허용 환경에서 `npm run qa:release` 진짜 PASS 및 생성 SHA/CSP 검사→`npm run qa:browser:node` Chromium/Edge 실결과→고객 PC Windows UX 1회→무료 public/유료 SELF 경계와 branch 통합 충돌 검토. 실 배포·판매·유료호스팅·서비스 권한 변경·병합/가격 확정 별도 승인 필요. 출고 완료 기준은 실제 실행과 보안/기능 판정이지 문서/소스 존재가 아님.
+10. **일시·기준:** 2026-10-27 KST, 최신 frontend GitHub connector 파일·브랜치 조회 및 V8 격리 테스트 기준; Native/브라우저/Production 검증 결여를 명시. 해당 STATUS/HANDOFF 갱신 후 HEAD 재조회해 다음 채팅 한 문장 재개 가능하게 유지.
+
