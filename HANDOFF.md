@@ -309,3 +309,13 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 9. **다음 행동·완료 기준·승인:** Native 최신 전체 checkout→`npm run qa:release` PASS 및 disk SHA/CSP→Chromium file:// E2E→Windows Edge 한 차례 최종 QA→main/front/backend 충돌 검토·승인 후 안전 병합/출시 판정. 공개·판매·가격·계정/유료 서비스는 사용자 별도 승인 전 금지.
 10. **갱신/기준:** 2026-10-27 KST. 확인은 현재 private GitHub branch 실제 파일·테스트 콜백 실행 범위이며, Node/실 PC 성공으로 확대하지 않는다. 문서 커밋 이후 최신 Git HEAD 재조회; 개발 hard stop 2026-11-07.
 
+## 2026-10-27 — 전처리 전용 브랜치 인계
+
+1. **사용자 지시:** 해커톤에 SMAX 전처리를 활용하기 위해 별도 브랜치 관리. Private `hibi89/SMAX`의 네 번째 `preprocessing` 브랜치를 backend SHA `5ec4a526b8d1ca90f7e2e4f846cee8cab6a7c868`에서 생성. 다른 브랜치는 그대로.
+2. **책임/범위:** SMAX 결정론적 전처리 공통 API·Strict JSON 계약·원본 출처/오류검토 큐·해커톤별 adaptor. 다른 팀/해커톤 코드 자동 수정·브랜치 병합/공개 배포 금지.
+3. **실행 코드:** `preprocessing/index.mjs` (`preprocessMappedCsv`, `validatePreprocessPackage`, `serializePreprocessPackage`) 및 `preprocessing/cli.mjs` (로컬 경로 입력/새 JSON, 2MiB, fatal UTF-8, overwrite 금지, source SHA). 기반 `site/csv-transform.mjs` 수정 없이 사용.
+4. **검증:** `SMAX_PREPROCESS_CSV_V0.schema.json` strict cross-language contract, 합성 `preprocessing/examples/synthetic-orders.csv`, 신규 Node 테스트 5+3+2=10개, `npm run test:preprocessing` 명령. 기존 CSV 엔진과 신규 package 테스트의 **격리 V8 5/5 PASS** 및 SHA 참조 3/3 확인. **Native 전체 테스트 10개와 CLI E2E NOT_RUN**.
+5. **복원:** `PREPROCESSING_HANDOFF.md`가 이 브랜치의 단독 운영 인계 정본. `preprocessing/README.md`·`docs/PREPROCESSING_BRANCH_PLAN_20261027.md`·`AGENTS.md` 상단 우선 읽기. 기존 3브랜치 한정 텍스트는 2026-10-27 사용자 신규 지시에 의해 4브랜치로 갱신됨.
+6. **주의:** Public 대회 저장소로 소스/사업 전략/고객 정보 원문 복사 금지. 공개 가능한 스키마·합성 fixture·코드 패키지를 사용자 승인/대회 규정 점검 후 분리. 실제 대회 합격·점수 상승·고객 데이터 정제 보장 근거 없음.
+7. **다음:** 최신 정확한 Private preprocessing checkout에서 `npm run test:preprocessing`/CLI 파일 생성 smoke, Generic CSV N필드 schema와 실 대회별 adapter. PDF/LLM/n8n/벡터는 향후. 병합·실고객 데이터·과금·외부 API 없음.
+8. **기준:** 2026-10-27 KST, 연결된 GitHub Private 원격 코드와 격리 V8 근거. 사용자 질문 “SMAX preprocessing 브랜치 확인하고 작업이어가셈” → 이 문서 복원 후 다음 안전 단위 진행.
