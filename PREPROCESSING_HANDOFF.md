@@ -41,3 +41,14 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 ## 6. 개발 운영 신호
 
 사용자가 다음 채팅에서 “[SMAX preprocessing 브랜치 확인하고 작업이어가셈]” 혹은 “전처리 총괄 ㄱ”으로 호출하면, hibi89/SMAX preprocessing 최신 HEAD·이 문서·preprocessing/README.md·docs/PREPROCESSING_BRANCH_PLAN_20261027.md·해당 소스·테스트 먼저 확인하고 안전한 다음 작업을 실제로 진행한다. 매 완료 단위에 STATUS/HANDOFF 및 이 정본을 최신화. 다른 브랜치는 자동 병합/배포/판매 금지.
+## 2026-10-27 — P1 범용 CSV 구현 후 역할·테스트 정본 추가
+
+**가장 최근 사용자 지시:** 스총/전처리 담당은 SMAX preprocessing 범용 데이터 전처리 엔진의 완성까지만 책임진다. KIC·유그린 등에서 코드를 가져가 변형하거나 특정 해커톤 저장소에 연결하는 작업은 해총 또는 각 해커톤 총괄 담당. 앞으로 전처리 담당이 대회별 어댑터를 만들거나 제출 과정을 조사하지 않는다.
+
+**이번 코드:** `site/csv-transform.mjs`의 기존 안전 CSV 파서 재사용 export `parseCsvRecords`; 신규 `preprocessing/generic-csv.mjs` 1~64 mapped fields, text/date/decimal/integer/boolean, 전 원본 행·열 보존, 필수값/정규화 오류·Excel formula 의심/완전중복 검토 큐 및 Strict JSON package. 새 JSON Schema 및 `tests/preprocessing-generic.test.mjs` 8건 + `tests/preprocessing-generic-schema.test.mjs` 2건. `package.json`의 `npm run test:preprocessing`에 등록. 3필드 V0 변환·판매 엔진·기존 main/frontend/backend 변화 없음.
+
+**검증:** 체크인 실제 CSV parser+V1 production 모듈+V1 8건 test callback을 모의 Node Crypto/Buffer와 V8에서 연결하여 **8/8 PASS**, 값 변조 거부 확인. 실제 native Node 테스트, JSON Schema 검증 라이브러리, 파일 디스크/실 고객 입력 품질 검수는 미실행. Native 전체 QA PASS로 오인 금지. V1 규격 샘플·타입·정보유출 경계 `preprocessing/README.md` 참조.
+
+**남은 전처리 작업:** Native 테스트 직접 실행 가능 환경 확보→V1 CLI 사용성→파일 형식별 플러그인과 provenance→필요 시 Local LLM 의미추출·Strict Schema·검토/승인 인터페이스. 해커톤별 연결·배포·코드 공개 정책은 해당 총괄들이 담당한다.
+
+**복원:** Private `hibi89/SMAX` `preprocessing` HEAD 및 `AGENTS.md`, `preprocessing/README.md`, `docs/PREPROCESSING_BRANCH_PLAN_20261027.md`, `PREPROCESSING_HANDOFF.md`, `STATUS.md`/ `HANDOFF.md` 확인. 대회·외부 계정·배포·유료 사용·실고객 자료 변경 없음.
