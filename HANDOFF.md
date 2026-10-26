@@ -723,3 +723,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본/백업/비밀·수정금지:** GitHub commit/blob 이력에 모든 변경 기록, 실데이터/토큰/계정 입력·외부 전송 없음. 고객 CSV, 주문번호, 원본 자격증명 없음. `site/` PRIVATE 제품 코어를 `public-site/`에 공개 배포하지 말 것; 엄격한 CSP 유지. 원본/브랜치 변경, 외부 공개 및 비용 발생은 별도 승인.
 9. **다음 우선순위·절차·완료기준·승인사항:** 출고에 가장 부족한 것은 **Native Node 전체 릴리스/디스크 SHA·CSP** 다음 **Windows Edge `file://` E2E + 사용성**. 현재 격리 PASS만으로 완료 표시 금지. 허가된 checkout 가능한 환경에서 검증 후 FAIL 로그가 나오면 원인별 최소 패치·회귀. 형에게 반복 Windows 명령 요청하지 않고 최종 필수 검증 시 1회만 요청. Cloudflare 공개·크몽 상품등록·거래/결제는 사용자 명시 승인 전 금지.
 10. **KST 갱신 및 증거 범위:** 2026-10-26, private `frontend` 원격 코드와 체크인 테스트 본문 V8 격리 검사·메모리 빌드만. 기준 문서 QA/STATUS/HANDOFF, 최종 브랜치 HEAD는 아래 후속 실제 재조회로 확정. `main`·`backend` 및 별도 해커톤에 변경 없음.
+
+## 2026-10-26 KST — 스총 인수: CSV 원본값 로컬 미리보기
+1. **목표/확정요구:** 사장님이 CSV 업로드 후 잘못된 날짜/품목/금액 열을 고르기 전에 첫 데이터값을 직접 확인하도록 사용성 강화. SMAX² SELF 2실행 + 8가이드, 로컬/무료·수동승인·2026-11-07 마감 유지.
+2. **기능/선택 근거:** 기존엔 실제 CSV 업로드 뒤 열 이름만 드롭다운으로 보이고 원본 샘플 행이 없어 유사 열 오선택 위험. 별도 외부 API/시각화 라이브러리 없이 기존 `parseCsv` 결과로 최대 3행×12열만 보여주는 A안 채택. 자동 추론/자동 승인 B안은 범위·위험 증가로 제외. 셀 80자 초과는 **화면 표시만** 축약, 제어문자/Bidi 제거·기존 `h()` HTML escape 적용. 데이터 변환·원본 출력·중복 규칙에 영향 없음.
+3. **테스트 경계:** 최신 실제 사이트 모듈 5개와 신규 checked-in async 테스트 콜백을 V8 fake DOM에서 직접 호출 **1/1 PASS**: 헤더 14개→표시는 12, 입력 4행→표시 3, 실제 정규화 4행 모두, 악성 HTML 셀 DOM 비실행, 100자 원본은 CSV 다운로드에서 완전 보존, 매핑 필수 유지, 다른 템플릿/합성 예제 전환시 격리. Native Node 전체·최신 실제 Edge `file://` **NOT_RUN**, 해당 진전은 출시 판정 아님.
+4. **진행/대기:** 생산 기능·회귀·고객안내 GitHub commit 완료. 기존 완성범위와 릴리스 게이트 분리. 코드 문제로 발견된 운영 장애는 없음; 실제 브라우저 시인성/scroll/너비는 Windows Edge 1회 최종 검수 대기.
+5. **실패/원인/재시도 피하기:** 37코어 시험/93,387B 인메모리 HTML SHA는 새로운 `site/app.mjs` 이전 코드에 대한 **역사적 증거**; 현재 SHA/HTML 출시 지문으로 인용하면 안 됨. 기존 container Git clone DNS 장애 지속. GitHub 원문+V8로 독립 제품 기능 확인 가능; Native 실행 못한 것을 PASS라고 쓰지 않음.
+6. **GitHub 브랜치/SHA/경로:** Private `hibi89/SMAX` `frontend`만; code `site/app.mjs` commit `e00236eb0f146c919d0f2bb3d2267f37b068f6b6`, tests `tests/offline-ui-smoke.test.mjs` commit `6661bad8b86a302b62f8d2cfc0867b9f16549dad`, quickstart `docs/SELF_CUSTOMER_QUICKSTART_20261025.md` `40283bfaa6899541c2763e560c1c4b5331246e0f`, STATUS `0c7c2a8cb27a1811453aa0a0f3f5a218d23a5bfc`; this HANDOFF 후 `CHAT_BOOTSTRAP.md` 및 최종 HEAD 확인 필요. `main` / `backend` 변경 없음.
+7. **환경/명령:** 정식 출고 명령 `npm run qa:release`, Edge 실기기 `QA_SELF_WINDOWS.cmd /edge`. Cloudflare/Vercel Production/구매가능 URL 아직 없음. `site/` 개인판매 코어를 `public-site/`로 공개하지 않음.
+8. **원본/백업/비밀:** GitHub private 커밋으로 복원. 사용자 실 CSV는 서버/파일시스템/로그에 저장되지 않음; preview는 브라우저 DOM으로만 출력. 테스트는 가상 합성 CSV에만 수행. 실고객자료/계정/API 키/결제정보/영업기밀 공유·외부호출 없음. 코드/운영 시크릿 미변경.
+9. **다음 작업:** 실제 새 코드에 대한 Native node 전체 릴리스 QA/최신 artifact SHA·CSP, Edge `file://` 시인성/테이블 스크롤/실입력 1회 확인이 필수. 사용자 반복 수동 명령 금지, 진행 가능한 안전 버그/성능 개선 및 isolated regression 선행. 최종 공개/크몽 등록/유료 판매는 사용자 명시 승인 요구.
+10. **증거 시각/범위:** 2026-10-26 KST, 인증 GitHub private 생산 소스/테스트 본문 직접 읽기·분리 V8 fake DOM 1회 PASS; Native Node/Edge 실사용/판매 검증 없음. 문서 반영 후 최종 HEAD 재조회하고 다음 `ㄱ`은 그 SHA에서 시작.
