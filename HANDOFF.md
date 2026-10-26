@@ -831,3 +831,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **다음 작업/명령/완료:** 실제 최신 소스 checkout 허용 Node 실행환경에서 `npm run qa:release` 성공→`dist/SELF_QA_REPORT.json`와 온디스크 HTML SHA/bytes 검증→실 Chromium `npm run qa:browser:node`→Windows Edge `QA_SELF_WINDOWS.cmd /edge`와 수동 UX 1회→승인된 별도 main 통합 및 상품 검수. 이전 SHA/옛 86/86 Native 결과를 재사용 금지.
 9. **실패/판정:** Node 전체 QA는 `BLOCKED_ENV`, 빌더 후보 정합은 `IN_MEMORY_PASS`, 브라우저는 `NOT_RUN`, releaseApproved=false. 코드/기능 이슈와 네트워크 실행환경의 독립성을 유지할 것.
 10. **일시:** 2026-10-27 KST. GitHub connector authenticated source + V8 메모리 함수 실행 기준. 다음 `ㄱ`에서 이 문서 먼저 확인하고 같은 DNS 실패 시도 반복 없이 안전한 보완을 이어간다.
+
+## 2026-10-27 KST — 스총 인계: Native 15검사 PASS, 릴리스 소스 동결 검증
+1. **현재 목표/기간:** Private SMAX² SELF 사장님 존 오프라인 HTML, 실제 CSV 표준화/잠정 매출 2종 및 설계 가이드 8종. 2026-11-07 1차 개발 상한, 대외 배포/판매 미승인.
+2. **이번 코드:** `frontend/scripts/qa-source-snapshot.mjs` 소스(코어/테스트/정적공개/예제/manifest) 파일 SHA·파일수 검사 추가. `frontend/scripts/qa-release.mjs` 테스트 전 A/보고 직전 B 비교, 빌드 입력이 바뀌면 FAIL 및 기존 산출물 삭제, `sourceSnapshotSha256`/ `sourceFileCount` 보고서 저장. 테스트 경로 필수 16/16.
+3. **브라우저/Windows 안전:** `scripts/self-qa-integrity.mjs`와 `scripts/VERIFY_SELF_WINDOWS.ps1`은 구형 QA 보고서 또는 잘못된 SHA/파일 개수면 브라우저 실행 전에 차단. PowerShell은 JSON의 Int32·Int64를 모두 허용. 관련 `tests/self-qa-integrity.test.mjs` 2개 회귀 추가, `tests/windows-qa-contract.test.mjs`의 mock 검증기를 신규 API에 맞춰 정정.
+4. **결함/복구:** PS1 편집 중 내용 중복·손상 발생을 원격 새 조회로 확인. Git blob `3bc6e82535cc52df9d8b0d0b957aeed4129501e8` 원본을 다시 가져와 신규 검증 블록만 안전 삽입; 원문 나머지가 정확히 일치하는지 비교 후 최종 `809937d6a775b5d79f6d8f27f91009e93f548811`로 정상화. 중간 깨진 버전은 사용 금지.
+5. **검증 결과:** Node v22.16.0로 개발 격리 fixture에서 **새 snapshot 5개 + 기존/확장 integrity 10개 = 15/15 Native PASS, FAIL 0**. 원격 실제 필수 테스트 16/16 목록 일치, 보고서/코드 연결 확인. **전체 Native `npm run qa:release`, 실 디스크 HTML SHA/CSP/Chromium/Windows Edge·수동 사용자 QA는 실행하지 못함**. Native 부분 테스트를 전체 출고 승인으로 격상 금지.
+6. **보존/복원:** `frontend`만 수정. 공통 상태/계약 문서 `docs/QA_RELEASE_SOURCE_LOCK_20261027.md` (commit `2b5de31af07fe142d1f731a8bb4e9473e62ec383`) 참조. `main 3ec3698551686b0ddee8e4e5ac217517a6b1f7ed`, `backend 5ec4a526b8d1ca90f7e2e4f846cee8cab6a7c868` 보존. 신규 테스트/`qa-release` 소스 SHA는 GitHub 확인.
+7. **운영/Production:** Cloudflare/Vercel Production 미배포, 구매/결제/개인정보/고객파일 처리 없음. 고객용 `dist/`는 GitHub에서 무시, 공개용 `public-site/`에 비공개 코어 넣지 않음. 부가 API·금전 지출 및 강제 브랜치 병합 금지.
+8. **다음 실제 작업:** Private 전체 frontend checkout 접근 가능한 승인된 Node 환경에서 `npm run qa:release` exit0와 disk `dist/SELF_QA_REPORT.json` source SHA 및 HTML hash 확보. 동일 HTML `npm run qa:browser:node`의 Chromium, Windows `QA_SELF_WINDOWS.cmd /edge` 1회, 수동 UX, 사업/사용권 승인 순서. 같은 DNS 불능 Git clone 반복 시도 금지.
+9. **판정:** `source_snapshot_unit=PASS`, `browser_report_integrity_unit=PASS`, `full_release_qa=NOT_RUN`, `releaseApproved=false`, `mergePerformed=false`. 결론 70% 내외 기술 추정치는 최신 풀 QA 전 임의 변경하지 않음.
+10. **갱신 시점:** 2026-10-27 KST, GitHub connector 최신 원문+별도 실제 Node subset fixture 증거, 실제 브라우저/배포 없음. 문서 커밋 후 최신 frontend HEAD 재조회.
