@@ -576,3 +576,13 @@
 - **회귀:** backend `tests/csv-transform.test.mjs`에 검토 2건만 포함/원본번호 3·4/전체 4건 보존/정상 2·5 미포함/검토 0건 시 헤더만 포함 증명, 커밋 `69e1344f8bf64f15e938f5678ef2fe828575966a`.
 - **실행:** 최신 원격 체크인 테스트 콜백을 생산 JS에 연결한 V8 격리 검사 **frontend 29/29 PASS, backend 30/30 PASS**; 양쪽 `reviewCsv` 반환 타입 `string`, 변환기 blob 동일 확인. Node test/assert/FS를 간이 adapter로 대체한 결과이므로 Native 전체 `npm run qa:release`, 디스크 아티팩트 SHA/CSP, 실제 Edge `file://` E2E 및 Windows 실사용은 **NOT_RUN**.
 - **운영:** Private repo `backend` 수정만, `frontend`/ `main` 제품 본문 불변, 병합·배포·과금·실고객 파일·외부 전송·크몽 출시/판매 승인 없음. SELF 2개 CSV 실행 + 8개 설계 가이드, 2026-11-07 개발 마감 유지. 형에게 반복 Windows QA 요청 없음.
+
+## 2026-10-27 KST — 스총: CSV 열 이름 시각적 혼동 차단 (직접 재현·패치·회귀)
+- **실제 결함 재현:** `거래날짜,금액,금\u200B액,품목` 입력은 눈으로 확인하기 어려운 zero-width U+200B가 끼어 있으나 기존 `parseCsv`와 `normalizeSpreadsheetCsv`가 모두 수락; 잘못 선택한 두 번째 금액 열 `999`를 정상 변환한 사례 확인. 이 상태는 사용자가 열 선택을 직접 확인하도록 한 안전 설계를 저해함.
+- **수정:** frontend `site/core.mjs`, frontend/backend `site/csv-transform.mjs`, backend `site/core.mjs`에 CSV 헤더의 제어문자·Unicode Default_Ignorable 코드포인트 fail-closed 차단과, NFKC+한국어 소문자 비교 시 같아지는 열 이름 중복 차단 추가. 사용자에게 원본 CSV 헤더 정정 오류를 표시하며 **원본 내용·유효 행·금액 변환·검토 CSV 구조를 변경하지 않음**.
+- **커밋:** frontend core `3b817b8b3edca4ec1975c09f5cd48f24e0b71010`; frontend transform `da644bd4fc795b3d54715d251214d57b94c92d1c`; backend transform `21cf2a42b932ad08ba47bbbf4eb5282a874da6ff`; backend core `7398e437679d4e255074a9aa1c670a3a1955680b`.
+- **회귀 소스:** 양쪽 브랜치에 `tests/csv-header-safety.test.mjs` 추가. frontend `293f5095fe0f6e7003bdaadf141afe9fb58bfc1e`; backend `125536c176a2e8fe26446632e51914cb580c0680`. 보이지 않는 U+200B/202E/2066/FEFF, 탭, NFKC 전각·조합 자모 충돌, 정상 BOM/한글·매출 리포트 보호 범위 확인.
+- **실행 범위:** 최신 원격 실제 `site/core.mjs`+`csv-transform.mjs`+`sales-report.mjs`와 체크인된 원본 `csv-transform`·`csv-hardening`·신규 `csv-header-safety` 테스트 콜백을 V8 격리 adapter에서 실행: **frontend 21/21 PASS, backend 23/23 PASS (총 44/44)**. Node 내장 test/assert와 파일시스템을 사용한 Native 테스트 아님; 독립 adapter는 검증 편의를 위해 대체 구현. 6/6 신규 예비 경계 검사도 통과.
+- **남은 관문:** 정확한 최신 소스 checkout의 `npm run qa:release`/실 디스크 HTML SHA·CSP/Chromium `file://`/Windows Edge 및 수동 UX **NOT_RUN**. Node v22.16.0 존재하지만 컨테이너 `github.com` DNS 실패로 private 전체 checkout 불가; 기존 실패 형태 반복·GitHub Actions 무단 재실행 금지.
+- **보존/사업:** Private `hibi89/SMAX` frontend/backend만 수정, main 소스/분기 이력/기존 고객데이터/대외 배포/크몽 판매/유료 AI/비용 변경 없음. 1차 SELF 2종 로컬 실행+8종 설계 가이드, 출시 미승인, 2026-11-07 하드마감 유지.
+
