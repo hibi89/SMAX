@@ -747,3 +747,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본/보안/백업:** 원본 CSV 변형 없음, 내부 가상 실험만. GitHub 커밋과 파일 SHA로 복원 가능; 강제 push·브랜치 통합 금지. 원본 3개 행 전체를 메모리에 보관하지만 DOM 공개 상한 12열이고 파일 원본2MB 제한 그대로. 사용자 컨펌 없이 실제 외부 발송/ERP/거래 수정/Cloudflare `public-site`로 private core 복사 금지.
 9. **다음 우선순위:** 최신 HEAD/메모리 검증 기준 확인→실제 Node QA·빌드 SHA/CSP/Edge 환경 권한 문제 해결 가능한지 확인→필요한 결함만 패치. 제품 사용성에서 재현되는 UI 문제 우선. 실 브라우저 QA 한 번은 필수이고 이를 건너뛰고 판매 PASS로 표시하지 말 것.
 10. **날짜/근거경계:** 2026-10-26 KST, 인증 GitHub 내용 및 실제 production 소스 기반 고립 V8. 새로 생성한 가상 CSV는 16열이고 실제 고객 자료 아님. 격리 테스트 2개만 검증, Native/실 브라우저 전체 성공 주장 금지. 개발 마감 11월 7일 유지.
+
+## 2026-10-26 KST — 스총 인수: 유니코드 접두어 CSV 수식 검토 경계
+1. **목표:** SMAX² SELF(오프라인 CSV 실제 실행 2종 + 가이드만 8종) 출시 전 입력 안전성. 승인 없는 판매/공개/고객 업로드 없음, 개발 마감 2026-11-07.
+2. **검증 전 문제:** 원격 생산 `normalizeSpreadsheetCsv`에 보이지 않는 Unicode `U+200E/202E/2066/2069/034F` 뒤 `=1+1` 넣으면 `FORMULA_PROTECTED` 없음·apos 보호 없음. Excel이 실제 수식 실행한다는 실험은 하지 않았으므로 **위장 위험을 보수적 검토로 분류**. 기존 U+200B/2060 보호는 정상.
+3. **구현:** `site/csv-transform.mjs` `excelSafe`의 수식 기호 앞에 제어문자·Unicode `Default_Ignorable_Code_Point`를 허용하는 경계 정규식 `u` 플래그 사용. 이 경우 기본 `'` 보호 + `FORMULA_PROTECTED`, 원본 표시 유지, 실제 음수 금액 `-123` 보호하지 않음. frontend `8aed84d` / backend `64e16ee`, 파일 둘의 preexisting `reviewCsv` shape 차이는 그대로.
+4. **회귀/실행:** CSV hardening 7 숨김 코드포인트 + 일반값 `a1cf7f4`/`2e805ce`; sales 3행에서 정상100원 포함·2 위장 채널 제외·reviewCSV 사유 원문 유지 `77663c1`/`1a23012`. 양 브랜치 실제 체크인 테스트 V8 **29/29 각각 PASS**, isolated adapter 사용, 별도 sales engine 실제 원문 시뮬레이션 확인. **Native Node, 브라우저 file://, Windows 수동 UX는 NOT_RUN**.
+5. **안전/불확실성:** 다양한 스프레드시트 프로그램의 내부 수식 재해석 여부를 포괄 검증하지 못함. 그 대신 모호한 선두 문자는 검토 표시 및 출력 apostrophe. 새 정규식은 modern Node/Chrome/Edge Unicode property escapes를 사용하지만 actual Windows Edge test는 추후 필요. Full imported tests/QA release는 남음.
+6. **Repo/branch:** private `hibi89/SMAX` frontend+backend 최소 shared-core bugfix 및 동일 테스트; main 변경 없음. Frontend customer quickstart `41533df`. STATUS 및 bootstrap 갱신 이후 각 브랜치 실제 HEAD 재조회. GitHub SHA 버전으로 복구.
+7. **Production/운영:** Cloudflare/Vercel SMAX live Production 없음, Kmong 상품 결제/호스팅 미승인. 영업비밀·실 CSV·키·유료 호출 없음. 로컬 정식 QA `npm run qa:release`; 최신 소스 체크아웃 가능한 Native Node 환경 확보해야 함.
+8. **원본/보존:** 외부 수집/전송/저장 추가 없음; 의심값의 원래 문자·원본 CSV 레코드 번호는 검토 CSV로 유지. 액셀/세무 확정 또는 AI 승인 없이 작업 실행 불가.
+9. **다음 우선순위:** 최신 frontend HEAD부터 code/tests/STATUS/HANDOFF 확인, 아직 Native 전체 QA와 실 Windows Edge file:// E2E 필요. 가능하면 추가 코드 자체 결함만 최소 수정. 형에게 반복 실기기 QA 요청은 최종 게이트에서 1회.
+10. **날짜/근거:** 2026-10-26 KST. GitHub private 원문과 V8 isolated 29/29 ×2 기반. 실기기 출고/판매 PASS 주장은 금지.
