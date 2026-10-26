@@ -45,7 +45,10 @@ function parseRecords(source) {
   if (!endedWithNewline || row.length || cell.length || afterQuote) pushRow();
   const headers = (records.shift() ?? []).map(v => v.trim());
   if (!headers.length || headers.some(v => !v)) throw new CsvTransformError('빈 CSV 열 이름이 있습니다.');
-  if (new Set(headers.map(v => v.toLocaleLowerCase('ko-KR'))).size !== headers.length) {
+  if (headers.some(v => /[\u0000-\u001F\u007F-\u009F\p{Default_Ignorable_Code_Point}]/u.test(v))) {
+    throw new CsvTransformError('CSV 열 이름에 보이지 않는 제어문자가 있습니다. 원본 열 이름을 수정하세요.');
+  }
+  if (new Set(headers.map(v => v.normalize('NFKC').toLocaleLowerCase('ko-KR'))).size !== headers.length) {
     throw new CsvTransformError('중복된 CSV 열 이름이 있습니다.');
   }
   for (let i = 0; i < records.length; i++) {
