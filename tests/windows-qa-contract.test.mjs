@@ -68,3 +68,21 @@ test('Node release QA blocks unnormalized inline CSS and script before any brows
   assert.match(release,/b64sha256\(css\)/);
   assert.match(release,/LOCAL_NODE_PASS_BROWSER_NOT_TESTED/);
 });
+
+test('release manifest and browser QA require new CSV header safety regression',()=>{
+  const release=readFileSync(new URL('../scripts/qa-release.mjs',import.meta.url),'utf8');
+  const manifest=release.indexOf("'csv-header-safety.test.mjs'");
+  const unit=release.indexOf("run('unit')");
+  const build=release.indexOf("run('build')");
+  assert.ok(manifest>=0 && unit>manifest && build>unit,
+    'new CSV header regression must be checked before tests and packaging');
+  const browser=readFileSync(new URL('../scripts/qa_browser.mjs',import.meta.url),'utf8');
+  for(const fragment of [
+    'HIDDEN_CSV_HEADER.csv',
+    'CONFUSABLE_SALES_HEADER.csv',
+    'Spreadsheet upload rejects invisible Unicode headers',
+    'Sales upload rejects NFKC-compatible duplicate headers'
+  ])assert.ok(browser.includes(fragment), 'missing browser safety contract: '+fragment);
+  assert.match(browser,/run-csv['"]\]\)\.isDisabled\(\)/);
+  assert.match(browser,/run-sales['"]\]\)\.isDisabled\(\)/);
+});
