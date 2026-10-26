@@ -1,6 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/smax/SMAX_PREPROCESS_CSV_V0.schema.json",
   "title": "SMAX CSV Preprocessing Package V0",
   "type": "object",
   "required": [
