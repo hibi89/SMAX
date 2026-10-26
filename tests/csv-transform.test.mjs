@@ -150,3 +150,30 @@ test('different order IDs preserve separate valid transactions even for equivale
   assert.equal(r.rows[2][5],'DUPLICATE');
   assert.equal(r.rows[1][4],'READY_FOR_HUMAN_REVIEW');
 });
+
+
+test('backend review-only CSV contract matches frontend and preserves every flagged source row', () => {
+  const input='거래날짜,품목,결제금액,주문번호\n'
+    +'2026-10-01,연필,100,A\n'
+    +'2026-10-01,연필,100,A\n'
+    +'2026-02-30,공책,200,B\n'
+    +'2026-10-02,지우개,300,C';
+  const r=normalizeSpreadsheetCsv(input,mapping);
+  assert.equal(r.summary.inputRows,4);
+  assert.equal(r.summary.outputRows,4);
+  assert.equal(r.summary.reviewRows,2);
+  assert.equal(r.rows.length,4,'all original records survive the full output');
+  assert.ok(r.csv.startsWith('\uFEFF'+SPREADSHEET_OUTPUT_COLUMNS.join(',')));
+  assert.ok(r.reviewCsv.startsWith('\uFEFF'+SPREADSHEET_OUTPUT_COLUMNS.join(',')));
+  assert.equal(r.csv.trimEnd().split('\r\n').length,5);
+  assert.equal(r.reviewCsv.trimEnd().split('\r\n').length,3);
+  assert.match(r.reviewCsv,/,3,NEEDS_REVIEW,DUPLICATE/);
+  assert.match(r.reviewCsv,/,4,NEEDS_REVIEW,INVALID_DATE/);
+  assert.doesNotMatch(r.reviewCsv,/,2,READY_FOR_HUMAN_REVIEW,/);
+  assert.doesNotMatch(r.reviewCsv,/,5,READY_FOR_HUMAN_REVIEW,/);
+  const clean=normalizeSpreadsheetCsv(
+    '거래날짜,품목,결제금액\n2026-10-02,지우개,300',mapping);
+  assert.equal(clean.summary.reviewRows,0);
+  assert.equal(clean.reviewCsv.trimEnd().split('\r\n').length,1,
+    'no flagged rows returns header-only reviewCsv');
+});
