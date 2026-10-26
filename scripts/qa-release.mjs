@@ -2,7 +2,7 @@
 // node scripts/qa-release.mjs  (or npm run qa:release)
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeSpreadsheetCsv } from '../site/csv-transform.mjs';
@@ -27,10 +27,17 @@ function run(label) {
 
 try {
   // Test discovery is platform-independent, unlike "tests/*.test.mjs" via Windows cmd.
-  for (const test of [
+  const requiredTests = [
     'core.test.mjs', 'demo-fixture-contract.test.mjs', 'csv-preflight-parity.test.mjs', 'csv-transform.test.mjs', 'csv-hardening.test.mjs', 'csv-header-safety.test.mjs', 'csv-property.test.mjs', 'csv-ui.test.mjs',
     'public-boundary.test.mjs', 'offline-package.test.mjs', 'offline-ui-smoke.test.mjs', 'sales-report.test.mjs', 'self-qa-integrity.test.mjs', 'windows-qa-contract.test.mjs', 'qa-branch-reconcile.test.mjs'
-  ]) {
+  ];
+  const actualTests = readdirSync(join(root, 'tests')).filter(name => name.endsWith('.test.mjs')).sort();
+  const expectedTests = [...requiredTests].sort();
+  requireCheck(requiredTests.length === new Set(requiredTests).size &&
+    actualTests.length === expectedTests.length &&
+    actualTests.every((name, index) => name === expectedTests[index]),
+    'release test inventory changed; inspect and update the mandatory list');
+  for (const test of requiredTests) {
     requireCheck(existsSync(join(root, 'tests', test)), 'expected test missing: ' + test);
   }
   run('unit');
