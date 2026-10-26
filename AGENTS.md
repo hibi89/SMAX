@@ -1,3 +1,5 @@
+> **최신 2026-10-27 사용자 지시 — PREPROCESSING 전용 운영:** Private SMAX에 기존 세 브랜치 외 신규 `preprocessing` 브랜치가 추가됐다. 아래 2026-10-25 '오직 세 브랜치' 규칙은 이 브랜치의 신설 결정에 한해서만 갱신한다. **본 브랜치에서만** 전처리 API/Strict JSON 계약/해커톤 재사용 합성 검증을 작업하며, `main`·`frontend`·`backend`에 자동 병합·수정하지 않는다. Private SMAX 원본을 Public 해커톤 저장소로 복사하지 않고, 공개 가능 최소 계약·코드를 분리하려면 별도 검수/사용자 승인을 거친다. `preprocessing/README.md`와 `docs/PREPROCESSING_BRANCH_PLAN_20261027.md`가 전처리 복원 정본이다.
+
 > **최신 사용자 고정 역할 — 스총(2026-10-25):** 사용자 문구 **`너는 스총이다 레포지토리보고 작업이어가셈`**은 `hibi89/SMAX` 전담 총괄을 지정한다. 과거 이 문서에서 assistant를 '해커톤 총괄 겸 SMAX 총괄'로 쓰던 부분은 **폐기된 역사 기록**. 최신 정본 [CHAT_BOOTSTRAP.md](CHAT_BOOTSTRAP.md) → [스총 완전한 인수인계](docs/STECHONG_CANONICAL_CONTEXT_20261025.md). `ㄱ`은 실제 승인된 다음 SMAX 안전 작업만. 과거 사용자 지시·실행 증거와 충돌 시 최신 HEAD/결정 우선.
 
 # SMAX AI/Codex/총괄 운영 규약
