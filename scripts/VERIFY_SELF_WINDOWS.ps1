@@ -55,46 +55,8 @@ try {
             throw "Release QA report missing required PASS evidence: $name"
         }
     }
-    # Ensure browser QA never accepts an older Node report without source-lock proof.
-    if ($report.sourceSnapshotSha256 -cnotmatch '^[a-f0-9]{64}
-        throw 'Release report must not claim sale approval.'
-    }
-    $actualSha = (Get-FileHash -LiteralPath $htmlPath -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($actualSha -ne $report.sha256.ToLowerInvariant()) {
-        throw 'Offline HTML SHA256 does not match the QA report.'
-    }
-    $actualBytes = (Get-Item -LiteralPath $htmlPath).Length
-    if ($actualBytes -ne [long]$report.bytes) {
-        throw 'Offline HTML byte count does not match the QA report.'
-    }
-    Write-Host ""
-    Write-Host "[SMAX SELF] Node QA + build PASS. Offline HTML:"
-    Write-Host "  $htmlPath"
-    Write-Host "  SHA256: $actualSha"
-    Write-Host "  Bytes:  $actualBytes"
-    if ($EdgeE2E) {
-        Write-Host "[SMAX SELF] Running actual Edge offline file:// QA (developer Playwright required)..."
-        & npm.cmd run qa:browser:node -- --channel msedge
-        $browserExit = $LASTEXITCODE
-        if ($browserExit -ne 0) {
-            throw "Edge E2E failed or blocked (exit $browserExit). Do not distribute."
-        }
-        Write-Host "[SMAX SELF] Edge automated file:// E2E PASS against release-QA-matched HTML."
-        Write-Host "[IMPORTANT] Manual Windows usability, customer delivery and sale approval still NOT GRANTED."
-    } else {
-        Write-Host "[IMPORTANT] Windows Edge/Chrome file:// and CSV downloads NOT TESTED."
-        Write-Host "To run real Edge automation: QA_SELF_WINDOWS.cmd /edge (developer Playwright required)."
-    }
-    $ok = $true
-    Write-Host "Release/sale approval: NOT GRANTED."
-} catch {
-    Write-Error ("[SMAX SELF] BLOCKED/FAIL: " + $_.Exception.Message)
-} finally {
-    Pop-Location
-}
-if (-not $ok) { exit 1 }
-exit 0
- -or
+    # Browser/Windows QA must not accept reports predating source-lock checks.
+    if ($report.sourceSnapshotSha256 -cnotmatch '^[a-f0-9]{64}$' -or
         ($report.sourceFileCount -isnot [int] -and $report.sourceFileCount -isnot [long]) -or
         $report.sourceFileCount -lt 1) {
         throw 'Release QA report missing valid source snapshot evidence.'
