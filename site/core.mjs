@@ -72,4 +72,14 @@ export function buildBlueprint(template,answers={},mapping={},options={}){
   };
 }
 
-export function buildHandoff(template,blueprint){const nl="\n";return[`# ${template.title} — AI 직접 구축 요청서`,``,`다음은 SMAX에서 작성한 **자동화 설계 초안**입니다. 실제 자료는 사용자 승인 전 임의로 외부 전송하지 마세요.`,`현재 상태: ${blueprint.state}`,"","## 목표",template.summary,"","## 입력 필드",...(blueprint.guideOnly?["**미검증 설계 항목명입니다. 실제 데이터 원본/필드 매핑이 확인되지 않았으며 자동화 실행에 사용할 수 없습니다.**",""]:[]),...blueprint.fields.map(f=>`- ${f.label}: ${f.sourceColumn||"미확정 (직접 매핑 필요)"}${blueprint.guideOnly?" (현장 확인 필요)":""}`),"","## 확정/미확정 질문",...blueprint.questions.map(q=>`- ${q.prompt}: ${q.answer||"미입력"}`),"","## 구축 단계",...blueprint.workflow.map((s,i)=>`${i+1}. ${s}`),"","## 사용할 수 있는 도구",...blueprint.tools.map(s=>`- ${s}`),"","## 주의",...blueprint.cautions.map(s=>`- ${s}`),"","## 외부 AI에게 요청","1. 위 내용 중 불명확한 필드나 업무 규칙을 먼저 질문하세요.","2. 실제 계정/개인정보/API 키를 요구하지 말고 가짜 예제로 따라 할 수 있게 설명하세요.","3. 사용자가 직접 설정하는 각 단계의 예상 화면·설정값·검증 방법을 구분해 알려 주세요.","4. 외부 도구의 현재 버전/권한/요금과 자동전송 단계는 사용자가 확인하고 승인해야 합니다.","","## 검증 체크리스트","- [ ] 사용자의 입력 필드와 원본 매핑이 정확함","- [ ] 모호한 업무 규칙과 예외를 사용자와 확인함","- [ ] 테스트 파일/계정을 활용하여 시뮬레이션 검증함","- [ ] 개인정보·영업기밀·외부 API 사용 권한 확인함","- [ ] 실제 발송·수정·결제 등 외부 쓰기 작업은 별도 승인함"].join(nl)}
+function handoffLiteral(value){
+  // Customer/CSV text is DATA, not an instruction or a Markdown section.
+  return String(value ?? '')
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g,' ')
+    .replace(/[\u202a-\u202e\u2066-\u2069]/g,'')
+    .replace(/\\/g,'\\\\')
+    .replace(/([`*_{}\[\]()#+.!|>~-])/g,'\\$1')
+    .trim();
+}
+
+export function buildHandoff(template,blueprint){const nl="\n";return[`# ${template.title} — AI 직접 구축 요청서`,``,`다음은 SMAX에서 작성한 **자동화 설계 초안**입니다. 실제 자료는 사용자 승인 전 임의로 외부 전송하지 마세요.`,`현재 상태: ${blueprint.state}`,"","## 목표",template.summary,"","## 입력 필드",...(blueprint.guideOnly?["**미검증 설계 항목명입니다. 실제 데이터 원본/필드 매핑이 확인되지 않았으며 자동화 실행에 사용할 수 없습니다.**",""]:[]),...blueprint.fields.map(f=>`- ${f.label}: ${f.sourceColumn?handoffLiteral(f.sourceColumn):"미확정 (직접 매핑 필요)"}${blueprint.guideOnly?" (현장 확인 필요)":""}`),"","## 확정/미확정 질문",...blueprint.questions.map(q=>`- ${q.prompt}: ${q.answer?handoffLiteral(q.answer):"미입력"}`),"","## 구축 단계",...blueprint.workflow.map((s,i)=>`${i+1}. ${s}`),"","## 사용할 수 있는 도구",...blueprint.tools.map(s=>`- ${s}`),"","## 주의",...blueprint.cautions.map(s=>`- ${s}`),"","## 외부 AI에게 요청","1. 위 내용 중 불명확한 필드나 업무 규칙을 먼저 질문하세요.","2. 실제 계정/개인정보/API 키를 요구하지 말고 가짜 예제로 따라 할 수 있게 설명하세요.","3. 사용자가 직접 설정하는 각 단계의 예상 화면·설정값·검증 방법을 구분해 알려 주세요.","4. 외부 도구의 현재 버전/권한/요금과 자동전송 단계는 사용자가 확인하고 승인해야 합니다.","","## 검증 체크리스트","- [ ] 사용자의 입력 필드와 원본 매핑이 정확함","- [ ] 모호한 업무 규칙과 예외를 사용자와 확인함","- [ ] 테스트 파일/계정을 활용하여 시뮬레이션 검증함","- [ ] 개인정보·영업기밀·외부 API 사용 권한 확인함","- [ ] 실제 발송·수정·결제 등 외부 쓰기 작업은 별도 승인함"].join(nl)}
