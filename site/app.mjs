@@ -76,9 +76,17 @@ function editorPanel(t){
   // Data remains in the browser: the bounded sample is display-only and cannot
   // authorize a mapping. Escape untrusted cells and strip invisible controls.
   const previewCell=value=>h(String(value??"").replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g," ").slice(0,80));
-  const previewColumns=state.headers.slice(0,12);
+  // Favor explicit human-selected columns, even when they are past column 12.
+  // Keep the displayed table bounded and preserve original left-to-right order.
+  const selectedIndexes=new Set(t.fields.map(f=>state.headers.indexOf(state.mappings[f.key])).filter(i=>i>=0));
+  const previewIndexes=[...selectedIndexes];
+  for(let i=0;i<state.headers.length&&previewIndexes.length<12;i++){
+    if(!selectedIndexes.has(i))previewIndexes.push(i);
+  }
+  previewIndexes.sort((a,b)=>a-b);
+  const previewColumns=previewIndexes.map(i=>state.headers[i]);
   const rawPreview=executable&&state.csvRowsSample.length
-    ? '<div class="csv-raw-preview"><p class="tiny">원본 CSV 값 미리보기 · 최대 3행/12열/셀 80자 (표시만 축약, 원본 데이터는 유지). 이 값으로 열 매핑을 직접 확인하세요.</p><div class="csv-scroll"><table class="csv-table" aria-label="원본 CSV 값 미리보기"><thead><tr>'+previewColumns.map(name=>'<th>'+previewCell(name)+'</th>').join("")+'</tr></thead><tbody>'+state.csvRowsSample.map(row=>'<tr>'+row.map(value=>'<td>'+previewCell(value)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div></div>'
+    ? '<div class="csv-raw-preview"><p class="tiny">원본 CSV 값 미리보기 · 최대 3행/12열/셀 80자 (표시만 축약, 원본 데이터는 유지). 선택한 열은 12번째 뒤에 있어도 우선 표시합니다. 이 값으로 열 매핑을 직접 확인하세요.</p><div class="csv-scroll"><table class="csv-table" aria-label="원본 CSV 값 미리보기"><thead><tr>'+previewColumns.map(name=>'<th>'+previewCell(name)+'</th>').join("")+'</tr></thead><tbody>'+state.csvRowsSample.map(row=>'<tr>'+previewIndexes.map(i=>'<td>'+previewCell(row[i])+'</td>').join("")+'</tr>').join("")+'</tbody></table></div></div>'
     : "";
   const maps=executable
     ? (state.headers.length
@@ -128,7 +136,7 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
   forgetCsv({preservePeriod:true});
   try{
     const csv=parseCsv(sample.source);
-    state.csvSource=sample.source;state.csvName=sample.name;state.headers=csv.headers;state.csvRowsSample=csv.rows.slice(0,3).map(row=>row.slice(0,12));state.demoMode=true;
+    state.csvSource=sample.source;state.csvName=sample.name;state.headers=csv.headers;state.csvRowsSample=csv.rows.slice(0,3).map(row=>row.slice());state.demoMode=true;
     state.mappings={...sample.mapping}; // Preset mappings apply ONLY to synthetic demo data.
     if(t.id==="spreadsheet")state.csvPreview=normalizeSpreadsheetCsv(sample.source,state.mappings);
     else state.salesPreview=buildSalesReport(sample.source,state.mappings,{period:state.salesPeriod});
@@ -207,7 +215,7 @@ document.addEventListener("change",async event=>{
       if(generation!==state.csvGeneration||selected!==state.selected)return;
       const csv=parseCsv(source);if(!csv.headers.length)throw Error("빈 파일입니다.");
       state.csvSource=source;state.csvName=file.name;
-      state.headers=csv.headers;state.csvRowsSample=csv.rows.slice(0,3).map(row=>row.slice(0,12));state.mappings={};
+      state.headers=csv.headers;state.csvRowsSample=csv.rows.slice(0,3).map(row=>row.slice());state.mappings={};
       const t=getTemplate(),suggestions=suggestFieldMap(csv.headers,t);
       const suggested=t.fields.filter(f=>!!suggestions[f.key].selected).length;
       state.fileMessage=file.name+" · "+csv.headers.length+"개 열 감지 / "+suggested+"개 자동 후보 (변환 전 직접 선택)";
