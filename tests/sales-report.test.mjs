@@ -136,3 +136,23 @@ test('leading-zero monetary padding is accepted by value while over-limit values
  assert.equal(upper.summary.netAmount,'999999999999.99');
  assert.match(upper.reviewCsv,/AMOUNT_EXCEEDS_REPORT_LIMIT/);
 });
+
+test('default-ignorable formula prefixes in sales channel are excluded and retained in review CSV',()=>{
+ const input='판매일,판매처,판매액,주문번호\n'
+  +'2026-10-26,온라인,100,SAFE\n'
+  +'2026-10-26,\u202E=1+1,200,SUSPECT\n'
+  +'2026-10-26,\u200E@SUM(1),300,SUSPECT2';
+ const r=buildSalesReport(input,mapping,{period:'daily'});
+ assert.equal(r.summary.sourceRows,3);
+ assert.equal(r.summary.includedRows,1);
+ assert.equal(r.summary.excludedRows,2);
+ assert.equal(r.summary.netAmount,'100.00');
+ assert.deepEqual(r.excluded,[
+   {sourceRecord:'3',reason:'FORMULA_PROTECTED'},
+   {sourceRecord:'4',reason:'FORMULA_PROTECTED'}
+ ]);
+ assert.match(r.reviewCsv,/FORMULA_PROTECTED/);
+ assert.match(r.reviewCsv,/\u202E=1\+1/);
+ assert.match(r.reviewCsv,/\u200E@SUM\(1\)/);
+ assert.doesNotMatch(r.reportCsv,/[\u202E\u200E]/);
+});
