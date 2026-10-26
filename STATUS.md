@@ -586,3 +586,12 @@
 - **남은 관문:** 정확한 최신 소스 checkout의 `npm run qa:release`/실 디스크 HTML SHA·CSP/Chromium `file://`/Windows Edge 및 수동 UX **NOT_RUN**. Node v22.16.0 존재하지만 컨테이너 `github.com` DNS 실패로 private 전체 checkout 불가; 기존 실패 형태 반복·GitHub Actions 무단 재실행 금지.
 - **보존/사업:** Private `hibi89/SMAX` frontend/backend만 수정, main 소스/분기 이력/기존 고객데이터/대외 배포/크몽 판매/유료 AI/비용 변경 없음. 1차 SELF 2종 로컬 실행+8종 설계 가이드, 출시 미승인, 2026-11-07 하드마감 유지.
 
+## 2026-10-27 KST — 스총: SELF 출시 QA 테스트 목록 누락 차단 및 브라우저 안전성 검사 확장
+- **재현된 누락:** 직전 기능 수정에서 신규 `tests/csv-header-safety.test.mjs`는 frontend에 존재했지만 `scripts/qa-release.mjs`의 명시적 출고 필수 테스트 목록 14종에는 포함되지 않았다. Node `--test`가 기본 발견할 수는 있어도 필수 목록 자체가 불완전해 파일 누락/향후 회귀 누락을 출고 게이트가 감지하지 못할 수 있었음.
+- **최소 수정:** `scripts/qa-release.mjs` 명시 목록에 헤더 회귀 추가, 실제 `tests/\\*.test.mjs` 파일 목록과 필수 목록을 정렬 비교하여 새 파일·빠진 파일·중복 선언 중 하나라도 있으면 `RELEASE_QA_FAILED`로 중단. 기존 테스트·빌드·SHA256/CSP·합성 2실행형 검증 및 실패 시 오래된 산출물 삭제 로직 보존. 코드 커밋 `7746a501`, 완전한 inventory gate `f56c41d3`.
+- **브라우저 E2E 확장:** `scripts/qa_browser.mjs`에 스프레드시트 파일업로드 `U+200B` 숨김열 거부 및 매출 업로드 전각/ASCII NFKC 동일 헤더 거부 시나리오 추가. 오류 경고 표시, 실행 버튼 비활성, 이전 결과 다운로드 차단 확인 뒤 정상 합성 fixture 계속 처리. 코드 커밋 `1bcd032e`. E2E 스크립트 추가는 실제 Chromium/Edge 실행 PASS의 증거가 아님.
+- **계약 테스트:** `tests/windows-qa-contract.test.mjs`에 새 필수 목록·브라우저 시나리오 존재 확인 및 실제 출고 목록 비교 코드에 대해 정상/미등록 파일/누락 파일 세 사례 fail-closed 검사 추가. 커밋 `0f09e38` → 정정 `a7f97bb` → 강화 `3301e0e`. 고객 안내 `docs/SELF_CUSTOMER_QUICKSTART_20261025.md`는 CSV 첫 행(열 이름) 수정 후 재저장을 설명, `4599247c`.
+- **검증한 범위:** GitHub 실제 `frontend/tests` 파일 **15개/15개 목록 정확히 일치**, 누락0·초과0. 이번 V8 격리 검사에서 정상/신규/누락 필수 목록 **3/3 PASS**, 체크인된 browser QA 두 합성 문자열을 실제 frontend `parseCsv`+`normalizeSpreadsheetCsv`로 보내서 **2/2 정확히 거부**, 체크인된 신규 QA 계약 테스트 **2/2 격리 콜백 PASS**. 변경된 JS 3종 `new Function` 파서 검사 PASS(ESM import/URL을 테스트 목적으로 치환). **Native Node `node --test`/실 `npm run qa:release`/온디스크 HTML SHA/CSP/실 Chromium·Edge 실행은 이번 차수 NOT_RUN**. 과거 Native 86/86은 이 코드에 대한 근거가 아니다.
+- **차단/예산:** 작업 도구 컨테이너 Node v22.16.0 존재하나 Private 전체 checkout은 이전부터 GitHub DNS 제한으로 불가. 동일 실패 네트워크 방식 반복 금지. GitHub Actions 최신 성공 러닝 근거 없음; 승인 없는 비용/자동 재시도 안 함. 사용자 Windows 반복 QA 요청 하지 않음.
+- **보존·다음:** private `hibi89/SMAX` frontend에서 QA/문서만 갱신. `site/` 상품 코어, main/backend 분기, Cloudflare/Vercel Production, 고객 파일, 유료 API, 판매/출시는 불변. 1차 SELF 로컬 2실행형 + 8설계 가이드; **마감 2026-11-07**. 다음은 권한 있는 온전한 최신 checkout에서 실제 `npm run qa:release`→파일 SHA/CSP→Chromium `file://`→Windows Edge 최종 1회→명시적 승인 후 출고/통합.
+
