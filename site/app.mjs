@@ -5,13 +5,13 @@ import {buildSalesReport} from "./sales-report.mjs";
 const root=document.getElementById("work-area");
 const $=sel=>document.querySelector(sel);
 const categories=["전체",...new Set(templates.map(t=>t.category))];
-const state={tab:"templates",category:"전체",query:"",selected:null,answers:{},headers:[],mappings:{},searchTerm:"",fileMessage:"",csvSource:null,csvName:"",csvPreview:null,csvError:"",salesPreview:null,salesError:"",salesPeriod:"daily",csvGeneration:0,demoMode:false};
+const state={tab:"templates",category:"전체",query:"",selected:null,answers:{},headers:[],mappings:{},searchTerm:"",fileMessage:"",csvSource:null,csvName:"",csvPreview:null,csvError:"",salesPreview:null,salesError:"",salesPeriod:"daily",csvGeneration:0,demoMode:false,csvRowsSample:[]};
 const sampleCsvByTemplate={"spreadsheet":{"name":"SMAX_DEMO_SPREADSHEET.csv","source":"거래날짜,품목,결제금액\n2026/10/24,연필,\"₩1,200원\"\n2026-10-25,공책,3500\n2026-10-25,공책,3500\n2026-02-30,리필,미확인\n","mapping":{"date":"거래날짜","item":"품목","amount":"결제금액"}},"sales":{"name":"SMAX_DEMO_SALES.csv","source":"판매일,판매처,판매액\r\n2026-10-01,온라인,100\r\n2026-10-01,온라인,100\r\n2026-10-02,매장,-20.10\r\n2026-02-30,매장,9\r\n2026-10-03,=1+1,4\r\n","mapping":{"date":"판매일","channel":"판매처","amount":"판매액"}}};
 const icons={spreadsheet:"↗",inventory:"◫",faq:"◇",sales:"▥",email:"✉",rag:"▤",quote:"▧",booking:"◷",web:"◎",reviews:"♡"};
 const h=s=>String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const getTemplate=()=>templates.find(t=>t.id===state.selected);
 const toast=msg=>{const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__smaxToast);window.__smaxToast=setTimeout(()=>t.classList.remove("show"),2800)};
-function forgetCsv({preservePeriod=false}={}){state.csvGeneration++;state.demoMode=false;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";if(!preservePeriod)state.salesPeriod="daily";state.headers=[];state.mappings={};state.fileMessage=""}
+function forgetCsv({preservePeriod=false}={}){state.csvGeneration++;state.demoMode=false;state.csvSource=null;state.csvName="";state.csvPreview=null;state.csvError="";state.salesPreview=null;state.salesError="";if(!preservePeriod)state.salesPeriod="daily";state.headers=[];state.mappings={};state.csvRowsSample=[];state.fileMessage=""}
 function updateSalesPeriodFromAnswer(answer){
   if(answer!=="일별"&&answer!=="월별")return false;
   state.salesPeriod=answer==="월별"?"monthly":"daily";
@@ -73,9 +73,16 @@ function editorPanel(t){
   if(!t)return '<aside class="editor-panel"><span class="side-label">YOUR WORKFLOW</span><h3>시작할 준비가 됐나요?</h3><p>원하는 업무를 입력하고 템플릿을 선택하면 개인별 업무 질문과 설계서 초안 만들기를 이어갈 수 있습니다.</p><p class="tiny">실제 계정 로그인, 이메일 발송 및 외부 서비스 연동은 이 데모에서 실행하지 않습니다.</p></aside>';
   const b=buildBlueprint(t,state.answers,state.mappings,{guideOnly:!Object.hasOwn(sampleCsvByTemplate,t.id)});
   const executable=Object.hasOwn(sampleCsvByTemplate,t.id);
+  // Data remains in the browser: the bounded sample is display-only and cannot
+  // authorize a mapping. Escape untrusted cells and strip invisible controls.
+  const previewCell=value=>h(String(value??"").replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g," ").slice(0,80));
+  const previewColumns=state.headers.slice(0,12);
+  const rawPreview=executable&&state.csvRowsSample.length
+    ? '<div class="csv-raw-preview"><p class="tiny">원본 CSV 값 미리보기 · 최대 3행/12열/셀 80자 (표시만 축약, 원본 데이터는 유지). 이 값으로 열 매핑을 직접 확인하세요.</p><div class="csv-scroll"><table class="csv-table" aria-label="원본 CSV 값 미리보기"><thead><tr>'+previewColumns.map(name=>'<th>'+previewCell(name)+'</th>').join("")+'</tr></thead><tbody>'+state.csvRowsSample.map(row=>'<tr>'+row.map(value=>'<td>'+previewCell(value)+'</td>').join("")+'</tr>').join("")+'</tbody></table></div></div>'
+    : "";
   const maps=executable
     ? (state.headers.length
-      ? '<div><label>확인된 CSV 열 매핑</label>'+t.fields.map(f=>'<div class="mapped-row"><label for="map-'+h(f.key)+'">'+h(f.label)+'</label><select data-action="map" id="map-'+h(f.key)+'" data-field="'+h(f.key)+'"><option value="">직접 확인 후 선택</option>'+state.headers.map(v=>'<option '+(state.mappings[f.key]===v?"selected":"")+' value="'+h(v)+'">'+h(v)+'</option>').join("")+'</select></div>').join("")+'</div>'
+      ? '<div><label>확인된 CSV 열 매핑</label>'+t.fields.map(f=>'<div class="mapped-row"><label for="map-'+h(f.key)+'">'+h(f.label)+'</label><select data-action="map" id="map-'+h(f.key)+'" data-field="'+h(f.key)+'"><option value="">직접 확인 후 선택</option>'+state.headers.map(v=>'<option '+(state.mappings[f.key]===v?"selected":"")+' value="'+h(v)+'">'+h(v)+'</option>').join("")+'</select></div>').join("")+rawPreview+'</div>'
       : "<p class='tiny'>CSV 파일을 선택하면 실제 열 이름을 확인하고 직접 매핑할 수 있습니다. 파일 본문은 서버로 전송하지 않습니다.</p>")
     : "";
   const inputPanel=executable
@@ -121,7 +128,7 @@ document.addEventListener("click",event=>{const el=event.target.closest("[data-a
   forgetCsv({preservePeriod:true});
   try{
     const csv=parseCsv(sample.source);
-    state.csvSource=sample.source;state.csvName=sample.name;state.headers=csv.headers;state.demoMode=true;
+    state.csvSource=sample.source;state.csvName=sample.name;state.headers=csv.headers;state.csvRowsSample=csv.rows.slice(0,3).map(row=>row.slice(0,12));state.demoMode=true;
     state.mappings={...sample.mapping}; // Preset mappings apply ONLY to synthetic demo data.
     if(t.id==="spreadsheet")state.csvPreview=normalizeSpreadsheetCsv(sample.source,state.mappings);
     else state.salesPreview=buildSalesReport(sample.source,state.mappings,{period:state.salesPeriod});
@@ -200,7 +207,7 @@ document.addEventListener("change",async event=>{
       if(generation!==state.csvGeneration||selected!==state.selected)return;
       const csv=parseCsv(source);if(!csv.headers.length)throw Error("빈 파일입니다.");
       state.csvSource=source;state.csvName=file.name;
-      state.headers=csv.headers;state.mappings={};
+      state.headers=csv.headers;state.csvRowsSample=csv.rows.slice(0,3).map(row=>row.slice(0,12));state.mappings={};
       const t=getTemplate(),suggestions=suggestFieldMap(csv.headers,t);
       const suggested=t.fields.filter(f=>!!suggestions[f.key].selected).length;
       state.fileMessage=file.name+" · "+csv.headers.length+"개 열 감지 / "+suggested+"개 자동 후보 (변환 전 직접 선택)";
