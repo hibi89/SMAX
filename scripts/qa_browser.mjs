@@ -104,6 +104,18 @@ async function main() {
         'Malformed UTF-8 was not rejected before spreadsheet mapping');
       assert(await page.locator('[data-action="download-csv"]').count() === 0,
         'A broken encoding unexpectedly offered a CSV download');
+      // Valid UTF-8 can still hide visually ambiguous mapping columns.
+      await page.locator('#csv-upload').setInputFiles({
+        name:'HIDDEN_CSV_HEADER.csv',mimeType:'text/csv',
+        buffer:Buffer.from('거래날짜,품목,결제금액,결제\u200B금액\n2026-10-27,연필,100,999','utf8')
+      });
+      assert((await page.locator('.editor-panel').innerText()).includes('보이지 않는 제어문자'),
+        'Invisible header was accepted by spreadsheet upload');
+      assert(await page.locator('[data-action="run-csv"]').isDisabled(),
+        'Invalid CSV header unexpectedly enabled spreadsheet conversion');
+      assert(await page.locator('[data-action="download-csv"]').count()===0,
+        'Invalid CSV header left a stale downloadable output');
+      checks.push('Spreadsheet upload rejects invisible Unicode headers');
       await page.locator('#csv-upload').setInputFiles(samplePath);
       for (const [field,label] of Object.entries({date:'거래날짜',item:'품목',amount:'결제금액'})) {
         await page.locator('#map-'+field).selectOption({label});
@@ -184,6 +196,18 @@ async function main() {
           'Malformed UTF-8 was not rejected before sales mapping');
         assert(await page.locator('[data-action="download-sales-report"]').count() === 0,
           'A broken encoding unexpectedly offered a sales report');
+        // Fullwidth and ASCII names collapse under NFKC, so cannot be mapped safely.
+        await page.locator('#csv-upload').setInputFiles({
+          name:'CONFUSABLE_SALES_HEADER.csv',mimeType:'text/csv',
+          buffer:Buffer.from('판매일,판매처,판매액,ＡＢＣ,ABC\n2026-10-27,온라인,100,A,B','utf8')
+        });
+        assert((await page.locator('.editor-panel').innerText()).includes('중복된 CSV 열 이름'),
+          'Unicode-compatible duplicate sales headers were accepted');
+        assert(await page.locator('[data-action="run-sales"]').isDisabled(),
+          'Confusable sales headers unexpectedly enabled aggregation');
+        assert(await page.locator('[data-action="download-sales-report"]').count()===0,
+          'Confusable sales headers left stale downloadable output');
+        checks.push('Sales upload rejects NFKC-compatible duplicate headers');
         const salesSample = readFileSync(join(root,'examples','SMAX_SALES_SAMPLE.csv'),'utf8');
         await page.locator('#csv-upload').setInputFiles({
           name:'SMAX_SALES_SYNTHETIC.csv',mimeType:'text/csv',
