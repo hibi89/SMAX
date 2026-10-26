@@ -17,6 +17,8 @@ test('Windows Node QA refuses stale reports without BOTH offline tool proofs',()
   assert.match(script,/Get-FileHash -LiteralPath \$htmlPath -Algorithm SHA256/);
   assert.match(script,/\$actualBytes -ne \[long\]\$report\.bytes/);
   assert.match(script,/\$report\.verification\.saleApproval -ne 'NOT_GRANTED'/);
+  assert.match(script,/sourceSnapshotSha256/);
+  assert.match(script,/sourceFileCount/);
 });
 
 test('Optional Edge E2E fails closed; success can only be set after browser exit check',()=>{
