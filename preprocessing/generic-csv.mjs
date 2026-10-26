@@ -154,6 +154,36 @@ export function validateGenericCsvPackage(p){
     }
     const all=JSON.stringify(row.source_cells);
     const duplicate=seen.has(all);seen.add(all);
+    // Recalculate expected normalized fields and issues from preserved source cells.
+    // A downstream consumer must not be able to silently forge ready/clean values.
+    const expectedIssues=[];
+    const addExpected=(field,code)=>expectedIssues.push({field,code});
+    for(const field of cols){
+      const raw=row.source_cells[s.headers.indexOf(field.source)],t=raw.trim();
+      let expected=t;
+      if(!t){
+        expected=null;
+        if(field.required)addExpected(field.key,'MISSING_REQUIRED');
+      }else if(field.type==='date'){
+        expected=parseDate(t);
+        if(expected===null)addExpected(field.key,'INVALID_DATE');
+      }else if(field.type==='decimal'){
+        expected=parseDecimal(t);
+        if(expected===null)addExpected(field.key,'INVALID_DECIMAL');
+      }else if(field.type==='integer'){
+        expected=parseInteger(t);
+        if(expected===null)addExpected(field.key,'INVALID_INTEGER');
+      }else if(field.type==='boolean'){
+        expected=parseBoolean(t);
+        if(expected===null)addExpected(field.key,'INVALID_BOOLEAN');
+      }
+      if(formulaRisk(raw))addExpected(field.key,'FORMULA_RISK');
+      if(row.values[field.key]!==expected)throw new TypeError('Mapped value disagrees with source cells');
+    }
+    if(duplicate)addExpected(null,'DUPLICATE_SOURCE_ROW');
+    if(JSON.stringify(row.issues)!==JSON.stringify(expectedIssues)){
+      throw new TypeError('Review issues disagree with original values');
+    }
     const codes=[];
     for(const issue of row.issues){
       if(!sameKeys(issue,['field','code'])||!ISSUE_CODES.has(issue.code)||
