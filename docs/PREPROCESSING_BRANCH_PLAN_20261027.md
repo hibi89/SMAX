@@ -50,3 +50,11 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 ## 복원 절차
 
 다음 채팅에서 “SMAX preprocessing 브랜치 확인하고 작업이어가셈” 요청 시 repo hibi89/SMAX Private preprocessing의 최신 HEAD, preprocessing/README.md, 이 문서, preprocessing/index.mjs, cli.mjs, 해당 tests, STATUS/HANDOFF 최신 부분을 읽고 안전한 다음 구현/테스트를 수행한다.
+## 2026-10-27 범용 CSV P1 착수 결과 및 전처리-only 운영
+
+- 사용자 최종 역할: 이 브랜치는 전처리 기술 개발·안정화·테스트만 담당. **대회별 적용은 각 해커톤 총괄이 자체 수행**. P5의 어댑터/타 레포 전송은 전처리 개발 계획에서 제외.
+- **실제 신규 구현:** 기존 `site/csv-transform.mjs` 정본 CSV parser를 `parseCsvRecords`로 export, `preprocessing/generic-csv.mjs`에 1~64개 타입 명시 필드 표준화·원본 전체 열+행 추적·정확히 같은 원본 행의 중복 검토·결측·형식·Excel 수식 위험 판정·품질 수치·불변 승인 제한 추가. 3필드 V0는 그대로 유지.
+- **공용 규격:** `SMAX_PREPROCESS_GENERIC_CSV_V1`, `preprocessing/SMAX_PREPROCESS_GENERIC_CSV_V1.schema.json`; 필드 타입 text/date/decimal/integer/boolean; 원본 SHA256·바이트·헤더·행 보존; issues/review_queue/approval.
+- **검증:** 실제 GitHub 코드 원문/체크인 테스트 8건 V8 격리 8/8 PASS; 일부 tampering 거부 별도 확인. 새 회귀 2건과 기존 테스트를 포함하는 전용 `npm run test:preprocessing` 변경. 전체 Native Node 실행과 실 사용자 파일 검증은 **NOT_RUN**.
+- **위험:** V1은 데이터 원문을 포함한 JSON 반환이므로 기밀·개인정보가 그대로 복제될 수 있다. 로컬 메모리/권한 있는 경로만 사용. JSON Schema는 구조 계약이며 실 규칙·행별 출처 상호 검증은 JS 검증기를 사용. 아직 Generic CSV CLI·PDF/XLSX/DOCX·LLM·Vector 없음.
+- **다음 엔진 작업:** 모든 V0/V1 자동 테스트 실제 Node 실행 → Generic CSV 전용 로컬 CLI/오류 복구 → 파일 provenance 검증·성능/한도 → 문서 입력 플러그인. 기존 다른 브랜치/대회별 브랜치 자동 변경 금지.
