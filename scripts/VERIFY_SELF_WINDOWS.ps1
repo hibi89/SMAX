@@ -95,7 +95,8 @@ try {
 if (-not $ok) { exit 1 }
 exit 0
  -or
-        $report.sourceFileCount -isnot [int] -or $report.sourceFileCount -lt 1) {
+        ($report.sourceFileCount -isnot [int] -and $report.sourceFileCount -isnot [long]) -or
+        $report.sourceFileCount -lt 1) {
         throw 'Release QA report missing valid source snapshot evidence.'
     }
     if ($report.verification.saleApproval -ne 'NOT_GRANTED') {
