@@ -48,6 +48,29 @@ test('bundler rejects modified import contract and embedded network code',()=>{
   assert.throws(()=>bundleOfflineSelf(b),/network request APIs/);
 });
 
+
+test('offline SELF blocks direct network transports and WebRTC escape paths',()=>{
+  const cases=[
+    'new WebSocket("wss://example.invalid")',
+    'new EventSource("/updates")',
+    'new WebTransport("https://example.invalid")',
+    'new RTCPeerConnection()',
+    'new window.RTCPeerConnection',
+    'window["WebSocket"]("wss://example.invalid")',
+    'globalThis["fetch"]("https://example.invalid")',
+    'navigator.sendBeacon("https://example.invalid","fixture")'
+  ];
+  const original=input();
+  const baseline=bundleOfflineSelf(original);
+  for(const statement of cases){
+    const modules=[...original.modules];
+    modules[0]+='\n'+statement+';\n';
+    assert.throws(()=>bundleOfflineSelf({...original,modules}),/network request APIs/,
+      'offline network primitive should be denied: '+statement);
+  }
+  assert.equal(bundleOfflineSelf(original),baseline,'safety guard must not rewrite the clean offline bundle');
+});
+
 test('bundler fails closed if source entrypoint or stylesheet changes',()=>{
   const a=input();
   a.html=a.html.replace('src="./app.mjs"','src="./renamed-app.mjs"');
