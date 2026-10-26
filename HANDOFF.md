@@ -819,3 +819,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **현재 미완·차단:** 최신 Node test/build artifact SHA/CSP, Chromium `file://`, Windows Edge, GUI/사용자 UX와 최종 상용 승인이 남음. 다음 스총은 위를 완료하지 않고 출시 PASS 선언하지 말 것.
 9. **다음 우선순위:** 현재 GitHub `frontend` HEAD 확인→권한 있는 실제 전체 checkout에서 `npm run qa:release` 실행→HTML SHA/CSP 기록→Chromium file:// E2E→Windows Edge/수동 QA 1회→사용자 승인하의 main/frontend/backend 충돌 해결 또는 SELF 출고. 출시 전 정적 regex 및 CSP 현실 한계 설명.
 10. **일시:** 2026-10-27 KST. 원격 private GitHub 체크인 원문+V8 격리 검증. 문서 업데이트 후 HEAD 최신 확인.
+
+## 2026-10-27 KST — 스총 인계: 최신 인메모리 SHA256 검증과 Native QA 환경 차단
+1. **범위:** Private `hibi89/SMAX` 프론트 SELF 오프라인 HTML, 고객 로컬 UTF-8 CSV 표준화·잠정 매출 2실행형+8설계 가이드. Node >=20 개발자 패키징, 고객은 Node 불필요가 제품 목표. 2026-11-07 개발상한.
+2. **실제 수행:** 연결된 인증 GitHub 최신 `frontend` 8개 파일 원문을 `bundleOfflineSelf` 본문에 주입. Node `crypto.createHash`는 메모리 V8에서 자체 SHA256 (표준 검증값 3/3)로 대체해 실제 텍스트를 해싱. 더미 digest를 출고 SHA로 쓰지 않음. 동일 소스 반복·Windows CRLF checkout 가상 입력이 같은 결과를 냄, inline JS V8 구문, CSP JS/CSS SHA, `connect-src 'none'`/외부 참조 없음 확인.
+3. **검증 수치:** 후보 HTML UTF-8 **95,861 bytes**, SHA256 `ed95c36e846b8d853eb57eb42c1f787e60835ca3c32725aa4173af71aa838ff6`, CSP JS `PwZ43b1XiQ6Q/QVD5wOVz1C4DgCCUW4HJpatRCZ3YSc=`, CSP CSS `KK30p01xXNscqed6Cq2oi30/KVeAHi2/dAg7l4fvT8c=`. 이 값은 검사 당시 파일 blob 조합에 대해서만 유효. 별도 증거 `docs/QA_IN_MEMORY_CURRENT_SHA_20261027.md`, 커밋 `2d92aad2a9caaf59d2b2cb4ae67fc145fdcb9449`.
+4. **환경 차단:** 컨테이너 Node v22.16.0 존재하지만 `git ls-remote https://github.com/hibi89/SMAX.git HEAD` DNS 실패 (`Could not resolve host: github.com`)로 모든 Private 파일을 컨테이너 디스크에 checkout 불가. 유사 재시도 반복 금지. GitHub Actions 2026-10-25 실패 1회 기록, 오래된 job log BlobNotFound 404라 실패 원인 확인 불가. Actions 재실행/사용자 결제 지시 금지.
+5. **검증 경계:** 현재 확인은 **V8 인메모리 실제 SHA256+구문/정적 CSP**. 정확한 최신 Native `node --test`, `npm run qa:release`, `dist/SMAX_SELF_OFFLINE.html` 실 디스크 SHA/CSP, 실제 Chromium `file://`/Windows Edge·GUI/네트워크/사용자 테스트는 **모두 NOT_RUN**. 출고·판매·제품 100% 완료 근거 아님.
+6. **변경·브랜치/백업:** 이번 단계 frontend 문서 신규 `docs/QA_IN_MEMORY_CURRENT_SHA_20261027.md` 및 `STATUS.md`/`HANDOFF.md` 외 제품·검사 코드는 변경하지 않음. main `3ec3698551686b0ddee8e4e5ac217517a6b1f7ed`, backend `5ec4a526b8d1ca90f7e2e4f846cee8cab6a7c868` 유지. 원격 GitHub SHA 복구 가능. 최종 frontend HEAD는 문서 커밋 후 재조회.
+7. **출시/금전/보안:** Private `site/`와 공개 정적 후보 `public-site/` 분리 유지, Cloudflare/Vercel Product 배포/판매 미적용, 실고객·개인정보·키 처리 없음. 비용 0원, 유료 API/금전/브랜치 병합·force push 없음. 공개/판매 별도 사용자 승인 전 금지.
+8. **다음 작업/명령/완료:** 실제 최신 소스 checkout 허용 Node 실행환경에서 `npm run qa:release` 성공→`dist/SELF_QA_REPORT.json`와 온디스크 HTML SHA/bytes 검증→실 Chromium `npm run qa:browser:node`→Windows Edge `QA_SELF_WINDOWS.cmd /edge`와 수동 UX 1회→승인된 별도 main 통합 및 상품 검수. 이전 SHA/옛 86/86 Native 결과를 재사용 금지.
+9. **실패/판정:** Node 전체 QA는 `BLOCKED_ENV`, 빌더 후보 정합은 `IN_MEMORY_PASS`, 브라우저는 `NOT_RUN`, releaseApproved=false. 코드/기능 이슈와 네트워크 실행환경의 독립성을 유지할 것.
+10. **일시:** 2026-10-27 KST. GitHub connector authenticated source + V8 메모리 함수 실행 기준. 다음 `ㄱ`에서 이 문서 먼저 확인하고 같은 DNS 실패 시도 반복 없이 안전한 보완을 이어간다.
