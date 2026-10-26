@@ -319,3 +319,13 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 6. **주의:** Public 대회 저장소로 소스/사업 전략/고객 정보 원문 복사 금지. 공개 가능한 스키마·합성 fixture·코드 패키지를 사용자 승인/대회 규정 점검 후 분리. 실제 대회 합격·점수 상승·고객 데이터 정제 보장 근거 없음.
 7. **다음:** 최신 정확한 Private preprocessing checkout에서 `npm run test:preprocessing`/CLI 파일 생성 smoke, Generic CSV N필드 schema와 실 대회별 adapter. PDF/LLM/n8n/벡터는 향후. 병합·실고객 데이터·과금·외부 API 없음.
 8. **기준:** 2026-10-27 KST, 연결된 GitHub Private 원격 코드와 격리 V8 근거. 사용자 질문 “SMAX preprocessing 브랜치 확인하고 작업이어가셈” → 이 문서 복원 후 다음 안전 단위 진행.
+
+## 2026-10-27 KST — PREPROCESSING 범용 엔진 담당·우선순위 최종 결정
+1. **현재 사용자 지시 최우선:** 스총/전처리 담당은 Private SMAX `preprocessing`의 **전처리 엔진 자체 완성만** 책임진다. 각 해커톤 총괄/해총이 필요한 엔진을 가져가 변형·연결한다. 해당 대회 코드는 전처리 담당이 관리하지 않는다. 이전 계획의 '해커톤별 adapter 작업'은 폐기.
+2. **신규 소스:** `site/csv-transform.mjs`에 내부 규칙형 CSV tokenizer를 export `parseCsvRecords`; `preprocessing/generic-csv.mjs`의 `preprocessGenericCsv`, `validateGenericCsvPackage`, `serializeGenericCsvPackage` 1~64컬럼/5타입/원본 전체 행·열 보존/오류 분리/미승인 JSON 구현. 기존 `preprocessing/index.mjs`의 날짜/상품/금액 V0 및 backend/SELF 기능 변경 없음.
+3. **계약과 테스트:** `preprocessing/SMAX_PREPROCESS_GENERIC_CSV_V1.schema.json`은 cross-language JSON Schema Draft 2020-12, 실제 행·검토 상호검증은 JS 함수 담당. `tests/preprocessing-generic.test.mjs` 8개, `tests/preprocessing-generic-schema.test.mjs` 2개, `package.json`의 `test:preprocessing`에 5개 test 파일 등록.
+4. **검증 실적:** GitHub 체크인 소스 콜백을 실제 V8로 실행하여 generic 8/8 + schema 2/2 PASS. JS `crypto`/Buffer 및 file read는 mock으로 연결한 제한된 실행이며 **Native `npm run test:preprocessing`과 전체 Node/npm, 디스크 E2E는 NOT_RUN**. 입력/출력 실제 바이트 SHA 출고 증거 없음. 모든 완료 주장은 범위 제한.
+5. **엔진 한계:** UTF-8 CSV 최대 2MiB 및 명시 스키마/필드 매핑. XLSX/PDF/DOCX/HTML/ZIP/Local LLM/Pydantic/n8n/vector는 여전히 미구현. V1 JSON은 `source_cells`로 매핑 밖 원문도 보존하므로 개인/기밀정보 취급 주의. `approval: NOT_GRANTED` 불변.
+6. **브랜치/복원:** Private hibi89/SMAX `preprocessing`, 다른 브랜치 main/frontend/backend 병합·수정 없음. 정본은 `AGENTS.md` 상단, `preprocessing/README.md`, `docs/PREPROCESSING_BRANCH_PLAN_20261027.md`, `PREPROCESSING_HANDOFF.md`. 신규 중요 코드 SHA: parser `e92b6b61`, generic `5f348da1`→검수 `90bf69be`, tests `b9e5e6da`·`45948ccd`. 코드 후속 문서 커밋 후 최신 HEAD 조회.
+7. **다음 전처리만:** 전체 Native Node 회귀 확인, Generic N필드 CLI/사용성, 고급 정제·파일 검증/파싱·입출력 포맷 지원, 실패복구/데이터 민감도/품질 측정. 대회별 작업·커넥터/배포·승인 범위 제외.
+8. **안전:** 타 저장소 Private IP 이동·Public 업로드·실고객 자료/비밀 입력·유료 API·외부 배포/결제·강제 merge/rebase 금지. SMAX SELF 진행 일정과 기존 대회 일정 변경하지 않음. 갱신 2026-10-27 KST.
