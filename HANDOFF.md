@@ -807,3 +807,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본·보안·백업:** main-only 8개 기획문서, backend-only 2개 계약문서, 양/삼중 변경된 8개 review 후보 각각 버전 원문 보존. GitHub 커밋/SHA가 복원 근거; force push/삭제/리셋/강제 병합 금지. 실제 고객자료·토큰·.env·유료호출·외부전송·판매 없음.
 9. **다음 작업·절차·완료 기준·승인:** 최신 frontend 전체 checkout에서 native Node `npm run qa:release` exit0→정확한 disk SHA/CSP→동일 HTML Chromium file://→Windows Edge 실 PC 1회→고객 UX·사업 표기 확인. 그 후 사용자 명시적 통합 승인 있으면 별도 통합 PR에서 main-only 8개 문서·서로 다른 8개 파일 개별 병합 및 회귀, QA 재실행. 완료조건은 실제 기능·보안·배포 정책 검증; 문서상 분류만으로 출시 PASS 금지.
 10. **갱신일시·검증범위·기준 커밋:** 2026-10-27 KST; authenticated GitHub branch heads/REST recursive git-tree blob 및 연결된 JS V8 모의 Git 호출, static package 소스 확인. 실제 Node/Windows/Production 미검증. 문서 반영 후 원격 HEAD를 마지막 확인하고 후속 ㄱ에서 기준점으로 삼는다.
+
+## 2026-10-27 KST — 스총 인계: SELF 오프라인 통신 API fail-closed
+1. **목표·범위·기술:** private `hibi89/SMAX` 사장님 존/SELF 로컬 HTML 2실행(UTF-8 CSV 표준화/잠정 매출)+8설계 가이드. 고객 CSV 기본 외부전송 0, 유료 API 기본 0원, 2026-11-07 1차 개발 종료 상한.
+2. **결함·실제 재현:** 현재 `frontend/scripts/build-self.mjs`는 `fetch`/ `sendBeacon` 호출만 감지해 `new WebSocket`, `new EventSource`, `new WebTransport`, `new RTCPeerConnection`, `new window.RTCPeerConnection`, `window['WebSocket']`, `globalThis['fetch']` 등의 코드 삽입을 허용했다. 동일 private HTML+CSS+5모듈 대상으로 수정 전/후 함수 검증해 차단 확인. CSP connect-src만으로 WebRTC 전체 외부전송 방지 보장 불가.
+3. **변경·커밋·근거:** `frontend/scripts/build-self.mjs` 위험 브라우저 통신/API 생성자·메서드 브래킷 접근 경계 거부 정규식 `2538cebd9ed2b5d4b53e28a110f597f9103d8635`. `frontend/tests/offline-package.test.mjs` 신규 회귀 `ea0721681f1089206f4aa02e23287fbd6f554b85`. 문서 `frontend/docs/OFFLINE_SELF_PACKAGE_20261025.md` 이력 `1ecec2e3cdf5be3bb25fdc5c386daac42060ccf2`.
+4. **검증·테스트 명령:** 신규 회귀 exact callback 1/1 격리 PASS, 수정 전/후 정상 번들 동일, 8종 금지 사례 경계 PASS. 실제 최신 Native `npm run qa:release`, HTML SHA256/CSP, Chromium `npm run qa:browser:node` / Windows `QA_SELF_WINDOWS.cmd /edge` **NOT_RUN**. V8 mock 해시·파일시스템은 실제 Node/보안 시험 대체 불가. 제품의 모든 가능한 JS 코드 우회 차단도 보장할 수 없음.
+5. **원인·복구·제약:** 기존 빌더가 fetch류만 차단하는 불완전한 denylist 사용. 새 regex는 알려진 주요 network primitive를 막아 방어심층화하며 CSP 유지. 간접 alias/dynamic code 생성을 100% 차단하지 않으므로 다른 신뢰검증과 함께 운영. GitHub Private 전체 소스를 실행 환경으로 가져올 수 없는 앞선 DNS 제한으로 Native 검수 대기.
+6. **저장소/브랜치/백업:** 오직 `frontend` 안전 빌더/테스트/문서. `main`과 `backend` 제품/사업 코어/기존 Git 기록 보존. 개별 Git SHA가 복구 원본. force push/리셋/임의 병합/실 고객 원본 저장/외부 전송 안 함.
+7. **Production·금전/권한:** 배포 URL/실 Production SHA 없음. Cloudflare/Vercel/크몽 판매/계정/비용 승인 미획득·변경 없음. `public-site/`와 유료 `site/`/`dist/` 분리 유지.
+8. **현재 미완·차단:** 최신 Node test/build artifact SHA/CSP, Chromium `file://`, Windows Edge, GUI/사용자 UX와 최종 상용 승인이 남음. 다음 스총은 위를 완료하지 않고 출시 PASS 선언하지 말 것.
+9. **다음 우선순위:** 현재 GitHub `frontend` HEAD 확인→권한 있는 실제 전체 checkout에서 `npm run qa:release` 실행→HTML SHA/CSP 기록→Chromium file:// E2E→Windows Edge/수동 QA 1회→사용자 승인하의 main/frontend/backend 충돌 해결 또는 SELF 출고. 출시 전 정적 regex 및 CSP 현실 한계 설명.
+10. **일시:** 2026-10-27 KST. 원격 private GitHub 체크인 원문+V8 격리 검증. 문서 업데이트 후 HEAD 최신 확인.
