@@ -149,6 +149,9 @@ export function normalizeSpreadsheetCsv(source, mapping) {
   counts.outputRows = rows.length;
   return {
     csv: toCsv([SPREADSHEET_OUTPUT_COLUMNS, ...rows]),
+    // Match SELF frontend: every original row stays in csv; only flagged rows
+    // also appear in a dedicated review export for deliberate human checking.
+    reviewCsv: toCsv([SPREADSHEET_OUTPUT_COLUMNS, ...rows.filter(row => row[4] === 'NEEDS_REVIEW')]),
     rows,
     summary: counts,
     state: counts.reviewRows ? 'NEEDS_REVIEW' : 'READY_FOR_HUMAN_REVIEW',
