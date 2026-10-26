@@ -1,0 +1,50 @@
+# SMAX² 전처리 전용 브랜치 및 해커톤 재사용 마스터플랜
+
+기준: 2026-10-27 KST. 사용자 승인: SMAX 전처리를 별도 브랜치에서 개발하고 해커톤에 재사용.
+
+## 브랜치 구성
+
+| 브랜치 | 담당 |
+|---|---|
+| main | 사업·기획 통합 기준 |
+| frontend | SELF UI·브라우저/Windows QA·정적 쇼룸 |
+| backend | 규칙형 로컬 CSV/매출 엔진 |
+| preprocessing | 해커톤용 재사용 전처리 API·검증·문서 |
+
+preprocessing은 기존 Private backend 커밋 5ec4a526b8d1ca90f7e2e4f846cee8cab6a7c868에서 분기했다. 기존 세 브랜치 코드·전략·진행률은 불변. 임의 merge/rebase/deploy 하지 않는다.
+
+## 설계 원칙
+
+1. 불신 파일 입력: UTF-8 구조·2MiB 제한·헤더·원본 바이트 SHA 검증.
+2. 원본 유지: 변환은 새 객체/파일로만. 표준화와 원본 행 번호 분리.
+3. 결정론적 정제 우선: 매핑·날짜·금액·중복·결측·수식 위험. LLM이 숫자·날짜를 임의로 확정하지 않음.
+4. Strict JSON: SMAX_PREPROCESS_CSV_V0; schema_version, source, mapping, rows, review_queue, quality, processing_mode, approval. 미등록 필드와 자동 APPROVED 등 거부.
+5. Human review: NEEDS_REVIEW는 검토 큐, READY_FOR_HUMAN_REVIEW도 사람 최종 판단 필수.
+6. 결과 소비: 로컬 JSON/메모리 API. DB와 벡터 인덱스는 별도 소비자 또는 후속 단계 담당.
+
+## 구현 완료/검증 현황
+
+- 실제 파일: preprocessing/index.mjs, preprocessing/cli.mjs, tests/preprocessing-package.test.mjs, tests/preprocessing-cli.test.mjs.
+- 기존 site/csv-transform.mjs를 그대로 재사용. 5개 체크인 package 테스트의 원본 콜백을 최신 실제 GitHub CSV 엔진/전처리 모듈에 연결한 격리 V8 검사 5/5 PASS. SHA256 구현 참조 벡터 3/3 PASS.
+- 이것은 실제 Node CLI/전체 원격 저장소 Native QA가 아님. CLI 입출력/Windows/실 해커톤 데이터 및 배포 상태는 NOT_RUN.
+- 비용: 외부 LLM/서버/API 0원. Private 저장소에서만 개발. 실고객 데이터 사용/대외 배포/소스 공개/판매 없음.
+
+## 차기 단계 (아직 구현되지 않음)
+
+P1: Generic CSV N필드 스키마와 입력 계약/합성 데이터셋, CSV 원본 전체 보존과 품질 보고서.
+P2: XLSX/PDF/DOCX/HTML 파서 플러그인, 파일 해시와 페이지/표/셀 provenance, 손상 파일/ZIP 폭탄 차단.
+P3: 규칙 기반으로 확정할 수 없는 자유 텍스트에 한해 선택적 Local LLM 의미 분석 → 엄격 필드·출처 검증 → 인간 검토 요청.
+P4: 선택형 n8n/Webhook 승인 어댑터, 정형 SQLite/분석 DB 및 문서 청킹·벡터 인덱스; 기존 RAG Studio AX_DATA_PACKAGE_V0와 호환 계약 테스트.
+P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤별 adapter와 E2E/대회 규정 확인.
+
+## 해커톤 사용 경계
+
+- KIC/유그린/기타 대회 데이터가 날짜·항목·금액 구조일 때만 현재 V0 직접 사용. 아니면 N필드 어댑터가 먼저 필요하다.
+- 해커톤 코드 저장소가 Public이면 SMAX 비공개 소스 전체나 사용자 사업 전략을 복제하지 않는다. 데이터 계약과 합성 fixture만 공유하는 방안과, 사용자 승인 후 공개 가능한 최소 코드 추출안을 구분한다.
+- 다른 저장소에 실제 소스 반영/브랜치 병합/CI 배포/대회 제출은 이 브랜치 생성만으로 승인된 게 아니다.
+- 과장 금지: 어떤 현장 데이터도 완벽 처리하거나 Pydantic/Vector/n8n이 현재 동작한다고 말하지 않는다. LLM 자가 confidence_score는 검증된 정확도 보증 아님.
+- 기존 SMAX SELF 2026-11-07 검증과 다른 프로젝트 기한을 이 작업으로 지연하거나 자동 조정하지 않는다.
+
+## 복원 절차
+
+다음 채팅에서 “SMAX preprocessing 브랜치 확인하고 작업이어가셈” 요청 시 repo hibi89/SMAX Private preprocessing의 최신 HEAD, preprocessing/README.md, 이 문서, preprocessing/index.mjs, cli.mjs, 해당 tests, STATUS/HANDOFF 최신 부분을 읽고 안전한 다음 구현/테스트를 수행한다.
