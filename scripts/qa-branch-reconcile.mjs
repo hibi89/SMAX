@@ -79,7 +79,7 @@ export function reconcileThreeWay({
   const all=[...new Set(Object.values(changed).flatMap(set=>[...set]))].sort();
   for(const path of all){
     const owners=Object.keys(changed).filter(key=>changed[key].has(path));
-    const group=owners.length===3?'allThree':owners.join('');
+    const group=({main:'mainOnly',frontend:'frontendOnly',backend:'backendOnly',mainfrontend:'mainFrontend',mainbackend:'mainBackend',frontendbackend:'frontendBackend',mainfrontendbackend:'allThree'})[owners.join('')];
     const destination=groups[group];
     if(!destination)throw Error('Unknown branch combination '+group);
     destination.push(path);
