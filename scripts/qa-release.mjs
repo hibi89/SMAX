@@ -7,6 +7,7 @@ import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeSpreadsheetCsv } from '../site/csv-transform.mjs';
 import { buildSalesReport } from '../site/sales-report.mjs';
+import { snapshotReleaseSources, requireUnchangedReleaseSources } from './qa-source-snapshot.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const dist = join(root, 'dist');
@@ -29,7 +30,7 @@ try {
   // Test discovery is platform-independent, unlike "tests/*.test.mjs" via Windows cmd.
   const requiredTests = [
     'core.test.mjs', 'demo-fixture-contract.test.mjs', 'csv-preflight-parity.test.mjs', 'csv-transform.test.mjs', 'csv-hardening.test.mjs', 'csv-header-safety.test.mjs', 'csv-property.test.mjs', 'csv-ui.test.mjs',
-    'public-boundary.test.mjs', 'offline-package.test.mjs', 'offline-ui-smoke.test.mjs', 'sales-report.test.mjs', 'self-qa-integrity.test.mjs', 'windows-qa-contract.test.mjs', 'qa-branch-reconcile.test.mjs'
+    'public-boundary.test.mjs', 'offline-package.test.mjs', 'offline-ui-smoke.test.mjs', 'sales-report.test.mjs', 'self-qa-integrity.test.mjs', 'windows-qa-contract.test.mjs', 'qa-branch-reconcile.test.mjs', 'qa-source-snapshot.test.mjs'
   ];
   const actualTests = readdirSync(join(root, 'tests')).filter(name => name.endsWith('.test.mjs')).sort();
   const expectedTests = [...requiredTests].sort();
@@ -40,6 +41,8 @@ try {
   for (const test of requiredTests) {
     requireCheck(existsSync(join(root, 'tests', test)), 'expected test missing: ' + test);
   }
+  // A parallel agent must not change code, public assets, fixtures or tests during QA.
+  const initialSources = snapshotReleaseSources(root);
   run('unit');
   run('build');
 
@@ -98,6 +101,9 @@ try {
     monthly.groups.every(group => group.period === '2026-10'),
     'Sales monthly release fixture changed');
 
+  const finalSources = snapshotReleaseSources(root);
+  requireUnchangedReleaseSources(initialSources, finalSources);
+
   mkdirSync(dist, { recursive: true });
   const result = {
     status: 'LOCAL_NODE_PASS_BROWSER_NOT_TESTED',
@@ -105,6 +111,8 @@ try {
     sha256: sha256(html),
     bytes: Buffer.byteLength(html, 'utf8'),
     node: process.version,
+    sourceSnapshotSha256: finalSources.sha256,
+    sourceFileCount: finalSources.files,
     verification: {
       allNodeTests: 'PASS',
       offlineBuild: 'PASS',
