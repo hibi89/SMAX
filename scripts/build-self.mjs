@@ -53,7 +53,13 @@ export function bundleOfflineSelf({html, css, modules}) {
   if (modules.slice(0,3).some(c => /^\s*import\s/m.test(c))) {
     throw Error('A dependency module gained an import');
   }
-  if (modules.some(c => /\b(?:fetch|XMLHttpRequest|sendBeacon)\s*\(/.test(c))) {
+  // CSP connect-src 'none' blocks ordinary requests, but WebRTC can be an
+  // independent data channel. Deny direct and bracket-access network primitives
+  // as defense in depth; this conservative guard is not a full JS code auditor.
+  const networkCall = /\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|WebTransport|RTCPeerConnection|webkitRTCPeerConnection)\s*\(/;
+  const networkConstructor = /\bnew\s+(?:(?:window|globalThis)\s*\.\s*)?(?:WebSocket|EventSource|WebTransport|RTCPeerConnection|webkitRTCPeerConnection|XMLHttpRequest)\b/;
+  const networkBracket = /\[\s*['"`](?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|WebTransport|RTCPeerConnection|webkitRTCPeerConnection)['"`]\s*\]/;
+  if (modules.some(code => networkCall.test(code) || networkConstructor.test(code) || networkBracket.test(code))) {
     throw Error('Offline SELF cannot contain network request APIs');
   }
   const bundled = [
