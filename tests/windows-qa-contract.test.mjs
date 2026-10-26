@@ -93,13 +93,14 @@ test('release QA re-evaluates its real mandatory test inventory gate',()=>{
   assert.ok(source,'missing mandatory inventory validation before Node test execution');
   const required=[...source.matchAll(/'([^']+\.test\.mjs)'/g)].map(match=>match[1]);
   assert.equal(required.length,new Set(required).size);
-  const validate=new Function('readdirSync','join','existsSync','requireCheck','run','root',source);
+  const validate=new Function('readdirSync','join','existsSync','requireCheck','run','snapshotReleaseSources','root',source);
   const runWith=files=>validate(
     ()=>files,
     (...parts)=>parts.join('/'),
     ()=>true,
     (condition,description)=>{if(!condition)throw Error(description);},
     label=>assert.equal(label,'unit'),
+    ()=>({sha256:'synthetic-snapshot',files:1}),
     '/synthetic-test-root'
   );
   assert.doesNotThrow(()=>runWith(required));
