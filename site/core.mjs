@@ -42,7 +42,10 @@ export function parseCsv(source) {
   const headers = (records.shift() ?? []).map(x => x.trim());
   if (!headers.length || headers.some(x => !x)) throw new Error("빈 열 이름이 있습니다.");
   if (!records.length) throw new Error("헤더만 있고 처리할 데이터가 없습니다.");
-  if (new Set(headers.map(x => x.toLocaleLowerCase("ko-KR"))).size !== headers.length) {
+  if (headers.some(x => /[\u0000-\u001F\u007F-\u009F\p{Default_Ignorable_Code_Point}]/u.test(x))) {
+    throw new Error("CSV 열 이름에 보이지 않는 제어문자가 있습니다. 원본 열 이름을 수정하세요.");
+  }
+  if (new Set(headers.map(x => x.normalize("NFKC").toLocaleLowerCase("ko-KR"))).size !== headers.length) {
     throw new Error("중복된 CSV 열 이름이 있습니다.");
   }
   for (let i = 0; i < records.length; i++) {
