@@ -759,3 +759,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본/보존:** 외부 수집/전송/저장 추가 없음; 의심값의 원래 문자·원본 CSV 레코드 번호는 검토 CSV로 유지. 액셀/세무 확정 또는 AI 승인 없이 작업 실행 불가.
 9. **다음 우선순위:** 최신 frontend HEAD부터 code/tests/STATUS/HANDOFF 확인, 아직 Native 전체 QA와 실 Windows Edge file:// E2E 필요. 가능하면 추가 코드 자체 결함만 최소 수정. 형에게 반복 실기기 QA 요청은 최종 게이트에서 1회.
 10. **날짜/근거:** 2026-10-26 KST. GitHub private 원문과 V8 isolated 29/29 ×2 기반. 실기기 출고/판매 PASS 주장은 금지.
+
+## 2026-10-27 KST — 스총 인수: backend reviewCsv 결과 계약 정렬
+1. **현재 목표/제품:** SMAX² SELF 소유자용 로컬 CSV 실제 실행 2종(표준화/잠정 매출) + 설계 가이드 8종, 유료 API/외부전송 0원, 완료 전 사람 검토 필요, 개발 하드 마감 **2026-11-07**.
+2. **확인한 문제:** `backend/site/csv-transform.mjs`은 같은 `normalizeSpreadsheetCsv`를 제공하면서도 `reviewCsv`를 반환하지 않음. 원본 3행 예제에서 2개 `NEEDS_REVIEW` 표시가 있어도 전체 CSV만 생성, 검토 전용 CSV 부재 확인. `frontend`의 계약과 불일치.
+3. **수정/결정:** backend 변환기에서 `reviewCsv`를 반환하도록 최소 수정한 뒤 frontend 최신 파일 원문과 동일하게 정렬. 최종 양쪽 `site/csv-transform.mjs` blob **`43c26279c1bca9064d0d41df44abf837b11f3603`**. backend 커밋 `3e6a2e04a4e78cf30085a0c5d7aa953c20824739`, 동기화 `37b1f1b17f3a695b612910d3d1282fc3d25d5a81`; frontend 프로덕션 코드는 이번 차수 무변경. 복잡한 분기/추론 방식 대신 deterministic 검토 CSV로 통일.
+4. **검증:** backend `tests/csv-transform.test.mjs` 신규 검토 CSV/원본 유지/검토 0건 헤더만 회귀 commit `69e1344f8bf64f15e938f5678ef2fe828575966a`. 최신 원격 실제 production+checked-in CSV transform/hardening/sales 테스트 callbacks를 V8 adapter로 실행 **frontend 29/29, backend 30/30 PASS**, 두 엔진 동일 blob. 이는 **Native `node --test`/전체 `npm run qa:release`/실 Windows Edge `file://` PASS가 아님**.
+5. **원인/주의:** frontend이 검토용 CSV 기능을 추가했으나 backend로 전파되지 않은 브랜치 드리프트. 기존 전체 `csv` 행 삭제/자동 확정/검토 자동 제외를 하지 않고 별도 reviewCsv만 추가. 백엔드 비동기 자동 연동/실거래 데이터 미적용.
+6. **Repo/경로/복원:** Private `hibi89/SMAX`, 이번 안전 코드는 backend `site/csv-transform.mjs`, backend `tests/csv-transform.test.mjs`. frontend STATUS/HANDOFF/bootstrap, backend STATUS/HANDOFF/bootstrap 문서로 기록. `main` 및 frontend 제품 코드 무변경. 커밋+blob SHA가 백업. 금전/고객정보/키·공개 배포/강제 push/임의 브랜치 병합 없음.
+7. **Production:** Cloudflare/Vercel SMAX Product Production 없음·미적용, Kmong 등록/결제/판매 미승인, GUI 고객 Windows QA 미완. 정식 Node `npm run qa:release`, Windows `QA_SELF_WINDOWS.cmd /edge`는 최신 소스 체크아웃 가능한 실 환경에서 필요.
+8. **현재 미완료:** 전체 Native Node QA, 디스크 빌드 HTML CSP/SHA, Edge file:// E2E, 최종 사용자 실기기 사용성 및 상품화 승인. 역사적 86/86 Node PASS·이전 인메모리 SHA는 **이전 빌드 증거**라 최신 출고 성공으로 승격 금지.
+9. **다음 행동:** GitHub `frontend`와 `backend` 최신 HEAD·STATUS/HANDOFF 확인; 개발자 자체 QA 우선. 안전한 구체적 실패만 패치, 형에게 Windows 실행 반복 요구는 최종 관문 1회만. 사업범위·가격·부가 RAG/SOVIA 추가는 미승인.
+10. **기준:** 2026-10-27 KST, 인증 GitHub 원문과 V8 격리 검증으로만 주장. 문서 커밋 뒤 최종 SHA 재확인.
