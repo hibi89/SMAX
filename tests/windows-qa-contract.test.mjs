@@ -86,3 +86,24 @@ test('release manifest and browser QA require new CSV header safety regression',
   assert.ok(browser.includes("page.locator('[data-action=\"run-csv\"]').isDisabled()"));
   assert.ok(browser.includes("page.locator('[data-action=\"run-sales\"]').isDisabled()"));
 });
+
+test('release QA re-evaluates its real mandatory test inventory gate',()=>{
+  const release=readFileSync(new URL('../scripts/qa-release.mjs',import.meta.url),'utf8');
+  const source=release.match(/  const requiredTests = \[[\s\S]*?  run\('unit'\);/)?.[0];
+  assert.ok(source,'missing mandatory inventory validation before Node test execution');
+  const required=[...source.matchAll(/'([^']+\.test\.mjs)'/g)].map(match=>match[1]);
+  assert.equal(required.length,new Set(required).size);
+  const validate=new Function('readdirSync','join','existsSync','requireCheck','run','root',source);
+  const runWith=files=>validate(
+    ()=>files,
+    (...parts)=>parts.join('/'),
+    ()=>true,
+    (condition,description)=>{if(!condition)throw Error(description);},
+    label=>assert.equal(label,'unit'),
+    '/synthetic-test-root'
+  );
+  assert.doesNotThrow(()=>runWith(required));
+  assert.throws(()=>runWith([...required,'unlisted-regression.test.mjs']),/test inventory changed/);
+  assert.throws(()=>runWith(required.filter(name=>name!=='csv-header-safety.test.mjs')),
+    /test inventory changed/);
+});
