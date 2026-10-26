@@ -83,6 +83,6 @@ test('release manifest and browser QA require new CSV header safety regression',
     'Spreadsheet upload rejects invisible Unicode headers',
     'Sales upload rejects NFKC-compatible duplicate headers'
   ])assert.ok(browser.includes(fragment), 'missing browser safety contract: '+fragment);
-  assert.match(browser,/run-csv['"]\]\)\.isDisabled\(\)/);
-  assert.match(browser,/run-sales['"]\]\)\.isDisabled\(\)/);
+  assert.ok(browser.includes("page.locator('[data-action=\"run-csv\"]').isDisabled()"));
+  assert.ok(browser.includes("page.locator('[data-action=\"run-sales\"]').isDisabled()"));
 });
