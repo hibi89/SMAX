@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/smax/SMAX_PREPROCESS_CSV_V0.schema.json",
+  "title": "SMAX CSV Preprocessing Package V0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source",
+    "mapping",
+    "rows",
+    "review_queue",
+    "quality",
+    "processing_mode",
+    "approval"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "SMAX_PREPROCESS_CSV_V0"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "format",
+        "sha256",
+        "bytes",
+        "source_rows"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "UTF8_CSV"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_rows": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "required": [
+        "date",
+        "item",
+        "amount"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "type": "string",
+          "minLength": 1
+        },
+        "item": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    },
+    "review_queue": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/review"
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": [
+        "input_rows",
+        "output_rows",
+        "review_rows",
+        "duplicate_rows",
+        "invalid_date_rows",
+        "invalid_amount_rows",
+        "missing_rows",
+        "formula_protected_rows"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "input_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "review_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "duplicate_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invalid_date_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invalid_amount_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missing_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "formula_protected_rows": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "processing_mode": {
+      "const": "DETERMINISTIC_LOCAL"
+    },
+    "approval": {
+      "const": "NOT_GRANTED"
+    }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "required": [
+        "source_record",
+        "date",
+        "item",
+        "amount",
+        "status",
+        "reasons"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_record": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "date": {
+          "type": "string"
+        },
+        "item": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "READY_FOR_HUMAN_REVIEW",
+            "NEEDS_REVIEW"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": [
+        "source_record",
+        "reasons"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source_record": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          }
+        }
+      }
+    }
+  }
+}
