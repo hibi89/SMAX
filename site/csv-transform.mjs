@@ -159,3 +159,7 @@ export function normalizeSpreadsheetCsv(source, mapping) {
     mapping: { date: mapping.date, item: mapping.item, amount: mapping.amount }
   };
 }
+
+// Generic preprocessing reuses this tested CSV tokenizer and strict header checks.
+// Public named export only; legacy 3-column output and behavior remain unchanged.
+export {parseRecords as parseCsvRecords};
