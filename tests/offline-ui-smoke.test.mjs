@@ -851,3 +851,55 @@ test('local raw CSV mapping preview is bounded, escaped and display-only for bot
   assert.doesNotMatch(env.rootNode.innerHTML,/aria-label="원본 CSV 값 미리보기"/,
     'guide-only templates must never show a stale CSV preview');
 });
+
+
+test('wide owner CSV previews always show explicitly selected columns beyond twelfth without exceeding 12 visible columns',async()=>{
+  const env=offlineFixture();
+  for(const [id,mapping,action,expected] of [
+    ['spreadsheet',{date:'거래날짜',item:'품목',amount:'결제금액'},'run-csv','913427'],
+    ['sales',{date:'판매일',channel:'판매처',amount:'판매액'},'run-sales','913427.00']
+  ]){
+    env.click('select',{id});
+    env.click('tab',{tab:'chat'});
+    const labels=id==='sales'?['판매일','판매처']:['거래날짜','품목'];
+    const headers=[labels[0],...Array.from({length:12},(_,i)=>'보조열'+(i+1)),labels[1],id==='sales'?'판매액':'결제금액'];
+    const row=['2026-10-01',...Array.from({length:12},(_,i)=>'보조값'+(i+1)),id==='sales'?'온라인':'연필','913427'];
+    const raw=headers.join(',')+'\n'+row.join(',');
+    await env.change({id:'csv-upload',dataset:{},files:[{
+      name:'wide.csv',size:Buffer.byteLength(raw,'utf8'),text:async()=>raw
+    }]});
+    let block=env.rootNode.innerHTML.match(/<table class="csv-table" aria-label="원본 CSV 값 미리보기">([\s\S]*?)<\/table>/)?.[1];
+    assert.ok(block,'source preview should render immediately');
+    assert.equal((block.match(/<th>/g)||[]).length,12,'default preview must remain bounded');
+    assert.doesNotMatch(block,/<th>결제금액<\/th>|<th>판매액<\/th>/,
+      'repro: final amount column is hidden before mapping');
+
+    for(const [field,value] of Object.entries(mapping)){
+      await env.change({dataset:{action:'map',field},value});
+    }
+    block=env.rootNode.innerHTML.match(/<table class="csv-table" aria-label="원본 CSV 값 미리보기">([\s\S]*?)<\/table>/)?.[1];
+    assert.ok(block,'source preview must survive mapping changes');
+    assert.equal((block.match(/<th>/g)||[]).length,12,'selected outlying columns cannot break 12-column cap');
+    assert.equal((block.match(/<td>/g)||[]).length,12);
+    assert.match(block,/<td>913427<\/td>/,'selected far-right amount must be visible');
+    assert.match(block,new RegExp('<th>'+(id==='sales'?'판매액':'결제금액')+'</th>'));
+    assert.match(block,new RegExp('<th>'+labels[1]+'</th>'),'selected item/channel must be visible');
+    assert.ok(block.indexOf('<th>'+labels[0]+'</th>')<block.indexOf('<th>'+labels[1]+'</th>'));
+    assert.ok(block.indexOf('<th>'+labels[1]+'</th>')<block.indexOf('<th>'+(id==='sales'?'판매액':'결제금액')+'</th>'),
+      'visible original column order must remain ascending');
+    assert.doesNotMatch(block,/보조열12/,'omit a non-selected middle column when necessary');
+    assert.match(env.rootNode.innerHTML,/선택한 열은 12번째 뒤에 있어도 우선 표시합니다/);
+
+    env.click(action);
+    assert.match(env.rootNode.innerHTML,/원본 1행/,'full source must remain executable');
+    if(id==='sales'){
+      assert.match(env.rootNode.innerHTML,/913427\.00원/);
+      env.click('download-sales-report');
+      assert.match(env.blobs.at(-1).parts[0],/913427\.00/);
+    }else{
+      assert.match(env.rootNode.innerHTML,/결과 1행/);
+      env.click('download-csv');
+      assert.match(env.blobs.at(-1).parts[0],/2026-10-01,연필,913427/);
+    }
+  }
+});
