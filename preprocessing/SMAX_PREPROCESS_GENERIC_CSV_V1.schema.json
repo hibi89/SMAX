@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SMAX Generic CSV Preprocessing V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "fields",
+    "rows",
+    "review_queue",
+    "quality",
+    "processing_mode",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "SMAX_PREPROCESS_GENERIC_CSV_V1"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "sha256",
+        "bytes",
+        "headers",
+        "source_rows"
+      ],
+      "properties": {
+        "format": {
+          "const": "UTF8_CSV"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "headers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_rows": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "source",
+          "type",
+          "required"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "text",
+              "date",
+              "decimal",
+              "integer",
+              "boolean"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    },
+    "review_queue": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/review"
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_rows",
+        "output_rows",
+        "review_rows",
+        "exact_duplicate_rows",
+        "missing_required_cells",
+        "invalid_cells",
+        "formula_risk_cells"
+      ],
+      "properties": {
+        "input_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "review_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "exact_duplicate_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missing_required_cells": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invalid_cells": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "formula_risk_cells": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "processing_mode": {
+      "const": "DETERMINISTIC_LOCAL"
+    },
+    "approval": {
+      "const": "NOT_GRANTED"
+    }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "code"
+      ],
+      "properties": {
+        "field": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "code": {
+          "enum": [
+            "MISSING_REQUIRED",
+            "INVALID_DATE",
+            "INVALID_DECIMAL",
+            "INVALID_INTEGER",
+            "INVALID_BOOLEAN",
+            "FORMULA_RISK",
+            "DUPLICATE_SOURCE_ROW"
+          ]
+        }
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_record",
+        "source_cells",
+        "values",
+        "status",
+        "issues"
+      ],
+      "properties": {
+        "source_record": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "source_cells": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "status": {
+          "enum": [
+            "READY_FOR_HUMAN_REVIEW",
+            "NEEDS_REVIEW"
+          ]
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/issue"
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_record",
+        "issues"
+      ],
+      "properties": {
+        "source_record": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/issue"
+          }
+        }
+      }
+    }
+  }
+}
