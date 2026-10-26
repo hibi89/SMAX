@@ -88,7 +88,10 @@ function duplicateAmountKey(amount) {
 function excelSafe(value) {
   const s = String(value);
   // CSV quotes do not stop spreadsheet formula evaluation; prepend an apostrophe.
-  return /^[\s\u0000-\u001F\u200B-\u200D\u2060\uFEFF\u00AD]*[=+@-]/.test(s) && !/^-?\d+(?:\.\d+)?$/.test(s) ? `'${s}` : s;
+  // Unicode default-ignorable prefix characters (including bidi controls/CGJ) can
+  // obscure a leading spreadsheet formula marker. Review conservatively, while
+  // keeping plain negative numbers untouched and the original cell text intact.
+  return /^[\s\u0000-\u001F\u007F-\u009F\p{Default_Ignorable_Code_Point}]*[=+@-]/u.test(s) && !/^-?\d+(?:\.\d+)?$/.test(s) ? `'${s}` : s;
 }
 
 function csvCell(value) {
