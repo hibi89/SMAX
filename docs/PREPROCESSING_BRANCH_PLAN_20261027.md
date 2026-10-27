@@ -66,3 +66,10 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - 원격 회귀 테스트 파일을 생성하려던 시도 2회는 도구 안전 검사에서 차단. **새 테스트 GitHub 미반영**. 원격 전체 checkout은 `github.com` DNS 오류로 불가; 실제 신규 CLI의 Native Node/E2E 실행 **NOT_RUN**. 작은 범위의 재구성본 문법 검사와 제품 회귀 QA를 구분해야 한다.
 - 기존 `npm run test:preprocessing`과 다른 브랜치, 프로덕션, 대회 저장소에는 변경 없음. 실제 변환과 실패복구 검증 후 CLI 출고 승인 여부 판정.
 - 다음 작업: GitHub 새 테스트 추가 가능 경로를 확보 → 최신 SHA 기준 전체 Native Node 회귀·CLI 파일 E2E → 파일 크기/UTF-8/BOM/중복·오류/출력 권한 측정 → 그 후 확장 포맷 플러그인 설계.
+
+## 2026-10-27 — Strict V1 validator + Generic CLI regression
+
+- V1 validator가 **원본 parser만큼 엄격하게 매핑하지 않은 header도 검사**하도록 보강했다. 실제 원격 모듈에서 unmapped Unicode invisible header 허용을 재현하고 코드+회귀를 커밋했다.
+- 신규 별도 test 파일 GitHub 생성 실패 2회를 반복하지 않고 기존 전용 테스트 파일의 추가 사례로 전환해 CLI 검증 4건, Generic schema 검증 1건을 체크인했다.
+- 실제 원격 CSV 코어+V1 엔진(crypto/TextEncoder stub) V8 테스트 6/6 PASS. 전체 Native Node, 실 CLI E2E, Windows, schema 라이브러리 검증 전까지 릴리스 승인 금지.
+- 다음 순서: Native QA 출처 확립 → 파일 CLI 불변성/실해시/오류복구 → 데이터 provenance 및 문서 포맷별 importer. 대회별 코드는 해총/해커톤 담당만.
