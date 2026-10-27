@@ -131,7 +131,8 @@ export function validateGenericCsvPackage(p){
   if(!sameKeys(s,['format','sha256','bytes','headers','source_rows'])||
     s.format!=='UTF8_CSV'||!/^[a-f0-9]{64}$/.test(s.sha256)||!nat(s.bytes)||
     !nat(s.source_rows)||!Array.isArray(s.headers)||!s.headers.length||
-    s.headers.some(h=>typeof h!=='string'||!h)||new Set(s.headers.map(normalizeKey)).size!==s.headers.length){
+    s.headers.some(h=>typeof h!=='string'||!h||h!==h.trim()||unsafeHeader.test(h))||
+    new Set(s.headers.map(normalizeKey)).size!==s.headers.length){
     throw new TypeError('Invalid source provenance');
   }
   validateGenericColumns(p.fields,s.headers);
