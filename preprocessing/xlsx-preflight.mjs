@@ -24,10 +24,24 @@ function safeName(name) {
   return parts.length > 0 && parts.every(part => part && part !== '.' && part !== '..');
 }
 function scanManifestXml(name, data) {
-  if (!(name.endsWith('.xml') || name.endsWith('.rels'))) return;
+  if (!(name.toLowerCase().endsWith('.xml') || name.toLowerCase().endsWith('.rels'))) return;
   const text = decoder.decode(data);
   if (/<!\s*(?:DOCTYPE|ENTITY)\b/i.test(text)) fail('XML entity declaration is forbidden');
-  if (/TargetMode\s*=\s*["']External["']/i.test(text)) fail('external relationship is forbidden');
+  // Relationship modes can include XML character references (e.g. Exter&#x6e;al).
+  // Inspect the decoded attribute rather than only the raw XML spelling.
+  const markers = text.match(/\bTargetMode\s*=/gi) || [];
+  const attributes = [...text.matchAll(/\bTargetMode\s*=\s*(["'])(.*?)\1/gi)];
+  if (markers.length !== attributes.length) fail('invalid relationship target mode');
+  for (const match of attributes) {
+    const mode = match[2].replace(/&(#x[0-9a-f]+|#[0-9]+|amp|lt|gt|quot|apos);/gi, (_, entity) => {
+      const known = {amp:'&',lt:'<',gt:'>',quot:'"',apos:"'"};
+      if (Object.hasOwn(known, entity)) return known[entity];
+      const cp = entity[1].toLowerCase()==='x' ? parseInt(entity.slice(2),16) : parseInt(entity.slice(1),10);
+      if (!cp || cp > 0x10ffff || cp >= 0xd800 && cp <= 0xdfff) fail('invalid relationship XML reference');
+      return String.fromCodePoint(cp);
+    });
+    if (mode !== 'Internal') fail('external relationship is forbidden');
+  }
 }
 
 /** Offline preflight only: validates ZIP bounds, content integrity and minimal XLSX parts.
