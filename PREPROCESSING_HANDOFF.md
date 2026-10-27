@@ -160,3 +160,16 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **안전·복구:** 실제 고객 파일 없이 합성 데이터만, HTTP·유료 API·새 의존성·외부 소스 이동 없음. GitHub 이전 커밋 복구 가능, force push/merge 없음.
 9. **다음 작업:** 인증된 비공개 전체 코드 로컬 Node 복원과 CSV+XLSX Native 전수 회귀 → 추가 결함 최소 수정 → 원본 출처·검토 큐를 보존하는 포맷 공통 어댑터 설계/실검증.
 10. **검증일:** 2026-10-27 KST. 최종 SHA는 이후 최신 HEAD 확인값 우선.
+
+## 2026-10-27 KST — Native QA 복구 확인 + XLSX Unicode 검토 게이트 (인수인계 10항)
+1. **목표·용도·기술:** Private SMAX `preprocessing`의 범용 로컬 CSV/XLSX Strict JSON 전처리. Node 20+, 의존성·API비용 0원, 승인 `NOT_GRANTED` 유지. 해커톤별 어댑터는 별도 총괄 담당.
+2. **완료 기능·판단:** 기존 전처리 17파일 Native QA 증거 확보(별도 `docs/PREPROCESSING_NATIVE_QA_20261027.md`). 추가로 XLSX 문자열의 bidi/기본무시 Unicode + 위험 접두어 `=+@-` 사람 검토 표시 누락 최소 수정. 음수 숫자 텍스트 정상 보존. A: 현행 파서+validator 동일 최소 규칙 변경(선택, 기존 API 유지), B: 공용 위험판단 모듈 분리(추가 import·변경 영향 증가, 추후 중복 방지 검토).
+3. **테스트 명령·증거:** 이전 HEAD `d2f6f627...` Linux Node v22 `npm run test:preprocessing` **59 PASS/0 FAIL**, 17/17 Git blob 일치. 이번 수정 3개 소스/테스트 V8 **syntax 3/3**, 규칙·validator 구조/상태 거부 각각 **6/6**, 독립 Node 정규식 **7/7**. 새 회귀 포함 최신 `npm run test:preprocessing` **NOT_RUN**. Windows·전 repo `npm test`·CI도 NOT_RUN.
+4. **완료/진행/대기:** 기존 CSV/XLSX 기준선 Native 통과 및 신규 결함 코드·테스트 GitHub 반영 **완료**. 최신 Native 회귀·합성 XLSX 추출·Windows **검증 대기**. 제품 전체 출시·고객 파일 호환성 **미완료**.
+5. **원인/시도/재시도/대안:** XLSX 검토 정규식이 `[\\s\\u200B\\u200E\\u200F]*[=+@]`로 좁아 시각적으로 가려진 값과 `-SUM` 누락. 변경 후 JS validator 위조 상태 거부 재검증. 이전 Private Git clone DNS 방식 재시도 금지; 연결된 GitHub에서 원문 파일 재구성 후 로컬 Node QA 실시.
+6. **저장소·브랜치·커밋·경로:** `hibi89/SMAX` `preprocessing`; baseline QA report `0cee79071f015ae473c5c53133fa84788c649b20`; parser `817a959332c87e25a1a839e498db07586df1d118`, validator `2c101fbf01c7bbfcdf527ba8056f671a1987233a`, regression `75a406ed062f6e3e70cd6eaf44105d13fdc505b5`. Paths `preprocessing/xlsx-cells.mjs`, `xlsx-package.mjs`, `tests/xlsx-preflight.test.mjs`. 문서 커밋 뒤 HEAD 재조회.
+7. **Production·환경:** Node.js v22.16.0 검증 환경; 명령 `npm run test:preprocessing`. Vercel/Cloudflare Production URL 및 Production SHA **미적용**, 공개/판매 승인 없음.
+8. **원본·백업·보안:** GitHub Private commit 이력 복구점. 원본 실고객/토큰/민감정보 저장·전송 없음. SHA256·원본 바이트 및 리뷰상태 보존. 무단 force push/merge/공개·라이선스 변경 금지.
+9. **다음 우선순위:** 현재 HEAD의 필수 17파일+신규 테스트를 GitHub blob 일치 확인 후 Native 테스트 재실행(예상 총 60), 합성 XLSX/CSV CLI 실제 E2E → 전체 `npm test`/Windows 한 번에 QA → workbook 관계/시트명·스타일을 안전하게 설계. 실패 시 원인별 최소 수정·회귀.
+10. **시점·범위:** 2026-10-27 KST, 인증된 Private GitHub 소스 기준 V8 제한 검증 + 독립 Node 정규식 확인. baseline 59/59와 최신 코드 미검증은 분리 기록. 문서 이후 최신 SHA 재조회.
+
