@@ -123,3 +123,17 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **원본/보안/백업:** 입력 파일 읽기 전용, 테스트 합성 XLSX만, 실제 고객 데이터/개인정보·토큰/LLM API·외부 요청·비용 0. 신규 XLSX JSON에 원본 모든 셀/수식이 있을 수 있으므로 원본 동일 기밀 취급. GitHub 기존 commit들이 복구점, force push/합병 없음.
 9. **다음 우선·완료 기준·사용자 승인:** 전체 Native repo QA와 명시적 release gate → XLSX Schema/검증기·시트 논리명/날짜 스타일 등 지원 범위 선별 및 원본 행 검토 강화 → 다른 문서 플러그인. 공개 코드 반출·사용자 실데이터·유료 API·배포·판매는 사용자 별도 승인.
 10. **시점:** 2026-10-27 KST. 현재 검증은 새 XLSX 코드/테스트와 두 합성 워크북의 로컬 Node에 한정, 전체 SMAX 제품이나 100% 완료 주장이 아님. 이후 문서 commit/최종 HEAD 확인.
+
+
+## 2026-10-27 KST — XLSX V0 Strict JSON gate 인수인계 (10항)
+
+1. **목표·제약:** SMAX Private `preprocessing` 전처리의 XLSX 결과를 자동 승인 없이 Strict JSON 구조·원본 바이트 기준 재확인. Node 20+, 신규 의존성/지출 0.
+2. **완료:** `preprocessing/xlsx-package.mjs`의 `validateXlsxCellsPackage(pkg,originalBytes?)`, `serializeXlsxCellsPackage`; `SMAX_PREPROCESS_XLSX_CELLS_V0.schema.json` Draft 2020-12. 원본 SHA·바이트 길이·재추출 동등성과 검토 상태 불변성/중복주소/경로/수량·타입 확인.
+3. **검증:** JS file blob `9b7ca74a328857e806c9574f278981ec00c9b8da`, test blob `a97571a54fd5973aa359dae9024c57ded5ad4d45` 양측 `git hash-object` 일치. 실제 Node v22.16.0 `node --test tests/xlsx-preflight.test.mjs` **26 PASS 0 FAIL**. 로컬 openpyxl·XlsxWriter 합성 XLSX 2종 원본 바이트 대조 Native PASS. 원격 JSON Schema 구조 파싱/검토 PASS; 별도 JSON Schema 검증 엔진, CSV 전체 test, Windows/CI **NOT_RUN**.
+4. **상태:** XLSX 엄격 결과 검증/출력 관련 코드·회귀·스키마 반영 완료. 별도 XLSX 전체 기능/SMAX 상품화/실배포 승인 아님.
+5. **결함/대안:** `approval='APPROVED'` 위조와 상태 변경·캐시된 수식 값을 JS 검증에서 거부. 유효한 문자열의 단순 변조는 원본 없는 구조 검사만으로 알아낼 수 없음 → 원본 Uint8Array 전달 시 전체 재추출 결과 비교 추가. Native CSV 전체 테스트 원격 private git DNS 차단 재시도 소모 금지, 안전한 소스 복원 경로 필요.
+6. **repo/branch/commits:** `hibi89/SMAX` Private `preprocessing`, 시작 HEAD `cfb87ed0a882a3b624f0a0f3fa0790228f6fd3a7`; validator commit `018bbaa04c324d569c821323ea77d97ca6f07f09`; regression `820d3fdb954b4e9bafdd41f00bf28ed8fbee1778`; schema `1e7c79b2efa9f15527b544f1ca5559deeacd7ef5`. 최종 HEAD 문서 갱신 후 재조회.
+7. **Production/실행:** Node `node --test tests/xlsx-preflight.test.mjs` Native PASS 26. `npm run test:preprocessing`에 기존 XLSX test 경로 이미 포함되어 있으나 전체 실행 없음. Production URL/배포 SHA 없음.
+8. **원본·보안·백업:** 합성 XLSX·실제 GitHub Private 코드만 사용, 고객/개인정보·토큰·외부 업로드·유료 API 없음. XLSX result JSON은 원본과 동일 기밀. 기존 repo commits 복원점, 타 브랜치/force push/merge 없음.
+9. **다음 우선/완료 조건·승인:** ① 전체 CSV+XLSX 정본 Native/npm 회귀 0 FAIL ② 원본 파일 상용 다양성·XLSX 표시 시트 이름/날짜 스타일/관계 처리 검증 ③ 포맷별 Strict/원본 인증 계약 + 사람 승인 게이트. 외부 공개, 결제/과금, 배포, 실고객 파일 사용 별도 승인.
+10. **시점 및 누락:** 2026-10-27 KST. JS Strict package validator와 공식 Schema 게시까지 반영. XML/ZIP parser 추가 공격면 포괄 보증하지 않으며, 구조 검사≠원본 데이터 진본성. 최종 HEAD는 아래 재조회 결과 우선.
