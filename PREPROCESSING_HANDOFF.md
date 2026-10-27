@@ -197,3 +197,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 9. **다음 순서 및 완료 기준:** 17+ 파일 Git blob 정본 복원 → `npm run test:preprocessing` **62/62 실제 PASS** 판정(실제 실행값 우선) → synthetic XLSX ZIP CR C/Formula/sharedStrings parity → 전체 `npm test`·Windows 경계 → generic provenance importer. 추가 비용·배포·고객 데이터는 별도 승인.
 10. **갱신 시점/범위:** 2026-10-27 KST, 원격 GitHub parser/validator/test 실제 원본 조회 및 V8 부분 실행 근거. 전체 Native/최종 출시 상태 미확정.
 
+## 2026-10-27 KST — Generic CSV unmapped formula-risk handoff (10항목)
+1. **목표/확정 요구/기술:** `hibi89/SMAX` Private `preprocessing` 브랜치의 오프라인 Node 20+ 범용 CSV/XLSX 전처리·표준화. 원본·provenance 보존, Strict JSON, 인간 검토·승인 `NOT_GRANTED`, 외부 API/유료 비용 0원.
+2. **실제 작업·대안/결정:** 매핑하지 않은 `source_cells`에도 수식형 문자열이 남는데 clean 상태로 통과하는 결함을 V8 실제 소스로 재현. A 비매핑 원본 헤더/검토 사유를 별도 `UNMAPPED_FORMULA_RISK` issue로 추가해 JSON 원본 보존(선택); B 원본 미매핑 열 삭제(보존 요건 위반); C 자동 보호문자 가공(원본 변조). quality formula counter는 매핑/비매핑 양쪽 합산.
+3. **테스트 명령·성공 실패:** 실제 GitHub CSV tokenizer + Generic CSV V1 수정 원문 + 체크인 `tests/preprocessing-generic.test.mjs` 9개를 V8 분리 검증 harness 실행 **9/9 PASS, 0 FAIL**, source row 상태 및 tampered issue mismatch 차단 확인. SHA digest는 **모의**, 실제 Node `npm run test:preprocessing`, CLI·ZIP E2E·Windows **NOT_RUN**. 이전 정본 59/59 Native는 과거 `d2f6f627` 기준선. 현재 체크인 정적 테스트 63개(검증된 count 아님).
+4. **완료/진행/차단:** 코드·정규식·검증기·JSON 스키마·회귀 GitHub 커밋 완료. 전체 Native 63건 검증 미완, CI·상용출고·배포 미승인.
+5. **결함/원인/해결/재시도 금지:** mapped field loop에서만 `formulaRisk` 호출해서 보존되는 unmapped values를 검사하지 않음. 양쪽 parser/validator 루프에서 비매핑 헤더를 결정론적으로 검사, 원문 값 보존, 위조 검토를 거부. Private GitHub full clone DNS/인증다운로드 제한으로 최신 63개 Node 실행을 확인하지 못함. 무단 CI 과금·Public 소스 반출·실고객 파일 업로드 금지.
+6. **Repo/branch/commit/SHA/경로:** Private `hibi89/SMAX` `preprocessing`; 수정 commit `ecf6cba8d22660180250cad3d5afb6b7014843d5`; `preprocessing/generic-csv.mjs` blob `3b6cedae4869b7d8d5ae587f8d565812b6d9e193`, `tests/preprocessing-generic.test.mjs` blob `3f99b78f416a36c08f299f6511a5f7f16c1215f3`, `preprocessing/SMAX_PREPROCESS_GENERIC_CSV_V1.schema.json` blob `ae5d2e8cbc40bc08ed586b7826c1bec5f5cead0d`. 본 문서 commit 후 HEAD 재확인.
+7. **Runtime·Production:** Node 22.16.0 있음, 최신 전체 Private 체크아웃 없음. GitHub status/CI/Windows/Production SHA·배포 URL 해당 없음.
+8. **보안/데이터/백업:** 원본 `source_cells` 무해화하지 않음, 위험 플래그만 추가. 소비자 Excel/CSV 출력 시 식 평가 위험 별도 봉쇄 필요. 실제 고객·키·실거래 자료 없음. Git SHA로 복구점 보존. `main/frontend/backend`, 해커톤 저장소 및 기타 앱 무변경.
+9. **다음 단계/완료 기준:** 인증 17+ 정본 파일 모든 blob SHA 비교 → `npm run test:preprocessing` 최신 63/63 (실행 결과 우선) → 합성 CSV CLI/원본 SHA256 실파일 E2E → XLSX 실제 ZIP E2E/Windows 경계 → 변경된 신규 issue enum을 읽는 소비자와 RAG 구조 호환·릴리스 검토. 무단 배포/판매/실자료/지출 금지.
+10. **갱신/근거:** 2026-10-27 KST, GitHub 코드/test/schema 커밋 확인, V8 분리 실행 근거. 63은 체크인 정적 개수이며 Native PASS 표기가 아님.
+

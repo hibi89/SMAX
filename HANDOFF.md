@@ -348,3 +348,9 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 - 원격 체크인 파일을 V8로 실제 실행해 synthetic XML 7/7 PASS, 코드/parser/test syntax 3/3 PASS. 전체 `npm run test:preprocessing` 현재 정적 62건 **NOT_RUN**, 과거 Native 59/59는 이전 commit 기준선만. ZIP E2E/Windows/CI/Production 미검증.
 - 재개: `PREPROCESSING_HANDOFF.md` 최신 10항 인계 및 `STATUS.md` 최신 마지막 기록 확인, 정확한 preprocessing HEAD/SHA→ 인증 정본 전체 17파일 복원 → Node 22 Native 62건 → CSV/XLSX real ZIP synthetic parity QA. Private 코드 Public 반출, 타 브랜치 자동 merge, 대회별 코드 변형, 지출·배포 금지.
 
+## 2026-10-27 KST — Generic CSV unmapped raw source formula risk fix
+- `hibi89/SMAX` Private `preprocessing`: mapped 이외 source_cells의 `=HYPERLINK(1)`가 READY/검토 0으로 정상 통과하던 문제를 실제 tokenizer+Generic core에서 재현 후 수정. 새 코드 `UNMAPPED_FORMULA_RISK`에 원본 header를 field로 넣고 `NEEDS_REVIEW`·formula counter에 포함; 기존 원본 행과 mapped 계약 유지.
+- 원격 core/test/schema 커밋 `ecf6cba8d22660180250cad3d5afb6b7014843d5` (core blob `3b6cedae4869b7d8d5ae587f8d565812b6d9e193`, test `3f99b78f416a36c08f299f6511a5f7f16c1215f3`, JSON Schema `ae5d2e8cbc40bc08ed586b7826c1bec5f5cead0d`). Actual V8 tokenizer/core regression **9/9 PASS**, digest 모의. 기존 62 → 신규 등록 총 63개 Native `npm run test:preprocessing` **NOT_RUN**. 기존 59/59 Native는 이전 코드 기준선.
+- 이 신규 issue code 추가는 V1 enum 확장이므로 downstream 코드의 허용 enum 연동 호환성 확인 필요. source_cells 원문 자체는 수식 이스케이프되지 않은 불신 데이터; exporter에서 별도 처리할 것.
+- 다음 `ㄱ`: PREPROCESSING_HANDOFF.md 마지막 10항목, STATUS.md 마지막 기록 → 최신 SHA 확인 → 17+파일 인증 checkout 정본 Node 전체 63건/실파일 CLI·XLSX ZIP E2E → 소비자 호환성/Windows QA. 타 branch/해커톤 수정·비용/배포 금지.
+

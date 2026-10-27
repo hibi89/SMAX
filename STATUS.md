@@ -366,3 +366,12 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 - **범위/비용**: Private preprocessing 내 code+test 및 본 인계 파일만 수정. `main/frontend/backend`, 해커톤 레포, 고객·개인정보, 결제, 배포·공개 변경 없음.
 - **다음**: 정본 SHA별 17파일 복원 가능한 인증 Node 실행 환경에서 `npm run test:preprocessing` 62건 실제 실행 및 synthetic XLSX ZIP parity E2E → 실무 Excel 파일의 지원/한계 점검 → 범용 텍스트/셀 provenance 보강.
 
+## 2026-10-27 KST — Generic CSV V1 unmapped source-column formula review
+- 실제 원격 V1 + CSV tokenizer에서 `Name,Note\nAlice,=HYPERLINK(1)`의 Name만 매핑하면 원본 `Note` 위험 문자열이 `source_cells`에 남는데도 `READY_FOR_HUMAN_REVIEW` / formula count 0, validator PASS가 됨을 재현. 고객/실데이터 미사용.
+- **A 결정:** 원본 열을 전부 보존하며 비매핑 열의 수식 의심 셀도 별도 `{field:<원본헤더>,code:'UNMAPPED_FORMULA_RISK'}`를 issues/review_queue에 기입, `status=NEEDS_REVIEW`, `quality.formula_risk_cells`에 합산. 기존 mapped `FORMULA_RISK`와 다른 명시적 코드. B(미매핑 셀 제거)는 provenance 원칙 위반, C(보호문자만 자동 삽입)는 원문 변조 위험으로 선택하지 않음.
+- **검증기/스키마:** 원문 `source_cells`에서 비매핑 위험을 다시 계산하고 검토 누락·상태 위조를 거부. JSON Schema `$defs.issue.properties.code.enum`에 새 코드 추가. 기존 V1 스키마 버전을 유지하되 issue code 허용 범위 확장이므로 소비자 enum 매핑 호환 확인 필요.
+- **GitHub 코드·테스트·스키마 commit:** `ecf6cba8d22660180250cad3d5afb6b7014843d5`. blobs: core `3b6cedae4869b7d8d5ae587f8d565812b6d9e193`, regression `3f99b78f416a36c08f299f6511a5f7f16c1215f3`, schema `ae5d2e8cbc40bc08ed586b7826c1bec5f5cead0d`.
+- **테스트 증거:** 인증된 최신 CSV tokenizer와 새 V1 원문/체크인 regression 9건을 V8 격리 harness에서 수행 **9/9 PASS**, 생성 패키지 검증+위조 거부 PASS. Hash는 stub; 실제 전체 Node CLI/파일/해시/ZIP test가 아님. 그 전까지 정적 선언 62개, 이번 +1로 **63개 (CSV 27/XLSX 36)**. Native `npm run test:preprocessing` 최신 전체 **NOT_RUN**, 과거 59/59 PASS는 구 commit 기준.
+- **범위 및 남은 리스크:** 오직 Private `preprocessing`, 타 브랜치·해커톤·고객 데이터·지출·배포 무변경. 모든 `source_cells`는 여전히 신뢰할 수 없는 원본이므로, 이 검토 사유만으로 안전한 CSV/Excel 출력이 보장되지는 않음; 실제 exporter는 재검증·적절한 수식 이스케이프 필수.
+- **다음 게이트:** SHA 동일 인증 checkout에서 Node `npm run test:preprocessing` 전체 63건 (실제 개수 우선), Generic CLI 파일 E2E/실해시와 ZIP XLSX synthetic parity, Windows QA → 별도 소비자 호환성 점검/출고 승인.
+

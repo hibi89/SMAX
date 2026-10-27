@@ -142,3 +142,10 @@ const json=serializeXlsxCellsPackage(pkg,original); // 사람이 승인한 파�
 - **수정:** `preprocessing/xlsx-preflight.mjs`에서 `TargetMode` 속성을 찾은 다음 XML numeric character reference(16진수·10진수)와 표준 named references를 디코드해 `Internal`만 허용. 누락된 인용부호/부정확한 참조 등은 실패 종료. 검사 파일 확장자 `.rels/.xml`은 대소문자와 관계없이 확인.
 - **회귀:** 외부 모드 문자참조·잘못된 모드, 정상 `Inte&#114;nal`, 대문자 `.RELS`의 외부 모드 총 4개 Node 테스트 추가. 최신 `node --test tests/xlsx-preflight.test.mjs`: **33/33 PASS, 0 FAIL**. 실제 생성한 합성 openpyxl/XlsxWriter XLSX 2종의 preflight/extract/원본 대조도 PASS. Python Schema unittest **5/5 PASS**.
 - **검증 근거:** 변경한 전처리 모듈 Git blob `ce0f96ce618c6b868bcf255e1d8b2508f3eb6bb3`; 회귀 테스트 blob `d484cea4ef13ad28b650902c164251d1daaf6121`; 각 파일 로컬 `git hash-object`와 GitHub SHA가 정확히 일치함. 전체 CSV 포함 `npm run test:preprocessing`, Windows, CI, 사용자 파일 호환·릴리스는 **NOT_RUN**.
+
+## 2026-10-27 — Generic CSV V1: 비매핑 원본 열 수식 위험 검토
+- `source_cells`는 선택하지 않은 원본 CSV 열까지 **가공하지 않고** 보존한다. 선택되지 않은 원본 열에도 `=HYPERLINK(1)` 등의 수식 의심 문자열이 있으면, 해당 행은 `NEEDS_REVIEW`, `issues[].code=UNMAPPED_FORMULA_RISK`, `issues[].field=<원본 CSV 헤더>`로 표시한다. 매핑된 열은 기존 `FORMULA_RISK`와 `issues[].field=<출력 매핑 key>` 계약을 그대로 쓴다.
+- `quality.formula_risk_cells`는 두 위험 유형의 셀 수를 합산한다. 원본 손실·자동 엑셀 이스케이프·자동 승인/실행은 하지 않는다. 소비자가 원문 `source_cells`를 Excel/CSV로 내보낸다면 **반드시 별도 셀 수식 위험 차단**이 필요하다.
+- 변경 SHA: core `3b6cedae4869b7d8d5ae587f8d565812b6d9e193`, schema `ae5d2e8cbc40bc08ed586b7826c1bec5f5cead0d`, regression `3f99b78f416a36c08f299f6511a5f7f16c1215f3`, commit `ecf6cba8d22660180250cad3d5afb6b7014843d5`.
+- V8 격리 실행 9/9 PASS (hash stub), 최신 전체 Native 63건·실파일/Windows·CI/출고 **NOT_RUN**.
+
