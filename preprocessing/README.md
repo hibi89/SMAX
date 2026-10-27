@@ -106,3 +106,22 @@ console.log(pkg.quality, pkg.sheets[0]?.rows[0]);
 ```
 
 **증거:** 실제 Node v22.16.0에서 `node --test tests/xlsx-preflight.test.mjs` **18/18 PASS**(기존 안전검사 10 + 신규 시트/셀 8). 실제 로컬에서 합성 생성한 `openpyxl` 및 `XlsxWriter` XLSX 2종에서 셀 추출·수식 검토 분리 성공. 두 생산 파일과 테스트에 고객 정보 없음. 원격 GitHub production 모듈 blob `ee81d55fbaa64e234d104a6e0a68904e812351f1`와 로컬 실행 소스 blob 동일, 원격 test blob `fbbc028188b0e4de16b66b4dcd9b7e330a9c6044`와 로컬 테스트 원문 동일. 기존 CSV 포함 **전체 Native `npm run test:preprocessing`·`npm test` 및 Windows는 아직 NOT_RUN**.
+
+
+## 2026-10-27 — XLSX Strict JSON 검증기 및 스키마 V0
+
+- 독립 계약 파일: `preprocessing/SMAX_PREPROCESS_XLSX_CELLS_V0.schema.json` (Draft 2020-12, 속성 추가 금지, 버전·타입·크기·승인 불가 구조).
+- 의미·무결성 검증기: `preprocessing/xlsx-package.mjs` — `validateXlsxCellsPackage(pkg, originalBytes?)`, `serializeXlsxCellsPackage(pkg, originalBytes?)`.
+- **구조 검증**: 변조된 행·셀 주소 및 중복, 허용되지 않은 상태 문자열·수식 결과, 품질 집계/행 개수·시트 경로 불일치, 최상위·하위 임의 속성 거부. 셀 상태는 수식/오류/수식형 텍스트 여부에 따라 필수 검토 상태와 일치해야 함.
+- **원본 인증 검증(선택, 강력 권고):** 두 번째 인수로 원본 XLSX 바이트를 전달하면 SHA-256·바이트 길이 확인 **및 같은 바이트로 재추출한 전체 결과 비교**. 원본 미전달 시 구조만 검증하므로 수정된 문자열이 유효 타입이면 통과할 수 있음. 구조 검증만으로 데이터 진본 여부를 주장하지 말 것.
+- 사용 예:
+```js
+import {readFileSync} from 'node:fs';
+import {extractXlsxCells} from './preprocessing/xlsx-cells.mjs';
+import {validateXlsxCellsPackage,serializeXlsxCellsPackage} from './preprocessing/xlsx-package.mjs';
+const original=readFileSync('input.xlsx');
+const pkg=extractXlsxCells(original);
+validateXlsxCellsPackage(pkg,original);
+const json=serializeXlsxCellsPackage(pkg,original); // 사람이 승인한 파일이 아님
+```
+- **검증 출처:** 이전 XLSX 실제 코드 및 이번 검증기/회귀가 GitHub 원격 blob SHA와 로컬 실행 파일 일치; Node 22.16.0 `node --test tests/xlsx-preflight.test.mjs` **26/26 PASS** (이전 18 + 신규 보안/원본 동등성 8). 스키마 JSON 자체는 원격 파싱/필드·`$defs`/승인 const 확인. 독립 Native schema 엔진(Ajv 등)을 사용한 JSON Schema 적합성 테스트 및 **CSV 포함 전체 npm test/Windows는 미실행**.
