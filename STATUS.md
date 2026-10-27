@@ -295,3 +295,13 @@
 - **검증:** GitHub에서 새로 읽은 `site/csv-transform.mjs` blob `26d84c9a59216107ab492aedfcd91cd571e40c66`, 패치된 `preprocessing/generic-csv.mjs` blob `534057062a270d1bc80a78d721d3b3edba84db93` 실제 소스를 V8에서 실행. 정상/검토 행, 위조 승인/임의·null 상태, 날짜·중복, 숨김 헤더, 값/출처/검토 큐 변조, JSON 직렬화 총 **20/20 PASS, 0 FAIL**. SHA256·TextEncoder 어댑터를 모의한 격리 검증만 수행했으며 **Native Node/npm 전체·디스크 CLI 통합/Windows·CI NOT_RUN**. Native QA 성공으로 주장하지 않음.
 - **장애/피벗:** 비공개 원격 전체 체크아웃의 컨테이너 DNS 차단 및 현 컨테이너에 전처리 코어 정본 파일이 없음. 기존 모의 CLI 검증 파일은 실제 엔진이 아니므로 Native 통합으로 오인 금지. 동일 차단 Git clone 반복 금지. 원격 검사·최소 코드/회귀 수정까지 수행, Native 테스트는 접근 가능한 정본 복원 경로가 필요.
 - **보존/다음:** `main/frontend/backend` 무수정, 외부 고객 자료/유료 API/배포/판매 없음. 향후 실제 repo 정본 Node 테스트 전수 실행·CLI 실 입력 E2E → CSV 경계 안정성·문서 파서 우선순위 설계. 최종 HEAD 문서 커밋 후 재조회.
+
+## 2026-10-27 KST — XLSX ZIP Preflight V0 (엄격 범용 문서 입력 검문소)
+
+- **작업 범위:** Private `hibi89/SMAX` `preprocessing` 브랜치만. 기존 `main/frontend/backend`와 이전 V0/V1 CSV 원본 코드 보존; 해커톤별 연결·배포/유료 API 금지.
+- **대안 비교 및 결정:** ① 외부 XLSX 파서 의존성 즉시 추가는 처리 범위 넓으나 의존성/라이선스/추가 공격면·공급망 점검 부담. ② Node 내장 zlib 기반 XLSX ZIP 사전검사를 먼저 만들면 셀 데이터는 아직 못 읽지만 비용 0·입력 안전 경계와 provenance 기반을 별도로 검증 가능. 사용자 범용 전처리/0원 계획에 따라 ② 수행.
+- **구현:** `preprocessing/xlsx-preflight.mjs` (GitHub 코드 커밋 `f78ae845437d06d7d9589473f30ba7adfc260949`, blob `dfd838aaf357179bbe092affc959a65b1e149705`) — 2MiB ZIP, 8MiB 압축해제, 512엔트리 상한, EOCD/CD/local header·CRC·오프셋 검증, path traversal/symlink/ZIP64/암호/외부 링크·macro·DOCTYPE/ENTITY 차단. 데이터 추출/시트 셀 해석·필드 매핑/벡터는 **미구현**.
+- **Native Node 단독 테스트:** 합성 ZIP 기반 `tests/xlsx-preflight.test.mjs` GitHub test blob `d54351e8644bbf1dce81d429a2084cfbcc91f547`, 테스트 파일 마지막 정정 커밋 `ea228d601d411e670222b13401976fce62252a16`. 로컬 `git hash-object`가 원격 코드+테스트 blob SHA 모두 일치. **Node 22.16.0 `node --test tests/xlsx-preflight.test.mjs` 10/10 PASS, 0 FAIL**. 초기 로컬 테스트 1건은 CRC 변조 위치가 잘못돼 실패했으나 정확히 데이터 영역으로 변경 후 통과. GitHub 복제 테스트의 ZIP 헤더 필드 폭 오기는 SHA 대조 발견 후 2회 정정, 최종 일치.
+- **통합/미검증:** `package.json` `npm run test:preprocessing`에 신규 테스트 추가. 그러나 Private GitHub 전체 checkout DNS 차단으로 **기존 CSV 전체 Node 테스트 / 실제 XLSX 샘플 호환·데이터 추출 / Windows / CI·서비스·배포는 NOT_RUN**. 이 Native PASS는 새 독립 모듈만의 PASS.
+- **원본/보안/비용:** 합성 텍스트 ZIP만 생성, 고객 원본/기밀·토큰 사용/외부 전송·돈 지출 없음. 로컬 temporary test code와 커밋된 비공개 GitHub 코드 외 장기 저장 자산 없음.
+- **다음:** 전체 Native CSV 정본 테스트 경로 확보 → XLSX 파일 목록+CRC 검사에서 승인된 제한형 시트·셀 추출로 점진 확장 → source provenance·검토 큐 Strict JSON 설계 후 완료기준 검증. 최종 GitHub HEAD 문서 커밋 후 재조회.
