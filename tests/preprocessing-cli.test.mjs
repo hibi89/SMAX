@@ -111,7 +111,7 @@ test('generic CLI disallows mapping symlink and identical paths',t=>{
   const f=fixture();try{
     const mapPath=join(f.dir,'mapping.json'),link=join(f.dir,'mapping-link.json');
     writeFileSync(mapPath,JSON.stringify(genericMapping));
-    assert.throws(()=>runGenericCsvCli(genericArgs(f,f.output)),/ENOENT|non-symlink/);
+    assert.throws(()=>runGenericCsvCli(genericArgs({...f,output:mapPath},mapPath)),/separate CSV input/);
     try{symlinkSync(mapPath,link)}catch(e){
       if(['EPERM','EACCES','ENOSYS'].includes(e.code)){
         t.skip('symlink creation unavailable');return;
