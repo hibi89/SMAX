@@ -279,3 +279,27 @@ test('reject external relationship in case-varied XML relationship filename',()=
  const rel='<Relationships><Relationship TargetMode="Exter&#110;al"/></Relationships>';
  assert.throws(()=>preflightXlsx(withEntry({name:'xl/_rels/workbook.xml.RELS',content:rel})),/external relationship/);
 });
+
+
+test('XLSX Unicode-obscured formula-like strings require review, but signed numeric text does not',()=>{
+ const suspicious=['\u202E=2','\u2066@SUM(1)','\u034F+1','-SUM(2)'];
+ for(const value of suspicious){
+   const source=xlsx(worksheet(`<row r="1"><c r="A1" t="inlineStr"><is><t>${value}</t></is></c></row>`));
+   const pkg=extractXlsxCells(source),cell=pkg.sheets[0].rows[0].cells[0];
+   assert.equal(cell.value,value);
+   assert.equal(cell.status,'NEEDS_REVIEW',JSON.stringify(value));
+   assert.equal(cell.reason,'FORMULA_LIKE_TEXT',JSON.stringify(value));
+   assert.equal(pkg.quality.review_cells,1);
+   assert.equal(validateXlsxCellsPackage(pkg,source),true);
+   const forged=structuredClone(pkg);
+   forged.sheets[0].rows[0].cells[0].status='READY_FOR_HUMAN_REVIEW';
+   assert.throws(()=>validateXlsxCellsPackage(forged),/review state mismatch/);
+ }
+ const source=xlsx(worksheet('<row r="1"><c r="A1" t="inlineStr"><is><t>-12.50</t></is></c></row>'));
+ const pkg=extractXlsxCells(source),cell=pkg.sheets[0].rows[0].cells[0];
+ assert.equal(cell.value,'-12.50');
+ assert.equal(cell.status,'READY_FOR_HUMAN_REVIEW');
+ assert.equal(cell.reason,null);
+ assert.equal(pkg.quality.review_cells,0);
+ assert.equal(validateXlsxCellsPackage(pkg,source),true);
+});
