@@ -5,6 +5,7 @@ import {mkdtempSync,writeFileSync,readFileSync,rmSync,symlinkSync,existsSync} fr
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {runPreprocessCli} from '../preprocessing/cli.mjs';
+import {runGenericCsvCli} from '../preprocessing/generic-cli.mjs';
 
 const fixture=()=>{
   const dir=mkdtempSync(join(tmpdir(),'smax-preprocess-cli-'));
@@ -50,5 +51,74 @@ test('CLI rejects missing mapping, unsupported output and source symlinks',t=>{
       if(['EPERM','EACCES','ENOSYS'].includes(e.code)){t.skip('symlink unavailable');return}throw e;
     }
     assert.throws(()=>runPreprocessCli(args({...f,input:link})),/no symlink/);
+  }finally{f.close();}
+});
+
+const genericArgs=({input,output},columnsPath)=>[
+  '--input',input,'--columns',columnsPath,'--output',output
+];
+const genericMapping={columns:[
+  {key:'record_date',source:'거래날짜',type:'date',required:true},
+  {key:'item',source:'품목',type:'text',required:true},
+  {key:'amount',source:'결제금액',type:'decimal',required:true}
+]};
+
+test('generic CLI writes V1 with BOM-inclusive provenance, original rows and review',()=>{
+  const f=fixture();try{
+    const mapPath=join(f.dir,'mapping.json');
+    writeFileSync(mapPath,JSON.stringify(genericMapping));
+    const result=runGenericCsvCli(genericArgs(f,mapPath));
+    const p=JSON.parse(readFileSync(f.output,'utf8'));
+    assert.equal(result.schema_version,'SMAX_PREPROCESS_GENERIC_CSV_V1');
+    assert.equal(p.source.sha256,createHash('sha256').update(f.bytes).digest('hex'));
+    assert.equal(p.source.bytes,f.bytes.length);
+    assert.equal(p.approval,'NOT_GRANTED');
+    assert.equal(p.rows.length,2);
+    assert.equal(p.rows[1].issues[0].code,'INVALID_DATE');
+    assert.equal(result.review_rows,1);
+    assert.deepEqual(readFileSync(f.input),f.bytes);
+  }finally{f.close();}
+});
+
+test('generic CLI never overwrites and refuses extra unapproved mapping keys',()=>{
+  const f=fixture();try{
+    const mapPath=join(f.dir,'mapping.json');
+    writeFileSync(mapPath,JSON.stringify(genericMapping));
+    writeFileSync(f.output,'existing');
+    assert.throws(()=>runGenericCsvCli(genericArgs(f,mapPath)),/EEXIST/);
+    assert.equal(readFileSync(f.output,'utf8'),'existing');
+    rmSync(f.output);
+    writeFileSync(mapPath,JSON.stringify({...genericMapping,approval:'APPROVED'}));
+    assert.throws(()=>runGenericCsvCli(genericArgs(f,mapPath)),/only a columns array/);
+    assert.equal(existsSync(f.output),false);
+  }finally{f.close();}
+});
+
+test('generic CLI rejects invalid UTF-8 source and oversized config',()=>{
+  const f=fixture();try{
+    const mapPath=join(f.dir,'mapping.json');
+    writeFileSync(mapPath,JSON.stringify(genericMapping));
+    writeFileSync(f.input,Buffer.from([255,254]));
+    assert.throws(()=>runGenericCsvCli(genericArgs(f,mapPath)),/encoded data was not valid/i);
+    writeFileSync(f.input,f.bytes);
+    writeFileSync(mapPath,' '.repeat(64*1024+1));
+    assert.throws(()=>runGenericCsvCli(genericArgs(f,mapPath)),/at most 65536 bytes/);
+    assert.equal(existsSync(f.output),false);
+  }finally{f.close();}
+});
+
+test('generic CLI disallows mapping symlink and identical paths',t=>{
+  const f=fixture();try{
+    const mapPath=join(f.dir,'mapping.json'),link=join(f.dir,'mapping-link.json');
+    writeFileSync(mapPath,JSON.stringify(genericMapping));
+    assert.throws(()=>runGenericCsvCli(genericArgs(f,f.output)),/ENOENT|non-symlink/);
+    try{symlinkSync(mapPath,link)}catch(e){
+      if(['EPERM','EACCES','ENOSYS'].includes(e.code)){
+        t.skip('symlink creation unavailable');return;
+      }
+      throw e;
+    }
+    assert.throws(()=>runGenericCsvCli(genericArgs(f,link)),/non-symlink/);
+    assert.equal(existsSync(f.output),false);
   }finally{f.close();}
 });
