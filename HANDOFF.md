@@ -337,3 +337,9 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 - **검증과 한계:** 변경된 3파일 JS 구문 3/3, V8 규칙·validator 각 6/6, Node 독립 정규식 7/7 통과. **최신 변경 포함 Native `npm run test:preprocessing`은 NOT_RUN**. 이전 59/59을 현재 신규 테스트까지 성공했다고 확대하지 않는다. 원본 XLSX 파일 사용 Node 통합도 최신 코드에 대해서는 검증 대기.
 - **다음 `ㄱ`:** `PREPROCESSING_HANDOFF.md`, `STATUS.md`, `docs/PREPROCESSING_NATIVE_QA_20261027.md` 및 최신 원격 코드/commit 확인 → Private 소스 SHA 보장된 로컬 Node 재현으로 신규 Native 회귀(예상 총 60) → 추가 결함 최소 수정. 공개/판매/고객자료·유료 API·해커톤 소스 이동 승인 없음.
 
+## 2026-10-27 KST — 스총 전처리 XLSX 혼합 입력 누락 수정 완료
+- Private `hibi89/SMAX` `preprocessing`에서 원본값 중복/혼합 OOXML 셀 무음 누락을 fail-closed 수정. production `preprocessing/xlsx-cells.mjs` + `tests/xlsx-preflight.test.mjs` 1개 regression, 코드 commit **`9ca4c722bb74b0bfbf7e7f035b976370c9f852dd`**. force push/merge 없고 main/frontend/backend/해커톤 저장소 무변경.
+- 최신 체크인 parser/validator 실제 본문의 V8 synthetic input **15/15 PASS**, 유효 패키지 approval 위조 **8/8 차단**, JS 3개 파일 구문 3/3 PASS. Node v22 별도 이전 Unicode predicate 회귀 **16/16 PASS**. 실제 ZIP 파일을 production 모듈로 전체 실행한 증거가 아닌 제한된 파서/validator 테스트.
+- Native 전체 preprocessing 59/59은 이전 `d2f6f627` 기준선 이력. Unicode 신규 회귀와 이번 혼합 입력 회귀를 포함한 최신 약 61개 `npm run test:preprocessing`는 **NOT_RUN**. 전체 Windows/CI/Production·상용 출고 미검증, URL 해당 없음.
+- 다음 `ㄱ`: `STATUS.md`/전용 `PREPROCESSING_HANDOFF.md`의 마지막 기록 → 최신 preprocessing SHA 확인 → 원격 정본 17파일 완전 복구 후 Native 전체·CSV/XLSX 합성 E2E 검증 → 공통 데이터 provenance 계층. Private 소스 Public 반출/유료 API/실고객 자료/배포·판매 무단 작업 금지.
+

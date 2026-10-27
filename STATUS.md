@@ -348,3 +348,12 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 - **최신 코드 변경 후 Native 상태:** 신규 회귀 추가로 예전 baseline **59/59 증거는 남지만 최신 코드는 재실행 NOT_RUN**. `npm run test:preprocessing`의 신규 총 테스트 예상값은 60; 통과 보장/릴리스 선언 금지. 정확한 최신 코드·SHA로 재구성하여 Native/실 파일 QA를 실행하는 것이 다음 1순위.
 - **보존·권한:** Private `preprocessing`만 변경; main/frontend/backend 및 해커톤별 저장소 무수정·미병합. 고객자료·외부 API·LLM·결제·배포/크몽 판매 없음. 원본은 Git 커밋으로 복구 가능. Windows/CI/전체 UI/Production 미검증, 사용자 승인 없는 배포·반출 금지.
 
+## 2026-10-27 KST — XLSX mixed-value data integrity fix (GitHub verified)
+- **정본/시작:** Private `hibi89/SMAX` `preprocessing@674bf1aabcf6487551834d958382207c17b760ea`; 이전 실패한 `update_file` 대신 새 Git blob → base tree → commit → non-force update_ref(expected_sha)로 원자적 수정.
+- **원인/재현:** 셀에 `<is>` 및 `<v>` 또는 `<f>`가 충돌해 함께 존재할 때 `extractXlsxCells`의 `parseSheet`는 일부 원본 내용을 조용히 버리고 유효한 단일값처럼 처리했음. 이전 턴 생산 코드 V8에서 잘못 수용되는 3개 synthetic 예제로 재현; 악성 파일의 실제 실행은 주장하지 않음.
+- **패치:** `preprocessing/xlsx-cells.mjs`의 혼합 표현을 `XLSX_CELLS: conflicting cell payload` 오류로 fail-closed. 정당한 수식 `<f>` + 캐시 `<v>`는 기존대로 값 신뢰 없이 `FORMULA_UNEVALUATED` 검토 유지, 정상 scalar·inline string 불변.
+- **회귀:** `tests/xlsx-preflight.test.mjs` 신규 1개 test에 충돌 셀 3종 reject, 정상 셀 3종의 원본 패키지 parity 통과 검사 등록. 코드/회귀 단일 커밋 `9ca4c722bb74b0bfbf7e7f035b976370c9f852dd` (code blob `79e4d3ac1f44e67ad9f599bce17f414311faac5e`, test blob `db5d6ce055ca131e4ee7d9a620d19cf035c9faa0`).
+- **실검증:** 최신 원격 parser(내장 `parseXml`/`parseSheet`)와 package validator 본문을 JS V8으로 구동: synthetic 15케이스 15/15 PASS(오염 혼합 7 reject, 정상 8 accept), 유효 구조에서 status `APPROVED` 위조 8/8 reject. parser/validator/test 구문 3/3 PASS. 실제 Node 22 별도 정규식 회귀 `xlsx_formula_review_isolated.test.mjs` 16/16 PASS. **V8 분리 검증 ≠ Native ZIP/Node 전체 실행.**
+- **미검증:** 선행 `d2f6f627` 코드 기준 Native `npm run test:preprocessing` 59/59 PASS는 기존 기록 그대로. 그 이후 Unicode 회귀 + 이번 혼합 payload 회귀가 추가되어 현재 약 61건 Native 통합 테스트는 **NOT_RUN**. ZIP 바이너리 E2E/전체 `npm test`/Windows/CI/Production 미실행. 비공개 저장소 전체를 현재 컨테이너로 복원하는 GitHub DNS/다운로드 경로 제한 지속; GitHub Actions 유료 가능성 때문에 무단 실행 없음.
+- **안전/범위:** 오직 Private preprocessing 2개 코드/테스트와 본 문서만 변경; `main/frontend/backend`, 해커톤별 저장소, 고객 데이터·외부 API·판매·배포 무변경. 다음은 안전한 full source SHA-verified checkout → 전수 Native QA → 공통 provenance adapter 설계.
+

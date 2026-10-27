@@ -173,3 +173,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 9. **다음 우선순위:** 현재 HEAD의 필수 17파일+신규 테스트를 GitHub blob 일치 확인 후 Native 테스트 재실행(예상 총 60), 합성 XLSX/CSV CLI 실제 E2E → 전체 `npm test`/Windows 한 번에 QA → workbook 관계/시트명·스타일을 안전하게 설계. 실패 시 원인별 최소 수정·회귀.
 10. **시점·범위:** 2026-10-27 KST, 인증된 Private GitHub 소스 기준 V8 제한 검증 + 독립 Node 정규식 확인. baseline 59/59와 최신 코드 미검증은 분리 기록. 문서 이후 최신 SHA 재조회.
 
+## 2026-10-27 KST — XLSX mixed-value source-loss fix (10항 인계)
+1. **목표/요구/기술:** Private SMAX `preprocessing` 범용 결정론적 CSV/XLSX Strict JSON 코어. Node 20+, SHA256 원본 출처, `approval=NOT_GRANTED`; 해커톤별 통합은 해총/담당자 소관.
+2. **작업·아키텍처 결정:** 위험한 `<is>`+비-inline type 또는 `inlineStr`+`<v>/<f>` 혼합 입력은 데이터 무음 손실을 피하기 위해 reject 선택. A 최소 parser 검문소 (0원/호환 범위 관리/변경 작음) vs B 혼합 표현 raw provenance 추가 (스키마/테스트/유지보수 복잡도 증가). 기존 수식 `<f><v>` 캐시는 유지, 계산/자동승인하지 않음.
+3. **검증 명령/성공 범위:** 이전 `d2f6f627` Linux/Node `npm run test:preprocessing` **59/59 PASS**(과거 기준선). 최신 원격 생산 `parseXml`/`parseSheet`+validator의 V8 합성 케이스 **15/15 PASS**, 위조 상태 **8/8 reject**, 3파일 JS parse **3/3 PASS**, 별도 Node v22 Unicode predicate `node --test xlsx_formula_review_isolated.test.mjs` **16/16 PASS**. 최신 전처리 Native 전체 `npm run test:preprocessing` **NOT_RUN**.
+4. **완료/진행/대기:** 코드+회귀 테스트 GitHub commit/branch push **완료**. 최신 Native 전체, 실제 바이너리 ZIP E2E·Windows·CI/판매 승인 **대기/미실행**.
+5. **오류/재현/대안:** 변경 전 생산 parser가 중복 스칼라 표현을 조용히 무시. 최소 reject patch + 회귀로 차단. 이전 GitHub contents update_file 요청 안전 검사 차단 → 승인된 Git data blobs/trees/non-force fast-forward/ref expected SHA 방식으로 성공. Native full checkout은 컨테이너 GitHub DNS/인증 다운로드 제한, 임의 Public 업로드/Actions 무단 실행 금지.
+6. **repo/branch/SHA/경로:** `hibi89/SMAX` Private `preprocessing`, 코드 HEAD `9ca4c722bb74b0bfbf7e7f035b976370c9f852dd`; 경로 `preprocessing/xlsx-cells.mjs` blob `79e4d3ac1f44e67ad9f599bce17f414311faac5e`; `tests/xlsx-preflight.test.mjs` blob `db5d6ce055ca131e4ee7d9a620d19cf035c9faa0`; `xlsx-package.mjs` validator 기존 동일. 본 문서 commit 후 정확한 HEAD 재조회.
+7. **Production·환경:** Chrome/Windows/Cloudflare/Vercel 실서비스 검증·배포 URL/Production SHA 없음. Node v22.16.0 독립(predicate) 테스트만 이 턴 로컬 Native PASS.
+8. **원본·백업·보안:** 고객 XLSX/비밀·토큰/유료 API/외부 네트워크 사용 없음. 원본 Git object rollback 가능. Private 소스 공개·타 브랜치 자동 병합·force push 하지 않음.
+9. **다음 단계/완료 게이트:** 현재 HEAD의 원본 17파일+추가 회귀 SHA 동일한 로컬 체크아웃에서 `npm run test:preprocessing` 약 61개(실제 수치 테스트로 결정) 전수 PASS → 합성 ZIP 원본 parity + CSV CLI E2E → 전체 `npm test`·Windows QA → 공통 CSV/XLSX provenance/strict adapter 설계 및 테스트. 출시·복사·실자료/유료 API·과금은 사용자 별도 승인.
+10. **갱신/근거:** 2026-10-27 KST, GitHub branch ref/commit diff 직접 검증 및 체크인 소스 V8 합성 실행 증거. 과거 59/59과 최신 미검증을 혼용하지 않음.
+
