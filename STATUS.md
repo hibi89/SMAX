@@ -315,3 +315,14 @@
 - **지원 제한·보안:** 기존 ZIP 제한(2MiB 압축, 총 8MiB 해제, 512 entries) + 최대 64 시트, 1만 행, 10만 셀, XML 30만 노드/깊이 64. 숫자를 원문 문자열로만 제공, 날짜 스타일·표시 시트 이름/워크북 관계·수식 계산·상업적 승인 미지원. 비정형 전체 내용의 완전한 전처리 도구 출고 아님.
 - **미검증/비용:** 기존 V0/V1 CSV 전용 Node/전체 `npm run test:preprocessing`·`npm test`는 Private 저장소 git DNS 차단으로 NOT_RUN. Windows/실고객 파일/실 API/배포/상업 실행도 NOT_RUN. 0원, 외부 자격증명·LLM/고객 자료 미접촉, repo 외 소스 전송·유료 API 없음.
 - **다음 1순위:** 전체 Private 정본에서 Native CSV 포함 전수 테스트 경로 확보. 후속으로 구조 계약 JSON Schema·XLSX 파싱에서 스타일/날짜/시트 매핑 별도 설계 및 원본 손실/미지원 경계 회귀. 사용자의 2026-11-07 제품 일정·대회별 담당 분리 유지.
+
+
+## 2026-10-27 KST — XLSX Strict JSON 계약 및 원본 대조 검증
+
+- **범위:** `hibi89/SMAX` Private `preprocessing`만 변경, 진입 HEAD `cfb87ed0a882a3b624f0a0f3fa0790228f6fd3a7`. 타 브랜치/해커톤/배포/유료 API 무변경.
+- **구현:** `preprocessing/xlsx-package.mjs`에서 `validateXlsxCellsPackage(pkg,originalBytes?)` 및 `serializeXlsxCellsPackage` 추가; 별도 `SMAX_PREPROCESS_XLSX_CELLS_V0.schema.json` JSON Schema Draft 2020-12를 비공개 repo에 게시. 엄격한 승인·원본 셀/행·시트 경로·숫자/불리언 타입·수식 검토 사유/상태·품질 합계/추가키 무허용 계약.
+- **중요한 구분:** 구조 검사만으로 문자열 값 변조는 입증 불가(검증 테스트가 구조-only 통과를 명시적으로 보여줌). **원본 Uint8Array를 전달한 경우** SHA-256/바이트 길이 대조와 새로 전처리한 결과 JSON deep-equivalence(직렬화 비교) 실행, 부정확한 값이나 위조 상태를 거부. 인증·사람 승인 자동 부여는 하지 않음.
+- **커밋/증거:** JS validator commit `018bbaa04c324d569c821323ea77d97ca6f07f09`, Git blob `9b7ca74a328857e806c9574f278981ec00c9b8da`는 로컬 Node 실행 파일 `git hash-object`와 정확히 일치. 테스트 commit `820d3fdb954b4e9bafdd41f00bf28ed8fbee1778`, blob `a97571a54fd5973aa359dae9024c57ded5ad4d45`는 로컬 26건 테스트와 byte-identical. 스키마 commit `1e7c79b2efa9f15527b544f1ca5559deeacd7ef5`, remote blob `73f299a9164876cc61391b82f72319af77a33b17`.
+- **실행:** Node v22.16.0, `node --test tests/xlsx-preflight.test.mjs` **26/26 PASS, 0 FAIL**, 원본 동일성 검증에 완전한 합성 XLSX ZIP 기반 사례 사용. 로컬 생성 openpyxl/XlsxWriter 2종 패키지 원본 대비 별도 validator 통과. GitHub 파일 SHA와 실제 실행 코드/테스트 동일성 검사 완료. JSON Schema는 원격 fetch 후 JSON.parse/필수키/$defs/approval const 구조 확인; 독립 JSON Schema 엔진/Ajv 테스트는 NOT_RUN.
+- **남은 게이트:** 비공개 CSV 정본 체크아웃 불가(DNS)로 `npm run test:preprocessing` 전체 및 `npm test`, Windows/실고객 파일/CI는 NOT_RUN. 문서·Schema 추가가 릴리스/판매 증거는 아님. 비용 0원.
+- **다음 1순위:** 전체 원격 정본 Native QA 경로 복구 → XLSX 결과로부터 CSV·보고서로 표준화하는 명시적 어댑터 및 JSON Schema 독립 validator 검증 → XML 서식·시트 관계/날짜 해석 정확도. 해커톤 연결은 각 총괄 담당.
