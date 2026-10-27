@@ -326,3 +326,7 @@
 - **실행:** Node v22.16.0, `node --test tests/xlsx-preflight.test.mjs` **26/26 PASS, 0 FAIL**, 원본 동일성 검증에 완전한 합성 XLSX ZIP 기반 사례 사용. 로컬 생성 openpyxl/XlsxWriter 2종 패키지 원본 대비 별도 validator 통과. GitHub 파일 SHA와 실제 실행 코드/테스트 동일성 검사 완료. JSON Schema는 원격 fetch 후 JSON.parse/필수키/$defs/approval const 구조 확인; 독립 JSON Schema 엔진/Ajv 테스트는 NOT_RUN.
 - **남은 게이트:** 비공개 CSV 정본 체크아웃 불가(DNS)로 `npm run test:preprocessing` 전체 및 `npm test`, Windows/실고객 파일/CI는 NOT_RUN. 문서·Schema 추가가 릴리스/판매 증거는 아님. 비용 0원.
 - **다음 1순위:** 전체 원격 정본 Native QA 경로 복구 → XLSX 결과로부터 CSV·보고서로 표준화하는 명시적 어댑터 및 JSON Schema 독립 validator 검증 → XML 서식·시트 관계/날짜 해석 정확도. 해커톤 연결은 각 총괄 담당.
+
+## 2026-10-27 KST — XLSX numeric-cell hardening
+
+XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in parser (8b76a855), JS validator (9b27cde0), and JSON Schema (39284d48). Repo-identical files tested locally: Node XLSX **29/29 PASS**; optional Python Draft202012 schema unittest **5/5 PASS**; extended local schema cases **21/21 PASS**. Numeric strings retain exact precision; NaN, Infinity and formula-like numeric data are rejected. Source/test/schema blobs matched GitHub. Private full checkout is not locally available: all CSV-inclusive npm suites, Windows, CI and production remain **NOT_RUN**. See PREPROCESSING_HANDOFF.md for exact commits and next steps.
