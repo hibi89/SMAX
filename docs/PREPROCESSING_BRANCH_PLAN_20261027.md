@@ -73,3 +73,10 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - 신규 별도 test 파일 GitHub 생성 실패 2회를 반복하지 않고 기존 전용 테스트 파일의 추가 사례로 전환해 CLI 검증 4건, Generic schema 검증 1건을 체크인했다.
 - 실제 원격 CSV 코어+V1 엔진(crypto/TextEncoder stub) V8 테스트 6/6 PASS. 전체 Native Node, 실 CLI E2E, Windows, schema 라이브러리 검증 전까지 릴리스 승인 금지.
 - 다음 순서: Native QA 출처 확립 → 파일 CLI 불변성/실해시/오류복구 → 데이터 provenance 및 문서 포맷별 importer. 대회별 코드는 해총/해커톤 담당만.
+
+## 2026-10-27 — P1 strict approval state invariant
+
+- 발견: 정상/검토 전처리 행의 임의 `APPROVED` 문자열이 기존 V1 JS validator에서 통과 가능. `approval='NOT_GRANTED'` 최상위 검사는 있어도 row.status 경계를 엄격히 검사해야 함.
+- 수정: 코드 `4948640b`, 회귀 `1944256e`; `issues.length`에 따라 허용 상태 정확히 2개만, 검토 누락/위조 실패.
+- 현 시점 실제 체크인 원본 CSV+V1을 사용한 V8 격리 시나리오 20/20 PASS. SHA256·TextEncoder 모의이고 Native npm/CLI E2E/Windows는 미실행.
+- 다음: Native 전용 및 전체 Node 회귀(동일 원격 소스) 확보 → 로컬 파일 SHA/출력 검증 → 독립 문서 파서 provenance 및 한도·오류 복구. 타 브랜치/대회별 연결·배포/비용 변경 없음.
