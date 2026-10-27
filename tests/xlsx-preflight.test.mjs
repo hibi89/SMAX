@@ -256,3 +256,26 @@ test('XLSX package refuses a tampered numeric text even without source bytes',()
    assert.throws(()=>validateXlsxCellsPackage(q),/invalid scalar type/,invalid);
  }
 });
+
+test('reject XML-entity-encoded external ZIP relationship target mode',()=>{
+ const malicious='<Relationships><Relationship TargetMode="Exter&#x6e;al" Target="https://invalid.example/file"/></Relationships>';
+ assert.throws(()=>preflightXlsx(withEntry({name:'xl/_rels/workbook.xml.rels',content:malicious})),/external relationship/);
+});
+
+test('reject decimal XML references and malformed relationship modes',()=>{
+ for(const mode of ['&#69;xternal','Exter&#110;al','Extern&amp;al','External','internal','Broken&#0;']) {
+   const rel=`<Relationships><Relationship TargetMode="${mode}" Target="../sheet.xml"/></Relationships>`;
+   assert.throws(()=>preflightXlsx(withEntry({name:'xl/_rels/workbook.xml.rels',content:rel})),/external relationship|invalid relationship/,mode);
+ }
+});
+
+test('allow explicit XML-encoded Internal relationship while remaining offline',()=>{
+ const rel='<Relationships><Relationship TargetMode="Inte&#114;nal" Target="worksheets/sheet1.xml"/></Relationships>';
+ const pf=preflightXlsx(withEntry({name:'xl/_rels/workbook.xml.rels',content:rel}));
+ assert.equal(pf.entry_count,4);
+});
+
+test('reject external relationship in case-varied XML relationship filename',()=>{
+ const rel='<Relationships><Relationship TargetMode="Exter&#110;al"/></Relationships>';
+ assert.throws(()=>preflightXlsx(withEntry({name:'xl/_rels/workbook.xml.RELS',content:rel})),/external relationship/);
+});
