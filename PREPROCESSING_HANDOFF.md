@@ -245,3 +245,8 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **원본/보안/복구:** 변경 전 부모 SHA에서 복구 가능; Private repo만 변경, 다른 3개 브랜치/해커톤 repo 미변경. 출력 `source.sha256`/provenance/NOT_GRANTED 보존.
 9. **다음 실행:** 최신 소스 정확한 SHA 기준 Node Native 테스트, 실제 로컬 XLSX ZIP E2E → 설계 누락 포맷 중 HTML 또는 DOCX 독립 입력 계약 우선 → 이후 검수. 타 대회 복사·Adapter는 각 총괄.
 10. **KST/검증 범위:** 2026-10-27 KST. 체크인 소스·샘플 테스트와 실제 실행을 엄격 구분하여 추후 수정.
+
+## 2026-10-27 KST — XLSX CLI Native I/O smoke after MVP entrypoint
+- GitHub commit `3cf9a5bf6ec5f50a8ce371a54da8a10b5f494cb9`, `preprocessing/xlsx-cli.mjs` blob `0b830360638baa1b6d7c33756a5d0271ad2fe299`와 동일한 `git hash-object`의 실제 파일을 로컬 Linux Node **v22.16.0**에서 `node --test smoke.mjs` 실행. **6/6 PASS, 0 FAIL**: 파일 생성·입력 SHA 보존, EEXIST 차단, 오류 시 출력 없음, 2MiB 초과 차단, symlink 차단, 잘못된 옵션 차단.
+- **중요 제한:** CLI 자체는 실제 GitHub 파일이지만 테스트 실행 시 `xlsx-cells.mjs` 및 `xlsx-package.mjs`만 별도 **시험용 stub**으로 교체했다. 따라서 이것은 **Native XLSX CLI 파일 I/O 고립 검사**이며, 실제 OOXML/XLSX 추출·package validator를 통합한 E2E 및 최신 `npm run test:preprocessing` PASS 근거가 **아니다**. Stub 및 smoke 테스트는 GitHub 제품 코드로 푸시하지 않았다.
+- 프로덕션·Windows/CI·고객 XLSX·상용출시는 미검증/미승인. 다음 1순위: 18+ 실제 원격 blob과 일치하는 Node 체크아웃에서 원본 extractor/validator와 함께 XLSX·CSV Native 통합 QA. Private 소스 공개·유료 CI·타 브랜치 수정 금지.

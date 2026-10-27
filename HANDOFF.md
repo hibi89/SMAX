@@ -362,3 +362,8 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 
 ## 2026-10-27 KST — preprocessing MVP local XLSX output
 - 기존 CSV CLI와 별도 `preprocessing/xlsx-cli.mjs` 추가, 합성 CLI 파일 회귀 3건 등록. Node 20+ / no dependency; strict JSON / original SHA parity / NOT_GRANTED / new output only. Native 최신 전체·Windows·실 Excel 고객 호환/Production NOT_RUN. 다음 작업은 실제 최신 Native 검증, 이후 최초설계 포맷 구현. 상세 10항 `PREPROCESSING_HANDOFF.md` 최신 참조.
+
+## 2026-10-27 KST — XLSX CLI Native I/O smoke after MVP entrypoint
+- GitHub commit `3cf9a5bf6ec5f50a8ce371a54da8a10b5f494cb9`, `preprocessing/xlsx-cli.mjs` blob `0b830360638baa1b6d7c33756a5d0271ad2fe299`와 동일한 `git hash-object`의 실제 파일을 로컬 Linux Node **v22.16.0**에서 `node --test smoke.mjs` 실행. **6/6 PASS, 0 FAIL**: 파일 생성·입력 SHA 보존, EEXIST 차단, 오류 시 출력 없음, 2MiB 초과 차단, symlink 차단, 잘못된 옵션 차단.
+- **중요 제한:** CLI 자체는 실제 GitHub 파일이지만 테스트 실행 시 `xlsx-cells.mjs` 및 `xlsx-package.mjs`만 별도 **시험용 stub**으로 교체했다. 따라서 이것은 **Native XLSX CLI 파일 I/O 고립 검사**이며, 실제 OOXML/XLSX 추출·package validator를 통합한 E2E 및 최신 `npm run test:preprocessing` PASS 근거가 **아니다**. Stub 및 smoke 테스트는 GitHub 제품 코드로 푸시하지 않았다.
+- 프로덕션·Windows/CI·고객 XLSX·상용출시는 미검증/미승인. 다음 1순위: 18+ 실제 원격 blob과 일치하는 Node 체크아웃에서 원본 extractor/validator와 함께 XLSX·CSV Native 통합 QA. Private 소스 공개·유료 CI·타 브랜치 수정 금지.
