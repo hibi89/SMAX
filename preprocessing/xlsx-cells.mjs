@@ -5,6 +5,7 @@ import {preflightXlsx} from './xlsx-preflight.mjs';
 
 export const XLSX_CELLS_VERSION='SMAX_PREPROCESS_XLSX_CELLS_V0';
 const maxRows=10000, maxCells=100000, maxXmlNodes=300000;
+const numberLiteral=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?$/;
 const decoder=new TextDecoder('utf-8',{fatal:true});
 const fail=(s)=>{throw new TypeError('XLSX_CELLS: '+s)};
 const localName=n=>n.substring(n.lastIndexOf(':')+1);
@@ -141,7 +142,10 @@ function parseSheet(bytes,path,shared,quality){
         if(idx>=shared.length)fail('shared string index out of bounds');
         value=shared[idx];kind='text';
       }else if(type==='n'||type==='str'){
-        if(v.length){value=v[0].text;kind=type==='n'?'number_text':'text';}
+        if(v.length){
+          value=v[0].text;kind=type==='n'?'number_text':'text';
+          if(type==='n'&&!numberLiteral.test(value))fail('invalid numeric cell literal');
+        }
       }else if(type==='b'){
         if(v.length!==1||!['0','1'].includes(v[0].text.trim()))fail('invalid boolean cell');
         value=v[0].text.trim()==='1';kind='boolean';
