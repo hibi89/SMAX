@@ -92,7 +92,7 @@ test('reject encrypted ZIP and unbounded descriptor-mode flags',()=>{
 
 // Native XLSX cell extraction smoke/edge cases, using a dependency-free local ZIP fixture.
 import {extractXlsxCells,XLSX_CELLS_VERSION} from '../preprocessing/xlsx-cells.mjs';
-const worksheet=(body)=>'<?xml version="1.0" encoding="utf-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+body+'</sheetData></worksheet>';
+const worksheet=(body)=>`<?xml version="1.0" encoding="utf-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${body}</sheetData></worksheet>`;
 const xlsx=(sheetXml,extra=[])=>makeZip([
  {name:'[Content_Types].xml',content:'<Types/>'},
  {name:'xl/workbook.xml',content:'<workbook/>'},
