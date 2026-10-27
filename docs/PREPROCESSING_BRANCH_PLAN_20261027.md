@@ -87,3 +87,10 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - 압축 한도(2MiB → 최대 8MiB/512 entry), CRC/헤더/경로/매크로/외부링크/DTD 검증·승인 미부여만 구현. 아직 셀 데이터 추출/자동 CSV 변환/실무 호환성 없음.
 - `package.json` 기존 테스트 스크립트에 케이스 등록. 전체 CSV Native 회귀·실제 XLSX/Windows·브라우저/Production QA는 미실행.
 - 개발 순서: 전체 정본 QA 장애 해결 → 제한형 XLSX 시트/셀 parser 설계 및 provenance 연결 → PDF/DOCX plugin 선택/허용 포맷 안전 기준 검증. 해커톤별 연동 책임은 각 해커톤 총괄.
+
+## 2026-10-27 — 실제 XLSX cell extractor V0 도달
+
+- 전용 \`preprocessing/xlsx-cells.mjs\` 및 기존 테스트 8건 증설. ZIP preflight를 통과한 입력에서 시트 XML 기반 셀/수식·원본 경로/행/주소를 수집한다. inline/shared strings, 정밀 숫자 문자열, bool, 오류/수식 검토. 자동 승인·수식 실행 금지.
+- Node 22 Native 테스트 \`tests/xlsx-preflight.test.mjs\` **18/18 PASS**, 원격/로컬 blob SHA 2개 완전 일치. 합성 openpyxl/XlsxWriter XLSX 2종 해석 통과. 전체 Private CSV 회귀는 환경 제약으로 미실행.
+- 제한형 파서 계약 우선. XML 깊이/노드 및 행·셀 상한, 원본 파일 2MiB/8MiB 압축해제, unsupported structures는 거부하거나 아직 의미 해석 불가. 표시 시트 이름, 날짜/서식·스타일, 전체 워크북 관계, formula evaluation, schema/validator는 차기 별도 단계.
+- 이번 개발 이후 우선순위: 정본 전체 Node/npm 검증 통로 → XLSX 구조 Schema·오류 검토 계약 → CSV와 공통 provenance 도출 → 다음 형식(DOCX/HTML/PDF) 선택. 각 해커톤 연동·복사/변형/제출은 별도 총괄.
