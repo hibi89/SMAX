@@ -250,3 +250,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 - GitHub commit `3cf9a5bf6ec5f50a8ce371a54da8a10b5f494cb9`, `preprocessing/xlsx-cli.mjs` blob `0b830360638baa1b6d7c33756a5d0271ad2fe299`와 동일한 `git hash-object`의 실제 파일을 로컬 Linux Node **v22.16.0**에서 `node --test smoke.mjs` 실행. **6/6 PASS, 0 FAIL**: 파일 생성·입력 SHA 보존, EEXIST 차단, 오류 시 출력 없음, 2MiB 초과 차단, symlink 차단, 잘못된 옵션 차단.
 - **중요 제한:** CLI 자체는 실제 GitHub 파일이지만 테스트 실행 시 `xlsx-cells.mjs` 및 `xlsx-package.mjs`만 별도 **시험용 stub**으로 교체했다. 따라서 이것은 **Native XLSX CLI 파일 I/O 고립 검사**이며, 실제 OOXML/XLSX 추출·package validator를 통합한 E2E 및 최신 `npm run test:preprocessing` PASS 근거가 **아니다**. Stub 및 smoke 테스트는 GitHub 제품 코드로 푸시하지 않았다.
 - 프로덕션·Windows/CI·고객 XLSX·상용출시는 미검증/미승인. 다음 1순위: 18+ 실제 원격 blob과 일치하는 Node 체크아웃에서 원본 extractor/validator와 함께 XLSX·CSV Native 통합 QA. Private 소스 공개·유료 CI·타 브랜치 수정 금지.
+
+## 2026-10-27 KST — P2 TXT/Markdown text segment importer Native PASS (10항 인계)
+1. **목표/설계:** 사용자 고정 순서 **MVP → 최초설계 누락 구현 → 보안·안정·호환 검증**에 따라 P2 문서 입력 기초 계층 착수. 2MiB 이하 UTF-8 TXT/MD, 규칙형 문단 분할, 원본/행·문자 위치 및 리뷰 상태 보존, 자동승인 금지.
+2. **아키텍처 A/B:** A 독립 결정론적 원문 보존 text importer + 별도 CLI (선택: 외부 의존성 0, 기존 CSV/XLSX 영향 0), B 복합 파일 통합 및 외부 문서 파서 도입(검증·릴리스 비용 확대).
+3. **완료 기능·근거:** `preprocessing/plain-text.mjs`와 `text-cli.mjs`, `tests/plain-text.test.mjs` 신규 코드. `SMAX_PREPROCESS_TEXT_V0` Strict JS validator/serializer, 전체 원문 `raw_text` 및 SHA256, 1-based 시작 행·UTF-16 문자 오프셋, 빈 줄 구분 문단, 잠재 수식 문자열 review, `approval=NOT_GRANTED`, 새 JSON exclusive write. `.md`는 Markdown 의미 분석이 아닌 UTF-8 일반 텍스트 취급.
+4. **테스트:** GitHub로 업로드된 3개 정확한 source Git blob hash가 실제 Linux Node 22 실행 파일 `git hash-object`와 일치: core `00326ed159afbcebe0ba08287f206cb29befd37f`, CLI `e84abf637df28fc35807e2f81f235a1e2e0c6eb7`, tests `2f6b87964514566a44b7e063f776341a099ba95c`. 로컬 `node --test tests/plain-text.test.mjs` **5/5 PASS**. 최신 전체 `npm run test:preprocessing`, Windows/CI **NOT_RUN**.
+5. **완료/미검증:** TXT/MD 자체 Native 기능 완료; 최종 상품 출시·일반 DOCX/PDF/HTML/Excel 호환성과 CSV/XLSX 전체 통합 QA 미완.
+6. **문제/복구:** Private clone DNS 실패 환경, GitHub Connector → 동일 blob 검증하여 **신규 TXT 모듈만 독립 Native 테스트**. 구형 전체 59건 통과를 최신 PASS로 오기 금지.
+7. **저장소/브랜치·파일:** Private `hibi89/SMAX` `preprocessing`, 작업 부모 `d51e64c3255c61514bc7e60f5e007cf1c135fe0b`, 수정 core/CLI/test/README/package/status/handoff. 본 문서 후 HEAD 조회.
+8. **보안/데이터/운영:** 완전 오프라인, 신규 런타임 의존성 없음, 고객 실제 데이터 없음, 출력 `raw_text`는 원문 기밀 포함 가능. 원본 경로 덮어쓰기·출력 재생성 덮어쓰기 금지. 타 브랜치/해커톤/Production/라이선스/비용 변경 없음.
+9. **다음:** TXT schema 정식 JSON Schema를 작성·검증 → HTML 정적 콘텐츠 parser 또는 DOCX 범위 비교 → CSV/XLSX 및 전체 repo Native 인증 checkout과 Windows QA. MVP 전체 완료는 최신 Native E2E 전 검증 대기.
+10. **검증 시점/범위:** 2026-10-27 KST, 실제 Node v22.16.0 isolated TXT/MD 5개. 출시·상용 QA 주장 금지.

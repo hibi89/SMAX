@@ -163,3 +163,11 @@ npm run test:preprocessing
 XLSX 경로는 ZIP preflight → 보수적인 시트/셀 추출 → 원본 바이트 SHA 검증/재추출 parity → `SMAX_PREPROCESS_XLSX_CELLS_V0` Strict JSON 생성 순서이며 원본을 수정하지 않는다. 새 결과 경로를 요구하며 이미 파일이 있으면 중단한다. 시트 구조를 거부할 수 있는 **제한형 MVP**이고 서식·날짜 의미 추론, 모든 Excel 포맷 호환, 공식 배포 또는 사용자의 승인 없이 외부 전송하는 기능은 없다. 모든 결과의 `approval=NOT_GRANTED`; 검토는 사용자 책임이다.
 
 **검증 상태:** XLSX CLI의 정상 파일·수식·해시, 오류 파일, 기존 출력 보호, 크기 제한·symlink 거부 합성 회귀 테스트 3개 등록. 이 항목들은 Native Node에서 실행 후 실제 통과 여부를 확정해야 한다. 전체 Native/Windows QA 및 판매/릴리스는 미검증. Private 코드의 타 저장소 전송·Public 공개는 별도 승인.
+
+## 2026-10-27 — TXT/Markdown 문단 전처리 P2 (Native 5/5)
+
+- `preprocessing/plain-text.mjs`: `preprocessPlainText(Uint8Array)`, `validatePlainTextPackage(pkg,originalBytes?)`, `serializePlainTextPackage(pkg,originalBytes?)`.
+- `preprocessing/text-cli.mjs`: `node preprocessing/text-cli.mjs --input local.txt --output new-result.json`; 확장자 `.txt`·`.md`. **Markdown 문법 구조 분석이 아닌 원문 문단 분리**.
+- 출력 `SMAX_PREPROCESS_TEXT_V0`: `source.raw_text`, SHA256, 1-based 첫 행, UTF-16 오프셋, 문단/수식형 검토, `approval=NOT_GRANTED`; 빈 줄 구분 문단이므로 원본 표시는 raw_text를 사용. 소스 JSON에도 실고객 원문 전체가 포함되므로 동일하게 보호.
+- 최대 2MiB/10,000 segments, UTF-8 fatal decode; 새 JSON exclusive 생성, input 손상 금지. 외부 NPM/LLM/HTTP 사용 안함.
+- 실제 원격 commit 대상 3파일과 `git hash-object` 일치하는 Linux Node 22 로컬 Native `node --test tests/plain-text.test.mjs` **5/5 PASS**. 전체 CSV/XLSX 통합 `npm run test:preprocessing`, Windows/CI/실고객 문서/Production 미검증.
