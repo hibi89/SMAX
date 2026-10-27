@@ -323,3 +323,15 @@ test('XLSX conflicting cell payloads fail closed without breaking formula caches
   assert.equal(validateXlsxCellsPackage(extractXlsxCells(source),source),true);
  }
 });
+
+
+test('XLSX phonetic annotations do not contaminate visible string values',()=>{
+ const rich='<r><t>東</t></r><r><t>京</t></r><rPh sb="0" eb="2"><t>=とうきょう</t></rPh><phoneticPr fontId="1"/>';
+ const source=xlsx(worksheet('<row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="inlineStr"><is>'+rich+'</is></c></row>'),
+  [{name:'xl/sharedStrings.xml',content:'<sst><si>'+rich+'</si></sst>'}]);
+ const pkg=extractXlsxCells(source),cells=pkg.sheets[0].rows[0].cells;
+ assert.deepEqual(cells.map(c=>c.value),['東京','東京']);
+ assert.deepEqual(cells.map(c=>c.reason),[null,null]);
+ assert.equal(pkg.quality.review_cells,0);
+ assert.equal(validateXlsxCellsPackage(pkg,source),true);
+});

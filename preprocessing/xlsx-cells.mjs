@@ -77,8 +77,8 @@ function parseXml(bytes){
   return root;
 }
 const children=(node,name)=>node.children.filter(n=>localName(n.name)===name);
-function descendants(node,name){
-  const found=[],stack=[node];while(stack.length){const n=stack.pop();if(localName(n.name)===name)found.push(n);for(let k=n.children.length-1;k>=0;k--)stack.push(n.children[k]);}return found;
+function visibleStringText(node){
+  const found=[],stack=[node];while(stack.length){const n=stack.pop(),tag=localName(n.name);if(tag==='rPh'||tag==='phoneticPr')continue;if(tag==='t')found.push(n.text);for(let k=n.children.length-1;k>=0;k--)stack.push(n.children[k]);}return found.join('');
 }
 function strictNumber(s,label){
   if(typeof s!=='string'||!/^(0|[1-9]\d*)$/.test(s))fail('invalid '+label);
@@ -112,7 +112,7 @@ function parseSharedStrings(buffer){
   if(!buffer)return [];
   const root=parseXml(buffer);if(localName(root.name)!=='sst')fail('sharedStrings root missing');
   const items=children(root,'si');if(items.length>maxCells)fail('too many shared strings');
-  return items.map(si=>descendants(si,'t').map(n=>n.text).join(''));
+  return items.map(si=>visibleStringText(si));
 }
 function parseSheet(bytes,path,shared,quality){
   const root=parseXml(bytes);if(localName(root.name)!=='worksheet')fail('worksheet root missing');
@@ -142,7 +142,7 @@ function parseSheet(bytes,path,shared,quality){
       if(formula){review='FORMULA_UNEVALUATED';quality.review_cells++;}
       else if(type==='inlineStr'){
         if(inline.length!==1)fail('inline string payload missing');
-        value=descendants(inline[0],'t').map(t=>t.text).join('');kind='text';
+        value=visibleStringText(inline[0]);kind='text';
       }else if(type==='s'){
         if(v.length!==1)fail('shared string index missing');
         const idx=strictNumber(v[0].text.trim(),'shared string index');
