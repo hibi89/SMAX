@@ -102,3 +102,10 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - JSON Schema: `additionalProperties:false`, 구조·타입·버전·수식 검토·절대 NOT_GRANTED·표준 크기 제한. JS validator 추가 제약: 참조 좌표, 중복 검사, 시트/품질 카운터, 조건부 리뷰 상태.
 - Native Node 실제 소스+회귀 테스트 26/26 PASS, 원격 Git blob SHA 2개 동일. 원본이 없으면 구조 검증만, 원본 제공 시 SHA256/재추출 전체 결과 동일성 확인. 신규 의존성 0, API 비용 0.
 - 다음: 비공개 원본 전체 Node/npm 검증 경로 → 독립 JSON Schema validator 계약 시험 → CSV/XLSX 공통 전처리 연결 및 XLSX 복잡 구조 지원 여부. 다른 브랜치/해커톤·배포 책임 없음.
+
+## 2026-10-27 — XLSX numeric lexical consistency + independent QA
+
+- Applied matching numeric-cell lexical checks to XLSX parser, JS package validator and Draft 2020-12 JSON Schema. Invalid `NaN`, `Infinity`, formula-shaped numeric content now fails closed; legitimate decimal/scientific strings retain exact textual precision.
+- Verified repository-identical sources: Node XLSX regression **29/29 PASS**, optional Python `jsonschema` conformance unit tests **5/5 PASS**, expanded independent schema compatibility cases **21/21 PASS**.
+- Added `tests/test_xlsx_schema_contract.py` for repeatability; optional dev-only Python dependency, no SMAX runtime package added.
+- Blocked: complete private-repo native `npm run test:preprocessing` / `npm test`, Windows and CI remain unrun. Next gate is full CSV+XLSX checkout and native execution, then provenance-preserving adapter development.
