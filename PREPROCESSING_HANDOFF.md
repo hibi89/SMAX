@@ -52,3 +52,16 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 **남은 전처리 작업:** Native 테스트 직접 실행 가능 환경 확보→V1 CLI 사용성→파일 형식별 플러그인과 provenance→필요 시 Local LLM 의미추출·Strict Schema·검토/승인 인터페이스. 해커톤별 연결·배포·코드 공개 정책은 해당 총괄들이 담당한다.
 
 **복원:** Private `hibi89/SMAX` `preprocessing` HEAD 및 `AGENTS.md`, `preprocessing/README.md`, `docs/PREPROCESSING_BRANCH_PLAN_20261027.md`, `PREPROCESSING_HANDOFF.md`, `STATUS.md`/ `HANDOFF.md` 확인. 대회·외부 계정·배포·유료 사용·실고객 자료 변경 없음.
+
+## 2026-10-27 KST — P1.1 로컬 Generic CSV CLI 최신 인계 (10항)
+
+1. **목표/기술:** 재사용 범용 전처리 자체를 0원·로컬 Node.js 20+로 완성. 1~64개 필드의 `SMAX_PREPROCESS_GENERIC_CSV_V1`는 유지, 해커톤별 연동은 타 총괄 담당.
+2. **완료/결정:** 구형 3필드 `cli.mjs`를 바꾸는 방식 대신 `preprocessing/generic-cli.mjs` 독립 분리. JSON mapping 파일 1개, CSV 1개 → 신규 JSON 파일 1개. 로컬 입력/매핑과 검토 결과의 결정론적 처리, 미승인 결과 보존. 근거: 기존 CLI 호환성·유지보수·고장 격리.
+3. **테스트/검증:** Node v22.16.0, npm v10.9.2 환경 존재 확인. 비공개 원격 코드 직접 checkout DNS 실패; 전체 GitHub 정본의 Native 테스트·실제 파일 CLI E2E·Windows 실행 **NOT_RUN**. 신규 회귀 테스트 GitHub 생성 2회 도구 안전 검사 차단, 0개 반영. 성공 테스트 수량을 추정하지 말 것.
+4. **상태:** 원격 기능 코드 커밋 **완료**, CI/Node 정본 테스트 **대기**, Windows/고객 파일/문서 파싱 **미검증**, 판매·배포 **미적용**. 신규 CLI 출시판 확정 금지.
+5. **실패/원인/대안:** `git ls-remote` 는 `Could not resolve host: github.com`; 같은 실패 방식 반복 금지. 회귀 테스트 작성은 코드 전송 안전 검사 2회 차단(사유 세부 미노출); 같은 요청 반복 금지. 대안은 접근 가능한 승인된 전체 체크아웃·다른 정상 도구 경로에서 검증하고 이후 최소 테스트 커밋.
+6. **저장소/브랜치/SHA/경로:** Private `hibi89/SMAX`, `preprocessing`만. 초기 HEAD `b6a71829b2597839533a2b0ffbc4d2e034b777dc`. 기능 커밋 `9eb19dbe49bcba2ed1dede39d920ae54828e3da2`, 문서 `preprocessing/README.md`, 원본 엔진 `preprocessing/generic-csv.mjs`, 기존 V0 `preprocessing/cli.mjs`. 최종 HEAD 재조회 필수.
+7. **환경/Production:** Node.js 20+, `npm run test:preprocessing`(기존 테스트), 신규 CLI 명령 `node preprocessing/generic-cli.mjs --input input.csv --columns columns.json --output output.json`. Cloudflare/Vercel Production **미적용**, SHA/URL 해당 없음.
+8. **원본/백업/비밀:** 원본 CSV와 3개 타 브랜치 모두 수정 금지, 새로운 출력만 생성. 기존 Git 이력/블롭 복구 가능, `force push`/병합 금지. 실고객·비밀·토큰 파일 업로드 금지. Generic JSON은 미매핑 원본 열도 포함하므로 접근 보호 필수.
+9. **다음 우선순위/완료 기준/승인:** 정본 Node 전체 회귀 및 생성 JSON SHA/행/권한 검증 → CLI 결함 수정·회귀 테스트 GitHub 반영 → XLSX/DOCX/PDF 등 선택적 범용 파서 설계. Public 소스 복사, 외부 데이터 전송, 배포·상품 판매, 지출은 별도 승인.
+10. **갱신/검증 시점:** 2026-10-27 KST, private GitHub 원격 소스·브랜치/문서 접근 확인, 로컬 Node/DNS 진단. 증빙은 코드 커밋과 정적 검토이며 신규 CLI의 실 E2E 성공 증거 없음. 본 문서 최종 커밋 이후 정확한 branch HEAD를 재조회해 다음 채팅에 사용.
