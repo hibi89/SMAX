@@ -286,3 +286,12 @@
 - **회귀 테스트:** 기존 `tests/preprocessing-generic-schema.test.mjs`에 unmapped header 보이지 않는 문자·앞공백·탭 변조 거부 테스트 추가 `923cb71a75e72ba57380823c1f42a07cfff1dc13`. 기존 `tests/preprocessing-cli.test.mjs`에 Generic CLI BOM 포함 바이트 SHA·원본 행·검토, 출력 덮어쓰기 방지, 매핑 초과키, UTF-8·설정 크기·symlink·경로 충돌 회귀 4건 추가 `c43bc4416e8e77efc321add57e4b52064ca49b74`→`301b1ebd9daabc1031b691b1dda2ecccae069fff`. 이번에는 기존 파일에 추가하는 경로로 성공(신규 파일 생성 차단 방식 재시도 안 함).
 - **직접 검증:** 실제 최신 GitHub CSV 파서/Generic 엔진 본문을 JS V8에서 평가한 한정 테스트 **6/6 PASS**, 미매핑 헤더 위·변조 거부 포함; 이전 문제 재현 후 패치 결과 개선 확인. SHA crypto와 TextEncoder는 V8 stub(실 Node 아님). **Native `npm run test:preprocessing`, 전체 `npm test`, 실제 모듈 디스크 CLI E2E, Windows/CI 전부 NOT_RUN**. 새 Node 회귀는 GitHub 체크인됐으나 직접 Native 실행 PASS 주장 불가.
 - **다음 작업:** 정확한 원격 정본으로 Native Node 전체 checkout과 CLI E2E 접근 경로 확보·실행 → 추가 결함 최소 수정/회귀 검수 → 승인된 범용 문서 형식 확장. 프론트/백엔드/메인, 다른 대회 레포, 배포/판매/유료 리소스 무변경.
+
+## 2026-10-27 KST — PREPROCESSING 검토상태 승인 위조 취약 경계 수정
+
+- **현재 기준:** 비공개 `hibi89/SMAX` `preprocessing` HEAD는 작업 시작 시 `7a6dc92facc1d9e9a93d729b5908fedee390f6ae`. 다른 세 브랜치 및 해커톤별 저장소 변경 없음.
+- **재현 결함:** `validateGenericCsvPackage`가 행의 `status`를 검사할 때 `(status==='NEEDS_REVIEW') === (issues.length>0)` 동등 조건만 검사. 문제 없는 행의 `status='APPROVED'`나 임의 문자열도 통과 가능(실제 체크인 GitHub 코어 기반 V8 재현에서 accepted=true). 이는 승인 불가 계약의 행 단위 우회.
+- **수정:** 유효 상태를 `issues.length ? 'NEEDS_REVIEW' : 'READY_FOR_HUMAN_REVIEW'`와 **완전 일치** 검증. 패키지 최상위 `approval='NOT_GRANTED'` 검증 기존 유지. 코드 커밋 `4948640bb3b2c7df1240c01837361b12660da1a3`, 해당 상태 위조/임의/null/빈 상태 회귀 `tests/preprocessing-generic-schema.test.mjs`에 커밋 `1944256e4fc793d997341655b843d07f656849ca`.
+- **검증:** GitHub에서 새로 읽은 `site/csv-transform.mjs` blob `26d84c9a59216107ab492aedfcd91cd571e40c66`, 패치된 `preprocessing/generic-csv.mjs` blob `534057062a270d1bc80a78d721d3b3edba84db93` 실제 소스를 V8에서 실행. 정상/검토 행, 위조 승인/임의·null 상태, 날짜·중복, 숨김 헤더, 값/출처/검토 큐 변조, JSON 직렬화 총 **20/20 PASS, 0 FAIL**. SHA256·TextEncoder 어댑터를 모의한 격리 검증만 수행했으며 **Native Node/npm 전체·디스크 CLI 통합/Windows·CI NOT_RUN**. Native QA 성공으로 주장하지 않음.
+- **장애/피벗:** 비공개 원격 전체 체크아웃의 컨테이너 DNS 차단 및 현 컨테이너에 전처리 코어 정본 파일이 없음. 기존 모의 CLI 검증 파일은 실제 엔진이 아니므로 Native 통합으로 오인 금지. 동일 차단 Git clone 반복 금지. 원격 검사·최소 코드/회귀 수정까지 수행, Native 테스트는 접근 가능한 정본 복원 경로가 필요.
+- **보존/다음:** `main/frontend/backend` 무수정, 외부 고객 자료/유료 API/배포/판매 없음. 향후 실제 repo 정본 Node 테스트 전수 실행·CLI 실 입력 E2E → CSV 경계 안정성·문서 파서 우선순위 설계. 최종 HEAD 문서 커밋 후 재조회.
