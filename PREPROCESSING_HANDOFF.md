@@ -146,3 +146,17 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 - Regression: Node test commit `3d60e838a88fdb5a0b701155d82e7d20bc1ebc4a` — actual Node.js v22 **29/29 PASS**, 0 failures. Optional Python Draft202012 unittest commit `440248a9f59109d57b748e1621351507a30d93fc` — **5/5 PASS**. Expanded local independent schema cases 21/21 PASS. All 5 checked GitHub blob SHA match exact locally executed files.
 - Environment: full native `npm run test:preprocessing`, `npm test`, Windows, CI and live files remain **NOT_RUN** because complete private repo is not mounted locally. No production release, merge, publication or paid service changes.
 - Next: recover verifiable full private checkout, execute all CSV/XLSX Node suites, fix discovered issues, then optional common-format adapter with provenance and explicit human review.
+
+
+## 2026-10-27 KST — XLSX 외부 관계 문자참조 우회 차단 인수인계
+
+1. **목표/범위:** 비공개 `hibi89/SMAX` `preprocessing`의 XLSX ZIP 입력 외부 링크 사전 차단 신뢰성 개선. Node 20+, 비용 0, 기존 다른 브랜치/해커톤 무변경.
+2. **실제 결함:** `xl/_rels/workbook.xml.rels`의 `TargetMode="Exter&#x6e;al"`을 raw regex가 놓쳐 우회 입력 통과. 재현 테스트 FAIL 확인 후 수정.
+3. **수정:** XML TargetMode 속성 numeric hex/decimal + named entity 해석 후 `Internal` 이외 모두 거부, 비인용·잘못된 참조 오류 처리. ZIP XML/.rels 확장자 대소문자 검사. 별도 네트워크 접근·관계 대상 파일 열기 없음.
+4. **실행 검증:** 실제 Node 22 `node --test tests/xlsx-preflight.test.mjs` **33 PASS/0 FAIL**, Python Draft202012 unittest **5 PASS/0 FAIL**, 합성 openpyxl/XlsxWriter 각 1종 실제 추출+원본 검증 성공. 새 코드/테스트 원격 Git blob과 실행 로컬 file hash 동일.
+5. **증거/커밋/경로:** 시작 HEAD `f9d7ac66d1624f4bd1a4b4f82cc2e6904a6bd414`. `preprocessing/xlsx-preflight.mjs` commit `9f28e6e1c7c98b5f3d3f83d3ba843d43ce30c57c`, blob `ce0f96ce618c6b868bcf255e1d8b2508f3eb6bb3`. `tests/xlsx-preflight.test.mjs` commit `d1c1d24c0169b7d6b9a81ec817dea4a1a6b9de9b`, blob `d484cea4ef13ad28b650902c164251d1daaf6121`.
+6. **상태:** XLSX 사전 차단 우회 결함 수정 및 독립 Native 검증 **완료**. 전체 시스템 통합/판매/릴리스는 미완료.
+7. **미실행:** `npm run test:preprocessing`(기존 CSV+XLSX), 전체 `npm test`, Windows/CI/고객자료/Production **NOT_RUN**, private repo 전체 정본의 컨테이너 체크아웃 DNS 차단. 이 제약은 해제됐다고 주장하지 말 것.
+8. **안전·복구:** 실제 고객 파일 없이 합성 데이터만, HTTP·유료 API·새 의존성·외부 소스 이동 없음. GitHub 이전 커밋 복구 가능, force push/merge 없음.
+9. **다음 작업:** 인증된 비공개 전체 코드 로컬 Node 복원과 CSV+XLSX Native 전수 회귀 → 추가 결함 최소 수정 → 원본 출처·검토 큐를 보존하는 포맷 공통 어댑터 설계/실검증.
+10. **검증일:** 2026-10-27 KST. 최종 SHA는 이후 최신 HEAD 확인값 우선.
