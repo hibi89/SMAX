@@ -134,6 +134,10 @@ function parseSheet(bytes,path,shared,quality){
       seen.add(ref);
       const type=cell.attributes.t??'n',v=children(cell,'v'),inline=children(cell,'is'),f=children(cell,'f');
       if(v.length>1||inline.length>1||f.length>1)fail('duplicate cell payload');
+      // Fail closed on ambiguous OOXML cell representations instead of losing source values.
+      // Formula cached <v> is supported but never trusted as the computed result.
+      if((inline.length&&type!=='inlineStr')||(type==='inlineStr'&&(v.length||f.length)))
+        fail('conflicting cell payload');
       const formula=f.length>0;let value=null,kind='blank',review=null;
       if(formula){review='FORMULA_UNEVALUATED';quality.review_cells++;}
       else if(type==='inlineStr'){

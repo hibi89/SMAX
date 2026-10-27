@@ -303,3 +303,23 @@ test('XLSX Unicode-obscured formula-like strings require review, but signed nume
  assert.equal(pkg.quality.review_cells,0);
  assert.equal(validateXlsxCellsPackage(pkg,source),true);
 });
+
+
+test('XLSX conflicting cell payloads fail closed without breaking formula caches',()=>{
+ const malformed=[
+  '<c r="A1" t="inlineStr"><is><t>safe</t></is><v>99</v></c>',
+  '<c r="A1" t="n"><v>12.5</v><is><t>hidden</t></is></c>',
+  '<c r="A1"><f>SUM(A2)</f><v>2</v><is><t>hidden</t></is></c>'
+ ];
+ for(const cell of malformed){
+  assert.throws(()=>extractXlsxCells(xlsx(worksheet(`<row r="1">${cell}</row>`))),/conflicting cell payload/);
+ }
+ for(const cell of [
+  '<c r="A1" t="inlineStr"><is><t>safe</t></is></c>',
+  '<c r="A1"><v>12.5</v></c>',
+  '<c r="A1"><f>SUM(A2)</f><v>2</v></c>'
+ ]){
+  const source=xlsx(worksheet(`<row r="1">${cell}</row>`));
+  assert.equal(validateXlsxCellsPackage(extractXlsxCells(source),source),true);
+ }
+});
