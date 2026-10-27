@@ -8,7 +8,7 @@ const unsafeHeader=/[\u0000-\u001F\u007F-\u009F\p{Default_Ignorable_Code_Point}]
 const SAFE_KEY=/^[a-z][a-z0-9_]{0,63}$/;
 const normalizeKey=x=>x.normalize('NFKC').toLocaleLowerCase('ko-KR');
 const ISSUE_CODES=new Set(['MISSING_REQUIRED','INVALID_DATE','INVALID_DECIMAL',
-  'INVALID_INTEGER','INVALID_BOOLEAN','FORMULA_RISK','DUPLICATE_SOURCE_ROW']);
+  'INVALID_INTEGER','INVALID_BOOLEAN','FORMULA_RISK','UNMAPPED_FORMULA_RISK','DUPLICATE_SOURCE_ROW']);
 
 export function validateGenericColumns(columns,headers){
   if(!Array.isArray(columns)||columns.length<1||columns.length>64)throw new TypeError('Define 1-64 mapped fields');
@@ -72,7 +72,7 @@ export function preprocessGenericCsv(source,{columns}={}){
   const positions=fields.map(field=>headers.indexOf(field.source));
   const counts={input_rows:records.length,output_rows:records.length,review_rows:0,
     exact_duplicate_rows:0,missing_required_cells:0,invalid_cells:0,formula_risk_cells:0};
-  const seen=new Set();
+  const seen=new Set(),mappedSources=new Set(fields.map(field=>field.source));
   const rows=[],review_queue=[];
   for(let i=0;i<records.length;i++){
     const cells=records[i];const values=Object.create(null),issues=[];
@@ -99,6 +99,12 @@ export function preprocessGenericCsv(source,{columns}={}){
       // Prevent tainted values from silently entering a spreadsheet exporter.
       if(formulaRisk(raw)){add(field.key,'FORMULA_RISK');counts.formula_risk_cells++;}
       values[field.key]=value;
+    }
+    // Preserve all source fields but require review of formula-looking unmapped cells.
+    for(let j=0;j<headers.length;j++){
+      if(!mappedSources.has(headers[j])&&formulaRisk(cells[j])){
+        add(headers[j],'UNMAPPED_FORMULA_RISK');counts.formula_risk_cells++;
+      }
     }
     const identity=JSON.stringify(cells); // All columns, not merely mapped subset.
     if(seen.has(identity)){add(null,'DUPLICATE_SOURCE_ROW');counts.exact_duplicate_rows++;}
@@ -143,7 +149,7 @@ export function validateGenericCsvPackage(p){
     !Array.isArray(p.rows)||!Array.isArray(p.review_queue)||
     p.quality.input_rows!==s.source_rows||p.quality.output_rows!==p.rows.length||
     p.rows.length!==s.source_rows)throw new TypeError('Quality counts or row collections invalid');
-  const expected=[],seen=new Set();
+  const expected=[],seen=new Set(),mappedSources=new Set(cols.map(field=>field.source));
   let dup=0,missing=0,invalid=0,formula=0;
   for(let i=0;i<p.rows.length;i++){
     const row=p.rows[i];
@@ -181,6 +187,11 @@ export function validateGenericCsvPackage(p){
       if(formulaRisk(raw))addExpected(field.key,'FORMULA_RISK');
       if(row.values[field.key]!==expected)throw new TypeError('Mapped value disagrees with source cells');
     }
+    for(let j=0;j<s.headers.length;j++){
+      if(!mappedSources.has(s.headers[j])&&formulaRisk(row.source_cells[j])){
+        addExpected(s.headers[j],'UNMAPPED_FORMULA_RISK');
+      }
+    }
     if(duplicate)addExpected(null,'DUPLICATE_SOURCE_ROW');
     if(JSON.stringify(row.issues)!==JSON.stringify(expectedIssues)){
       throw new TypeError('Review issues disagree with original values');
@@ -188,13 +199,15 @@ export function validateGenericCsvPackage(p){
     const codes=[];
     for(const issue of row.issues){
       if(!sameKeys(issue,['field','code'])||!ISSUE_CODES.has(issue.code)||
-        !(issue.field===null||cols.some(c=>c.key===issue.field))||
-        (issue.code==='DUPLICATE_SOURCE_ROW')!==(issue.field===null)){
+        (issue.code==='DUPLICATE_SOURCE_ROW'?issue.field!==null:
+         issue.code==='UNMAPPED_FORMULA_RISK'?
+           typeof issue.field!=='string'||!s.headers.includes(issue.field)||mappedSources.has(issue.field):
+           !cols.some(c=>c.key===issue.field))){
         throw new TypeError('Unrecognized review issue');
       }
       codes.push(issue.code);
       if(issue.code==='MISSING_REQUIRED')missing++;
-      else if(issue.code==='FORMULA_RISK')formula++;
+      else if(issue.code==='FORMULA_RISK'||issue.code==='UNMAPPED_FORMULA_RISK')formula++;
       else if(issue.code.startsWith('INVALID_'))invalid++;
     }
     if(duplicate!==codes.includes('DUPLICATE_SOURCE_ROW'))throw new TypeError('Duplicate source proof mismatch');

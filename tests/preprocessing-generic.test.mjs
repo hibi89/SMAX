@@ -108,3 +108,16 @@ test('formula-looking text is kept in JSON and flagged, not silently changed',()
   assert.deepEqual(p.review_queue[0].issues,[{field:'text',code:'FORMULA_RISK'}]);
   assert.equal(p.rows[1].issues.length,0);
 });
+
+test('unmapped source formula-like fields trigger review without changing raw cells',()=>{
+ const columns=[{key:'name',source:'Name',type:'text',required:true}];
+ const raw='Name,Note,Other\nAlice,=HYPERLINK(1),-100\nBob,safe,+SUM(2)';
+ const pkg=preprocessGenericCsv(raw,{columns});
+ assert.deepEqual(pkg.rows.map(row=>row.source_cells),[['Alice','=HYPERLINK(1)','-100'],['Bob','safe','+SUM(2)']]);
+ assert.deepEqual(pkg.rows.map(row=>row.issues),[[{field:'Note',code:'UNMAPPED_FORMULA_RISK'}],[{field:'Other',code:'UNMAPPED_FORMULA_RISK'}]]);
+ assert.deepEqual(pkg.rows.map(row=>row.status),['NEEDS_REVIEW','NEEDS_REVIEW']);
+ assert.equal(pkg.quality.formula_risk_cells,2);
+ assert.equal(validateGenericCsvPackage(pkg),true);
+ const forged=structuredClone(pkg);forged.rows[0].issues=[];forged.rows[0].status='READY_FOR_HUMAN_REVIEW';forged.review_queue.shift();
+ assert.throws(()=>validateGenericCsvPackage(forged),/Review issues disagree/);
+});

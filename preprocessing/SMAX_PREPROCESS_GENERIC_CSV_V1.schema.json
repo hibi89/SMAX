@@ -175,7 +175,8 @@
             "INVALID_INTEGER",
             "INVALID_BOOLEAN",
             "FORMULA_RISK",
-            "DUPLICATE_SOURCE_ROW"
+            "DUPLICATE_SOURCE_ROW",
+            "UNMAPPED_FORMULA_RISK"
           ]
         }
       }
