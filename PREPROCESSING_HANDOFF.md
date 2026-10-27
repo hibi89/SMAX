@@ -84,3 +84,16 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **원본/보안:** 외부 실제 고객자료/토큰/영업비밀·LLM API·HTTP 전송 없음. GitHub 이력 백업으로 이전 SHA 복원 가능. 다른 세 브랜치·사용자 파일 수정 금지, force push/임의 merge 금지. 원본 전체 열 포함 JSON 보호.
 9. **다음 우선순위/완료 조건:** 체크인 된 전체 코드 정본 Node/CI 의존성·실시간 SHA 일치 검증 및 전체 테스트 PASS 후에 Generic CLI 입력·출력/파일시스템 E2E/실 Windows 게이트. 이후 문서 플러그인 및 provenance, 앞선 작업 중 검증 누락 시 수정. 외부 계정·지출·공개·소스 이동 승인 별도.
 10. **날짜/증거:** 2026-10-27 KST, 연결된 Private GitHub 코드로 실제 오류 재현·수정·격리 테스트 범위까지만 검증. 기준 문서 갱신 커밋 및 HEAD는 이후 재조회하며 상태를 다음 채팅에 반영.
+
+## 2026-10-27 KST — P1 V1 행 승인상태 위조 차단 인수인계 (10항)
+
+1. **목표·기술:** Private `hibi89/SMAX` `preprocessing`에서 로컬 Node 20+ 범용 전처리와 Strict JSON 검증/불승인 계약 완성. 대회별 어댑터·제출 제외.
+2. **완료·결정 근거:** V1 결과 패키지 검증기가 행의 상태 문자열을 `NEEDS_REVIEW` 여부의 불리언만으로 판정하던 문제를 수정. 검토 사유 유무에 따라 **정확히** `NEEDS_REVIEW` 또는 `READY_FOR_HUMAN_REVIEW`만 통과. 임의 `APPROVED`/null/UNKNOWN 거부. 최상위 `approval='NOT_GRANTED'` 유지. 과도한 인터페이스 변경 없이 최소 수정.
+3. **테스트 명령·증거:** `npm run test:preprocessing` 및 `npm test` Native 전수는 이번에도 **NOT_RUN**. 원격 원문 CSV parser SHA `26d84c9` + 최신 generic V1 SHA `5340570`의 V8 격리 20/20 PASS, 0 FAIL. SHA256·TextEncoder 모의이므로 실제 Node 파일 CLI/E2E·Windows 미검증.
+4. **상태:** 결함 재현 → 최소 수정·회귀 소스 GitHub 반영 **완료**. 전체 Native/실 JSON 파일 E2E·문서 파서 **대기**. 라이브 배포/판매 **미적용**.
+5. **오류 근거·시도·재시도 금지:** 수정 전 `status='APPROVED'`인 clean row 패키지를 `validateGenericCsvPackage`가 받아들임. 부정확한 boolean invariant 원인. 기존 컨테이너의 GitHub private checkout DNS 실패 및 현 로컬 소스 불완전 상태에서 정본 Native 실행 불가; 같은 방식으로 무의미한 git clone 반복 금지. GitHub 연결 소스 검증/이력 중심 작업.
+6. **저장소·브랜치·SHA·경로:** 비공개 `hibi89/SMAX` `preprocessing`; 시작 SHA `7a6dc92facc1d9e9a93d729b5908fedee390f6ae`; 코드 `4948640bb3b2c7df1240c01837361b12660da1a3`; 테스트 `1944256e4fc793d997341655b843d07f656849ca`. 핵심 경로 `preprocessing/generic-csv.mjs`, `tests/preprocessing-generic-schema.test.mjs`. 최종 HEAD 재조회.
+7. **환경/Production:** 로컬 Node >=20, 전용 `npm run test:preprocessing`. `preprocessing/generic-cli.mjs`는 별도 V1 파일 CLI. Cloudflare/Vercel Production URL·배포 SHA **미적용**.
+8. **원본·백업·보안:** 첫 커밋 이전 기존 소스 SHA로 GitHub 이력 복원 가능; 원본 CSV 변환/행 데이터·기존 세 브랜치 변경 금지. 고객 비밀/토큰 사용·전송 없음. V1 JSON은 원본 모든 열을 포함하므로 원본과 동일 보안 취급.
+9. **다음 우선순위·완료 기준·승인 사항:** 정확한 원격 SHA 전체 소스를 Node 환경으로 복원한 후 전용/전체 Native PASS 및 Generic CLI 파일 생성/해시·E2E 점검. 이후 검증 가능한 XLSX/문서 플러그인. Public 코드 반출/유료 비용/실자료 외부 업로드/배포는 사용자 별도 승인.
+10. **KST·검증 범위:** 2026-10-27 KST, 실제 GitHub 체크인 소스 기반 V8 재현·패치 검증 20/20. 최신 문서 커밋 SHA는 재조회하고 다음 채팅에서 이 기준을 사용.
