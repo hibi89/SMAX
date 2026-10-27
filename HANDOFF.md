@@ -329,3 +329,11 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 6. **브랜치/복원:** Private hibi89/SMAX `preprocessing`, 다른 브랜치 main/frontend/backend 병합·수정 없음. 정본은 `AGENTS.md` 상단, `preprocessing/README.md`, `docs/PREPROCESSING_BRANCH_PLAN_20261027.md`, `PREPROCESSING_HANDOFF.md`. 신규 중요 코드 SHA: parser `e92b6b61`, generic `5f348da1`→검수 `90bf69be`, tests `b9e5e6da`·`45948ccd`. 코드 후속 문서 커밋 후 최신 HEAD 조회.
 7. **다음 전처리만:** 전체 Native Node 회귀 확인, Generic N필드 CLI/사용성, 고급 정제·파일 검증/파싱·입출력 포맷 지원, 실패복구/데이터 민감도/품질 측정. 대회별 작업·커넥터/배포·승인 범위 제외.
 8. **안전:** 타 저장소 Private IP 이동·Public 업로드·실고객 자료/비밀 입력·유료 API·외부 배포/결제·강제 merge/rebase 금지. SMAX SELF 진행 일정과 기존 대회 일정 변경하지 않음. 갱신 2026-10-27 KST.
+
+## 2026-10-27 KST — 전처리 QA 최신 복원 및 Unicode 검토 수정
+- **역할:** SMAX `preprocessing` 전용 범용 엔진만 담당. 타 브랜치·해커톤별 통합·대회 코드 변경 금지.
+- **새 QA 사실:** 선행 커밋 `0cee79071f015ae473c5c53133fa84788c649b20`의 `docs/PREPROCESSING_NATIVE_QA_20261027.md`에서 GitHub 정본 17파일 일치·Native `npm run test:preprocessing` **59/59 PASS**, CSV CLI와 합성 XLSX 원본 검증 확인. 아래 예전 `NOT_RUN` 항목은 당시 이력일 뿐 baseline 현재 상태가 아님. 단, 전체 `npm test`, Windows, CI는 여전히 미검증.
+- **이번 개선:** `preprocessing/xlsx-cells.mjs`와 `xlsx-package.mjs`에서 숨김 Unicode/bidi 접두어의 수식 의심 텍스트를 사람 검토로 분류하고 `-12.50` 음수 숫자 텍스트는 유지; `tests/xlsx-preflight.test.mjs`에 회귀 추가. 코드 커밋 순서 `817a9593` → `2c101fbf` → `75a406ed`. 기존 SELF/frontend/backend/main 무변경.
+- **검증과 한계:** 변경된 3파일 JS 구문 3/3, V8 규칙·validator 각 6/6, Node 독립 정규식 7/7 통과. **최신 변경 포함 Native `npm run test:preprocessing`은 NOT_RUN**. 이전 59/59을 현재 신규 테스트까지 성공했다고 확대하지 않는다. 원본 XLSX 파일 사용 Node 통합도 최신 코드에 대해서는 검증 대기.
+- **다음 `ㄱ`:** `PREPROCESSING_HANDOFF.md`, `STATUS.md`, `docs/PREPROCESSING_NATIVE_QA_20261027.md` 및 최신 원격 코드/commit 확인 → Private 소스 SHA 보장된 로컬 Node 재현으로 신규 Native 회귀(예상 총 60) → 추가 결함 최소 수정. 공개/판매/고객자료·유료 API·해커톤 소스 이동 승인 없음.
+
