@@ -58,3 +58,11 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - **검증:** 실제 GitHub 코드 원문/체크인 테스트 8건 V8 격리 8/8 PASS; 일부 tampering 거부 별도 확인. 새 회귀 2건과 기존 테스트를 포함하는 전용 `npm run test:preprocessing` 변경. 전체 Native Node 실행과 실 사용자 파일 검증은 **NOT_RUN**.
 - **위험:** V1은 데이터 원문을 포함한 JSON 반환이므로 기밀·개인정보가 그대로 복제될 수 있다. 로컬 메모리/권한 있는 경로만 사용. JSON Schema는 구조 계약이며 실 규칙·행별 출처 상호 검증은 JS 검증기를 사용. 아직 Generic CSV CLI·PDF/XLSX/DOCX·LLM·Vector 없음.
 - **다음 엔진 작업:** 모든 V0/V1 자동 테스트 실제 Node 실행 → Generic CSV 전용 로컬 CLI/오류 복구 → 파일 provenance 검증·성능/한도 → 문서 입력 플러그인. 기존 다른 브랜치/대회별 브랜치 자동 변경 금지.
+
+## 2026-10-27 — P1.1 Generic CSV 파일 CLI 추가 (부분 완료)
+
+- 기존 3컬럼 V0 CLI에 옵션을 혼합하는 설계보다 V1 전용 `preprocessing/generic-cli.mjs`를 별도 작성했다. 하위 호환성·분리 테스트·오류 범위 면에서 유리하고 외부 종속성은 0개다.
+- 원격 코드 커밋: `9eb19dbe49bcba2ed1dede39d920ae54828e3da2`. 명시 `--input .csv --columns .json --output .json`, 최대 CSV 2MiB/매핑 64KiB, fatal UTF-8, regular file 확인, 파일 심볼릭링크 차단, exclusive new output, V1 스키마 및 SHA 반환.
+- 원격 회귀 테스트 파일을 생성하려던 시도 2회는 도구 안전 검사에서 차단. **새 테스트 GitHub 미반영**. 원격 전체 checkout은 `github.com` DNS 오류로 불가; 실제 신규 CLI의 Native Node/E2E 실행 **NOT_RUN**. 작은 범위의 재구성본 문법 검사와 제품 회귀 QA를 구분해야 한다.
+- 기존 `npm run test:preprocessing`과 다른 브랜치, 프로덕션, 대회 저장소에는 변경 없음. 실제 변환과 실패복구 검증 후 CLI 출고 승인 여부 판정.
+- 다음 작업: GitHub 새 테스트 추가 가능 경로를 확보 → 최신 SHA 기준 전체 Native Node 회귀·CLI 파일 E2E → 파일 크기/UTF-8/BOM/중복·오류/출력 권한 측정 → 그 후 확장 포맷 플러그인 설계.
