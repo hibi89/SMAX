@@ -97,3 +97,16 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **원본·백업·보안:** 첫 커밋 이전 기존 소스 SHA로 GitHub 이력 복원 가능; 원본 CSV 변환/행 데이터·기존 세 브랜치 변경 금지. 고객 비밀/토큰 사용·전송 없음. V1 JSON은 원본 모든 열을 포함하므로 원본과 동일 보안 취급.
 9. **다음 우선순위·완료 기준·승인 사항:** 정확한 원격 SHA 전체 소스를 Node 환경으로 복원한 후 전용/전체 Native PASS 및 Generic CLI 파일 생성/해시·E2E 점검. 이후 검증 가능한 XLSX/문서 플러그인. Public 코드 반출/유료 비용/실자료 외부 업로드/배포는 사용자 별도 승인.
 10. **KST·검증 범위:** 2026-10-27 KST, 실제 GitHub 체크인 소스 기반 V8 재현·패치 검증 20/20. 최신 문서 커밋 SHA는 재조회하고 다음 채팅에서 이 기준을 사용.
+
+## 2026-10-27 KST — XLSX 사전검사 Native 실검증 인수인계 (10항)
+
+1. **목표·범위·기술:** SMAX² Private `preprocessing` 범용 데이터 전처리, 비용 0, Node.js >=20, 의존성 0. 기존 CSV V0/V1와 타 브랜치 불변.
+2. **완료 기능·결정 근거:** 외부 XLSX 라이브러리 우선 추가(넓은 처리, 의존성/공급망 위험) 대신 내장 `zlib`로 엄격 ZIP preflight V0 구현. `preflightXlsx(bytes)`는 문서 압축·엔트리·CRC·내부 구성 확인만 하고 시트 데이터는 **파싱하지 않음**.
+3. **테스트·성공/실패:** 실제 Node v22.16.0 `node --test tests/xlsx-preflight.test.mjs` **10 PASS/0 FAIL**. GitHub 원격 파일 blob SHA와 실행 로컬 파일 `git hash-object` 2개 일치 증빙. 초기에 ZIP 변조위치 테스트 1실패를 테스트 정정; GitHub 전송 테스트 파일의 ZIP 크기 폭 오기 두 차례 수정해 일치. `npm run test:preprocessing`, `npm test`, 기존 CSV Native 테스트·Windows·실 XLSX 파일은 **NOT_RUN**.
+4. **상태:** 코드+체크인 회귀+스크립트 등록 완료, 실제 XLSX sheet/cell parsing 미구현, 종합 릴리스/실서비스 미적용.
+5. **오류·시도·재시도 금지·대안:** 전번부터 Private Git clone DNS 차단으로 전체 정본 Node 실행 불가; 재시도 반복 대신 인증 GitHub 커넥터로 읽고 별도 독립 신규 모듈의 정확 SHA를 Node 로컬에서 직접 검증. 실제 전체 정본을 확보하기 전 기존 모듈 테스트 통과를 주장하지 않는다.
+6. **저장소·브랜치·SHA·경로:** Private `hibi89/SMAX`/`preprocessing`; 원래 시작 `5fac694954bcad053b8ad9761aa969474a5d2fe9`; code commit `f78ae845437d06d7d9589473f30ba7adfc260949`, test 최종 `ea228d601d411e670222b13401976fce62252a16`, `package.json` test script `e9f34b322cc19d9989286b410403b9acc1ec96c2`; 경로 `preprocessing/xlsx-preflight.mjs`, `tests/xlsx-preflight.test.mjs`.
+7. **Production·실행 환경:** `node --test tests/xlsx-preflight.test.mjs`/로컬 Node >=20. Vercel·Cloudflare 배포는 미적용, Production URL/SHA 없음.
+8. **원본·백업·인증:** 기존 브랜치/CSV 엔진/원본 변경 없음. GitHub 이전 HEAD가 복구점이며 force push/merge 없음. 테스트 합성 ZIP만 사용, 소스 비공개. 실고객·비밀·LLM API/과금·외부 데이터 송수신 없음.
+9. **다음 우선순위/완료기준/승인:** 동일 비공개 SHA의 전체 Native 회귀 Node 0 FAIL/CLI 실제 파일 E2E → XLSX 제한형 워크시트/셀 추출 및 실패 시 fail-closed → provenance/Schema→타 총괄에 계약 제공. Public 코드 반출·지출·배포·자료 외부 사용 별도 승인.
+10. **갱신/KST/검증 범위:** 2026-10-27 KST. SHA 동일 두 모듈 Native 독립 테스트 10/10 성공만 주장. 전체 출시 PASS 아님. 문서 커밋 후 원격 최종 HEAD 재조회.
