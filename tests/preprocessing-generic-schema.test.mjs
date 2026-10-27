@@ -46,3 +46,20 @@ test('V1 validator rejects hidden, control or padded names in unmapped source he
   }
   assert.equal(validateGenericCsvPackage(original),true);
 });
+
+test('strict V1 validator refuses forged per-row APPROVED or unknown states',()=>{
+  const fields=[{key:'value',source:'값',type:'text',required:true}];
+  const clean=preprocessGenericCsv('값\nnormal',{columns:fields});
+  for(const state of ['APPROVED','ACCEPTED','UNKNOWN',null,'']){
+    assert.throws(()=>validateGenericCsvPackage({...clean,rows:[
+      {...clean.rows[0],status:state}
+    ]}),/Review state mismatch/);
+  }
+  const review=preprocessGenericCsv('값\n=SUM(1)',{columns:fields});
+  assert.equal(review.rows[0].status,'NEEDS_REVIEW');
+  assert.throws(()=>validateGenericCsvPackage({...review,rows:[
+    {...review.rows[0],status:'APPROVED'}
+  ]}),/Review state mismatch/);
+  assert.equal(validateGenericCsvPackage(clean),true);
+  assert.equal(validateGenericCsvPackage(review),true);
+});
