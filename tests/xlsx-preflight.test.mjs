@@ -155,3 +155,77 @@ test('XLSX two worksheets retain distinct source paths',()=>{
  assert.deepEqual(p.source.worksheet_paths,['xl/worksheets/sheet1.xml','xl/worksheets/sheet2.xml']);
  assert.equal(p.sheets[1].rows[0].source_row,5);
 });
+
+// Strict JSON package contract tests use only checked-in synthetic fixtures.
+import {validateXlsxCellsPackage,serializeXlsxCellsPackage} from '../preprocessing/xlsx-package.mjs';
+const verified =()=>{
+  const source=xlsx(worksheet('<row r="1"><c r="A1" t="inlineStr"><is><t>name</t></is></c><c r="B1"><f>SUM(B2)</f><v>2</v></c></row><row r="2"><c r="A2" t="b"><v>1</v></c></row>'));
+  return {source,pkg:extractXlsxCells(source)};
+};
+test('XLSX strict package validates structure and original source bytes',()=>{
+  const {source,pkg}=verified();
+  assert.equal(validateXlsxCellsPackage(pkg),true);
+  assert.equal(validateXlsxCellsPackage(pkg,source),true);
+  assert.deepEqual(JSON.parse(serializeXlsxCellsPackage(pkg,source)),pkg);
+});
+test('XLSX strict package prevents top-level approval and unknown fields',()=>{
+  const {pkg}=verified();
+  for(const approval of ['APPROVED','PENDING',null]){
+    const q=structuredClone(pkg);q.approval=approval;
+    assert.throws(()=>validateXlsxCellsPackage(q),/contract or approval/);
+  }
+  const q=structuredClone(pkg);q.new_flag='UNSAFE';
+  assert.throws(()=>validateXlsxCellsPackage(q),/contract or approval/);
+});
+test('XLSX strict package rejects forged cell approval, errors and totals',()=>{
+  const {pkg}=verified();
+  const cases=[
+    q=>q.sheets[0].rows[0].cells[0].status='APPROVED',
+    q=>q.sheets[0].rows[0].cells[1].status='READY_FOR_HUMAN_REVIEW',
+    q=>q.sheets[0].rows[0].cells[1].reason=null,
+    q=>q.quality.review_cells=0,
+    q=>q.quality.cells=999
+  ];
+  for(const edit of cases){const q=structuredClone(pkg);edit(q);
+    assert.throws(()=>validateXlsxCellsPackage(q));
+  }
+});
+test('XLSX strict package rejects cached formula or scalar promotion',()=>{
+  const {pkg}=verified();
+  const cases=[q=>q.sheets[0].rows[0].cells[1].value='2',
+    q=>q.sheets[0].rows[0].cells[1].kind='number_text',
+    q=>q.sheets[0].rows[1].cells[0].value='true'];
+  for(const edit of cases){const q=structuredClone(pkg);edit(q);
+    assert.throws(()=>validateXlsxCellsPackage(q));
+  }
+});
+test('XLSX strict package rejects coordinate and path mismatches',()=>{
+  const {pkg}=verified();
+  const cases=[q=>q.sheets[0].rows[0].cells[0].ref='XFE1',
+    q=>q.sheets[0].rows[0].cells[0].ref='A9',
+    q=>q.sheets[0].source_path='../escape.xml',
+    q=>q.source.worksheet_paths=['xl/worksheets/sheet2.xml']];
+  for(const edit of cases){const q=structuredClone(pkg);edit(q);
+    assert.throws(()=>validateXlsxCellsPackage(q));
+  }
+});
+test('XLSX strict package detects duplicate row or cell provenance',()=>{
+  const {pkg}=verified();
+  const q=structuredClone(pkg);q.sheets[0].rows.push(structuredClone(q.sheets[0].rows[0]));
+  assert.throws(()=>validateXlsxCellsPackage(q),/invalid source row/);
+  const w=structuredClone(pkg);w.sheets[0].rows[0].cells.push(structuredClone(w.sheets[0].rows[0].cells[0]));
+  assert.throws(()=>validateXlsxCellsPackage(w),/duplicate cell/);
+});
+test('XLSX strict package source parity detects semantically altered values',()=>{
+  const {source,pkg}=verified();const q=structuredClone(pkg);
+  q.sheets[0].rows[0].cells[0].value='tampered';
+  assert.equal(validateXlsxCellsPackage(q),true); // Structural-only is not authenticity proof.
+  assert.throws(()=>validateXlsxCellsPackage(q,source),/differs from source extraction/);
+  assert.throws(()=>serializeXlsxCellsPackage(q,source),/differs from source extraction/);
+});
+test('XLSX strict package matches SHA and exact source type',()=>{
+  const {source,pkg}=verified();
+  const modified=Buffer.from(source);modified[5]^=1;
+  assert.throws(()=>validateXlsxCellsPackage(pkg,modified),/source hash mismatch/);
+  assert.throws(()=>validateXlsxCellsPackage(pkg,'source.xlsx'),/Uint8Array/);
+});
