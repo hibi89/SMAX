@@ -134,3 +134,11 @@ const json=serializeXlsxCellsPackage(pkg,original); // 사람이 승인한 파�
 - **검증:** Native Node v22.16.0 `node --test tests/xlsx-preflight.test.mjs` **29/29 PASS**(이전 26 + 숫자형 3). 외부 오픈소스 `jsonschema` Draft202012Validator로 원격 Schema 동일 blob `ff25c696a64ebb1e71439f163e748b7a9857bbf1`를 독립 검사한 로컬 케이스 **21/21 PASS**(정상 원본 2, 변조/문법 19). 재실행 가능한 새 `tests/test_xlsx_schema_contract.py`를 추가했으며 `python -m unittest discover -s tests -p 'test_xlsx_schema_contract.py'` **5/5 PASS**. Python jsonschema는 개발자 선택 검사 도구이며 SMAX 사용자 런타임 설치 필수 아님(없으면 unittest skip).
 - **정본 증거:** 변경된 XLSX 코드/검증기/Schema/Node 테스트/Python 테스트 5개 파일 각각의 `git hash-object`가 Private GitHub blob SHA와 동일. `preprocessing`만 수정.
 - **미검증:** 기존 CSV V0/V1 전체 `npm run test:preprocessing`, 전체 `npm test`, Windows 및 실고객 XLSX 파일은 **NOT_RUN**. 이번의 29/29와 5/5는 신규 XLSX 테스트 범위만이다. CSV와 XLSX가 통합된 전처리 시스템 출시 승인 아님.
+
+
+## 2026-10-27 — XML 문자참조 External 관계 우회 차단
+
+- **재현:** XLSX ZIP 내부 `xl/_rels/workbook.xml.rels`에 `TargetMode="Exter&#x6e;al"`이 포함돼도 기존 `preflightXlsx()`는 원문 `External` 비교만 하므로 사전검사를 통과. 사용자 파일은 사용하지 않고 합성 ZIP으로 실제 Node에서 재현했으며, 수정 전 해당 새 테스트가 FAIL했다.
+- **수정:** `preprocessing/xlsx-preflight.mjs`에서 `TargetMode` 속성을 찾은 다음 XML numeric character reference(16진수·10진수)와 표준 named references를 디코드해 `Internal`만 허용. 누락된 인용부호/부정확한 참조 등은 실패 종료. 검사 파일 확장자 `.rels/.xml`은 대소문자와 관계없이 확인.
+- **회귀:** 외부 모드 문자참조·잘못된 모드, 정상 `Inte&#114;nal`, 대문자 `.RELS`의 외부 모드 총 4개 Node 테스트 추가. 최신 `node --test tests/xlsx-preflight.test.mjs`: **33/33 PASS, 0 FAIL**. 실제 생성한 합성 openpyxl/XlsxWriter XLSX 2종의 preflight/extract/원본 대조도 PASS. Python Schema unittest **5/5 PASS**.
+- **검증 근거:** 변경한 전처리 모듈 Git blob `ce0f96ce618c6b868bcf255e1d8b2508f3eb6bb3`; 회귀 테스트 blob `d484cea4ef13ad28b650902c164251d1daaf6121`; 각 파일 로컬 `git hash-object`와 GitHub SHA가 정확히 일치함. 전체 CSV 포함 `npm run test:preprocessing`, Windows, CI, 사용자 파일 호환·릴리스는 **NOT_RUN**.
