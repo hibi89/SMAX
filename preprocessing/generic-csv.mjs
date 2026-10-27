@@ -199,7 +199,8 @@ export function validateGenericCsvPackage(p){
     }
     if(duplicate!==codes.includes('DUPLICATE_SOURCE_ROW'))throw new TypeError('Duplicate source proof mismatch');
     if(duplicate)dup++;
-    if((row.status==='NEEDS_REVIEW')!==(codes.length>0))throw new TypeError('Review state mismatch');
+    const expectedStatus=codes.length?'NEEDS_REVIEW':'READY_FOR_HUMAN_REVIEW';
+    if(row.status!==expectedStatus)throw new TypeError('Review state mismatch');
     if(codes.length)expected.push({source_record:row.source_record,issues:row.issues});
   }
   if(expected.length!==p.review_queue.length||p.quality.review_rows!==expected.length||
