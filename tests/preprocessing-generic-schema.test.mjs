@@ -33,3 +33,16 @@ test('strict validator cannot accept tampered clean values or hidden review issu
     ...p,rows:[{...p.rows[0],issues:[]}],review_queue:[]
   }),/Review issues disagree/);
 });
+
+test('V1 validator rejects hidden, control or padded names in unmapped source headers',()=>{
+  const original=preprocessGenericCsv('ID,비고\nA,정상',{columns:[
+    {key:'id',source:'ID',type:'text',required:true}
+  ]});
+  for(const header of ['비\u200B고','비\u202E고',' 비고','비고\t']){
+    const corrupted={...original,source:{
+      ...original.source,headers:['ID',header]
+    }};
+    assert.throws(()=>validateGenericCsvPackage(corrupted),/Invalid source provenance/);
+  }
+  assert.equal(validateGenericCsvPackage(original),true);
+});
