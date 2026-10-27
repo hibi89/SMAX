@@ -137,3 +137,12 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **원본·보안·백업:** 합성 XLSX·실제 GitHub Private 코드만 사용, 고객/개인정보·토큰·외부 업로드·유료 API 없음. XLSX result JSON은 원본과 동일 기밀. 기존 repo commits 복원점, 타 브랜치/force push/merge 없음.
 9. **다음 우선/완료 조건·승인:** ① 전체 CSV+XLSX 정본 Native/npm 회귀 0 FAIL ② 원본 파일 상용 다양성·XLSX 표시 시트 이름/날짜 스타일/관계 처리 검증 ③ 포맷별 Strict/원본 인증 계약 + 사람 승인 게이트. 외부 공개, 결제/과금, 배포, 실고객 파일 사용 별도 승인.
 10. **시점 및 누락:** 2026-10-27 KST. JS Strict package validator와 공식 Schema 게시까지 반영. XML/ZIP parser 추가 공격면 포괄 보증하지 않으며, 구조 검사≠원본 데이터 진본성. 최종 HEAD는 아래 재조회 결과 우선.
+
+## 2026-10-27 KST — XLSX numeric validation gate, latest
+
+- Scope: Private SMAX `preprocessing` branch only; other branches unchanged.
+- Bug: untrusted XLSX numeric <v> content such as NaN, Infinity or formula-shaped strings could be incorrectly treated as trusted number_text. Fixed in parser, JavaScript package validator and JSON Schema; legitimate numbers are preserved as exact strings, without float conversion.
+- Source commits: parser `8b76a8555e4212bac3606bd1ca898179ea2b41aa`, package validator `9b27cde049540961cb7210b943dae97476aa53b7`, Schema `39284d4871a3ad519fd2e3c907bcca40861bc5d8`.
+- Regression: Node test commit `3d60e838a88fdb5a0b701155d82e7d20bc1ebc4a` — actual Node.js v22 **29/29 PASS**, 0 failures. Optional Python Draft202012 unittest commit `440248a9f59109d57b748e1621351507a30d93fc` — **5/5 PASS**. Expanded local independent schema cases 21/21 PASS. All 5 checked GitHub blob SHA match exact locally executed files.
+- Environment: full native `npm run test:preprocessing`, `npm test`, Windows, CI and live files remain **NOT_RUN** because complete private repo is not mounted locally. No production release, merge, publication or paid service changes.
+- Next: recover verifiable full private checkout, execute all CSV/XLSX Node suites, fix discovered issues, then optional common-format adapter with provenance and explicit human review.
