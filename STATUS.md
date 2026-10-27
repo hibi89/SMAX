@@ -262,3 +262,12 @@
 - **시큐리티/정보 보호:** V1 출력은 매핑하지 않은 열도 `source_cells`로 보존한다. JSON 파일은 원본과 동일 수준의 민감 데이터이므로 타 레포/공개 API/LLM에 무단 전달 금지. 숫자·날짜는 추정하지 않고 검토 행 삭제 없음. 스키마의 교차 행 검증은 생산 JS 검사기가 담당.
 - **커밋 근거:** 원본 CSV parser export `e92b6b61`; Generic 엔진 `5f348da1` + 원본/정규화 검증 강화 `90bf69be`; 테스트 `b9e5e6da`, Schema `c72928e6`, Schema 회귀 `45948ccd`, test script `508a4c54`. 인수인계/설계 문서 후속 최신화 참조.
 - **다음 작업:** 범용 전처리 Native 전체 테스트 및 파일 CLI 확보→가변필드 고급 규칙·성능/한도→XLSX·문서 파서와 provenance→검증 가능한 선택적 Local LLM/스키마/검토 UI. **해커톤별 어댑터/대회 전송은 작업 대상 아님**. main/frontend/backend·대회 저장소·판매/배포·유료 API/고객자료 불변.
+
+## 2026-10-27 KST — PREPROCESSING P1.1 범용 CSV 전용 CLI
+
+- **최신 범위:** Private `hibi89/SMAX` `preprocessing`만, 단독 총괄 전처리 엔진 관리. KIC/PayPal/UGREEN별 연결·어댑터·제출 금지; `main/frontend/backend` 보존.
+- **설계:** 기존 `cli.mjs`의 V0 옵션 확장보다 별도 `generic-cli.mjs` 선택(이전 API 보존, 의존성 0, 명시적 mapping JSON). `SMAX_PREPROCESS_GENERIC_CSV_V1` 출력으로 원본 전체 행·열/검토 큐/미승인 상태 보존.
+- **코드:** `preprocessing/generic-cli.mjs` 생성 GitHub SHA `9eb19dbe49bcba2ed1dede39d920ae54828e3da2`; CSV 2MiB·매핑 JSON 64KiB, UTF-8 fatal, regular file/심볼릭링크 검사, 출력 신규파일 독점 생성. CLI 사용법은 `preprocessing/README.md`에 기록.
+- **검증/장애:** 이 환경 Node v22.16.0/npm 10.9.2 확인. `git ls-remote https://github.com/hibi89/SMAX.git`는 DNS `Could not resolve host: github.com` 실패. 원격 테스트 파일 작성 2회는 도구 안전 검사 차단; 해당 테스트는 **미반영**. 원격 전체 의존성의 `npm run test:preprocessing`/실 파일 CLI E2E/Windows 검증은 **NOT_RUN**; PASS 주장 금지.
+- **보존:** 외부 고객 데이터·API·DB·LLM·유료 지출·Cloudflare/Vercel 공개 배포·제품 출고 없음. 기초 `preprocessing` HEAD `b6a71829`; 새 코드 커밋 `9eb19dbe`; 최종 HEAD는 전체 문서 갱신 후 재조회.
+- **다음 안전 작업:** 회귀 테스트 등록 경로 복구 후 최신 checkout에서 Node 전체 테스트·합성 CSV 실제 쓰기/해시/UTF-8·파일 권한/오류복구 E2E. 이어 CSV 고급 타입/대용량 한도와 문서 파싱 플러그인. 신규 출력이 민감 원문 전체를 포함한다는 보안 경계 유지.
