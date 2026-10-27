@@ -274,3 +274,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **Production/backup/privacy:** Cloudflare/Vercel Production 없음, 코드 GitHub commit parent가 복구점. 고객자료·토큰·네트워크·유료 API·타 브랜치/해커톤 변경 없음. 출력은 기밀 원문 포함 가능.
 9. **다음 검증·개발 우선순위:** 최신 전체 `npm run test:preprocessing` Native 기준선과 실제 CLI E2E → DOCX 안전 파서(기존 XLSX ZIP preflight 정책과 비교) → PDF 범위 판단; 제품 출시 전 Windows/CI/보안/규모 검수.
 10. **시각·범위:** 2026-10-27 KST, 신규 문서 모듈/스키마 Native 9/9 + schema 2형식 독립 시험. 전체 제품 완료 아님.
+
+## 2026-10-27 KST — DOCX MVP and native QA (10항 인계)
+1. **목표·기술:** Private SMAX `preprocessing`의 오프라인 DOCX 기본 문단/표 텍스트 → Strict JSON; 사용자 개발 순서 MVP 완성 → 원설계 보강 → 후단 보안·안정·호환 검수.
+2. **설계 대안:** XLSX ZIP `preflightXlsx`는 필수 `xl/` parts에 종속됨. A 안전 한도/CRC32 검사 정책을 공유하되 별도 독립 DOCX 경로를 구현(채택: XLSX 변경/회귀 위험 0), B 기존 ZIP 추출 공통 모듈로 즉시 리팩터링(이번 MVP 범위 확대, 보류).
+3. **구현:** `docx.mjs` safe ZIP inspection, XML 본문 기본 문단/표 안 문단/탭·br, raw source SHA/paragraph_index provenance/NOT_GRANTED; `docx-cli.mjs` local exclusive output; `SMAX_PREPROCESS_DOCX_V0.schema.json`; `tests/docx.test.mjs` 및 npm 스크립트 등록.
+4. **실제 테스트:** 로컬 Linux Node 22.16 `node --test tests/docx.test.mjs` **10/10 PASS**. 파이썬 `python-docx` 생성 실제 합성 문서 36,764 bytes → 실제 Node CLI Strict JSON 네 문단/표+formula review PASS. `jsonschema.Draft202012Validator` 정상 패키지 PASS, 임의 `APPROVED` FAIL. 생성한 4개 Git blob SHA 모두 로컬 테스트 파일과 일치. 기존 전체 Native suite는 미실행.
+5. **범위/완료/미검증:** 별도 DOCX importer 1차 범위 구현 완료. 복합 DOCX/이미지/하이퍼링크/각주/머리말/페이지 셀 구조 미지원(명시적 거부). 전체 CSV/XLSX/TXT/HTML 통합 및 Windows/실 고객/성능 릴리스 시험 미실행.
+6. **원인/교정/재시도:** 처음 '<w:p/>' 처리에서 중첩 오류 확인, 수정 후 전체 10 PASS. GitHub 테스트 blob 전송 시 1줄 누락을 local Git blob SHA 교차검증으로 발견·복구. git SHA 불일치한 시도 blob은 브랜치에 넣지 않음.
+7. **레포/브랜치:** `hibi89/SMAX` private `preprocessing`, 변경 전 `3dd9051819961428115c06e59065e8285a043300`; `preprocessing/docx.mjs`, `docx-cli.mjs`, `SMAX_PREPROCESS_DOCX_V0.schema.json`, `tests/docx.test.mjs`, package/README/status/handoff. 최종 commit/ref 재확인.
+8. **데이터/권한:** 비용 0원·Private 소스·합성 파일만; 실제 고객/신원/토큰 사용 없음; main/frontend/backend 및 타 해커톤 레포, CI/배포/Public publish, force push 변경 없음. JSON에 고객 텍스트가 복제될 수 있어 로컬 접근통제 요구.
+9. **다음:** authenticated 전체 checkout에서 정확한 Git blob 집합으로 `npm run test:preprocessing`, 전체 `npm test` 실행 → 실제 MS Word DOCX 호환성 범위 확대 또는 PDF 1차 importer 우선순위 결정 → Windows 및 보안/릴리스 QA. 임의 외부 모델 호출/공개 금지.
+10. **기준 시각/검증 범위:** 2026-10-27 KST, 실제 DOCX Native 단독 10 PASS + 합성 실파일 CLI + independent JSON Schema 검증만 성공. 다른 포맷 전체 Native 검수와 상용 완료는 주장하지 않음.

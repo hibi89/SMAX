@@ -373,3 +373,6 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 
 ## 2026-10-27 KST — preprocessing limited HTML importer and schemas
 - MVP 원설계 보강: TXT/HTML Draft202012 Strict JSON Schemas + `preprocessing/html.mjs`, `html-cli.mjs`, `tests/html.test.mjs`, `tests/document-schemas.test.mjs`. New modules only Node 22 Native **9/9 PASS**, independent Python Schema checks passed. All 6 new Git blobs match local tested files. Whole existing preprocessing test suite/Windows/CI/Production NOT_RUN. HTML subset, not full HTML5. See latest `PREPROCESSING_HANDOFF.md` 10-part handoff.
+
+## 2026-10-27 KST — DOCX importer handoff
+- Private preprocessing DOCX V0: strict 2MiB/8MiB ZIP+XML bounded paragraph/table text, SHA/lineage/review, local CLI wx output. Standalone Git SHA matched Native Node 22 **10/10 PASS** + python-docx synthetic CLI real-file PASS. Limited DOCX subset; hyperlinks, tracked changes, external relationships, macros/media rejected. Latest entire preprocessing suite, Windows, CI/Production not tested. Details latest PREPROCESSING_HANDOFF.md 10 points.

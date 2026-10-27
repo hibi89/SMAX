@@ -394,3 +394,6 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 
 ## 2026-10-27 KST — preprocessing P2 HTML/TXT schema
 - Code added: HTML UTF8 subset parser, local HTML CLI, strict TXT/HTML Draft 2020-12 JSON Schema, 9 newly checked Node tests. Local Native **9/9 PASS**, Git blob parity **6/6**; Python jsonschema normal/tamper checks pass. No external NPM/LLM/API or runtime cost. Whole latest `npm run test:preprocessing`/Windows/CI/real customer documents/Production NOT_RUN. User's MVP→design gap→security order maintained; no other branch touched.
+
+## 2026-10-27 KST — P2 DOCX Strict JSON MVP
+- New DOCX safe ZIP + basic Word XML paragraph/table text importer, CLI and Draft202012 contract. Native Node22 DOCX standalone 10/10 PASS; python-docx synthetic real file CLI PASS; independent JSON Schema valid/tamper PASS; 4 local-tested Git blobs exact SHA match. Entire preprocessing Native suite/Windows/CI/Production NOT_RUN. No paid service, public source, user data or other branch modifications.

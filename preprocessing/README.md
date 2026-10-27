@@ -179,3 +179,11 @@ XLSX 경로는 ZIP preflight → 보수적인 시트/셀 추출 → 원본 바�
 - `preprocessing/html-cli.mjs`: `node preprocessing/html-cli.mjs --input local.html --output new.json`. Supports .html/.htm; input ≤2MiB, no symlink, new output exclusive write, local only.
 - Tests: `tests/html.test.mjs` and `tests/document-schemas.test.mjs`, included in `npm run test:preprocessing`. The **newly added HTML + schema files only** were checked as exact Git blob SHA against local Node 22 files; `node --test tests/html.test.mjs tests/document-schemas.test.mjs` **9/9 PASS**. Independent Python `jsonschema` Draft 2020-12 compared valid and 3 tampering cases for each new schema. Latest **whole-repo** Native regression, Windows, CI, actual customer HTML and release are still NOT_RUN.
 - Document source and outputs may contain customer text/HTML. Do not render raw HTML or export formula-like text to spreadsheets without separate encoding; no remote sharing, publish, billing or auto approval.
+
+## 2026-10-27 — P2 DOCX basic text importer (Native smoke verified)
+- 구현: `preprocessing/docx.mjs` = `preprocessDocx(Uint8Array)`, `validateDocxPackage(pkg,originalBytes?)`, `serializeDocxPackage(pkg,originalBytes?)`; `preprocessing/docx-cli.mjs`; Draft 2020-12 `preprocessing/SMAX_PREPROCESS_DOCX_V0.schema.json`.
+- 실행: `node preprocessing/docx-cli.mjs --input source.docx --output new-result.json`. 외부 NPM/네트워크/LLM 비용 0원, 기존 소스 덮어쓰기 금지, 기존 결과 경로 `wx` 거부.
+- 범위: DOCX ZIP ≤2 MiB/압축해제 총량 ≤8 MiB/최대 512 entry. ZIP CRC32/로컬-중앙 헤더·경로·중복·압축해제 한도 검사. `word/document.xml`의 기본 문단·표 안 문단·탭·줄바꿈/개행 및 정규 XML 엔터티만 추출. 원본 byte SHA256·part path·실제 w:p 문단 서수·검토 상태·`approval=NOT_GRANTED` 보존. 모든 실제 DOCX 구조의 안전한 완전 복원은 **미지원**.
+- 거부/한계: 매크로·ActiveX·이미지/첨부/외부 관계, 메모·머리글·바닥글·각주, 변경추적·필드 코드·하이퍼링크·임베디드/미지원 구조는 실패 종료. Word 페이지 번호·셀 좌표·서식/표 구조의 완전한 복원, PDF·LLM은 포함하지 않는다. 빈 문단은 결과에 포함하지 않지만 문단 index 공백은 보존한다.
+- 검증: 실제 로컬 Linux Node 22.16.0 `node --test tests/docx.test.mjs` **10/10 PASS** (1회 empty paragraph FAIL 후 수정하여 재실행), 이와 별도로 `python-docx`로 생성한 실제 합성 DOCX 파일→로컬 CLI→Strict JSON→SHA/문단/기본 표 추출 PASS. Python `jsonschema` Draft 2020-12 스키마 정상 승인/APPROVED 변조 거부 PASS. 4개 Git Blob이 로컬 Native 시험 원본 `git hash-object`와 전부 일치.
+- 기존 CSV/XLSX/TXT/HTML을 합한 최신 `npm run test:preprocessing`, Windows, CI, 실제 고객 문서, Production/상용 출시 **NOT_RUN/미승인**. 다음은 전체 정본 Native 회귀와 PDF 최소 입력 범위 정의 및 설계 대비 gap 우선.

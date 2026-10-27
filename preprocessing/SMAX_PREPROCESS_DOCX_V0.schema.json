@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SMAX DOCX V0 read-only strict paragraph extraction",
+  "description": "Structural contract. Recheck document ZIP SHA, exact extraction and semantic invariants with validateDocxPackage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "segments",
+    "quality",
+    "processing_mode",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "SMAX_PREPROCESS_DOCX_V0"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/paragraph"
+      }
+    },
+    "quality": {
+      "$ref": "#/$defs/quality"
+    },
+    "processing_mode": {
+      "const": "DETERMINISTIC_LOCAL"
+    },
+    "approval": {
+      "const": "NOT_GRANTED"
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "sha256",
+        "bytes",
+        "part"
+      ],
+      "properties": {
+        "format": {
+          "const": "DOCX_ZIP"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 22,
+          "maximum": 2097152
+        },
+        "part": {
+          "const": "word/document.xml"
+        }
+      }
+    },
+    "paragraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path",
+        "paragraph_index",
+        "text",
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "source_path": {
+          "const": "word/document.xml"
+        },
+        "paragraph_index": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "READY_FOR_HUMAN_REVIEW",
+            "NEEDS_REVIEW"
+          ]
+        },
+        "reason": {
+          "enum": [
+            null,
+            "FORMULA_LIKE_TEXT"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "status": {
+              "const": "READY_FOR_HUMAN_REVIEW"
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "NEEDS_REVIEW"
+            },
+            "reason": {
+              "const": "FORMULA_LIKE_TEXT"
+            }
+          }
+        }
+      ]
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paragraphs",
+        "review_paragraphs"
+      ],
+      "properties": {
+        "paragraphs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "review_paragraphs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        }
+      }
+    }
+  }
+}
