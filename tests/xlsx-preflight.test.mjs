@@ -229,3 +229,31 @@ test('XLSX strict package matches SHA and exact source type',()=>{
   assert.throws(()=>validateXlsxCellsPackage(pkg,modified),/source hash mismatch/);
   assert.throws(()=>validateXlsxCellsPackage(pkg,'source.xlsx'),/Uint8Array/);
 });
+
+
+test('XLSX numeric raw text is validated without lossy floating-point coercion',()=>{
+ const literals=['-12.50','+.5','1.','1e-13','0','+42','1000000000000000000000000.00001'];
+ const cells=literals.map((v,i)=>`<c r="A${i+1}"><v>${v}</v></c>`);
+ const file=xlsx(worksheet(cells.map((c,i)=>`<row r="${i+1}">${c}</row>`).join('')));
+ const pkg=extractXlsxCells(file);
+ assert.deepEqual(pkg.sheets[0].rows.map(r=>r.cells[0].value),literals);
+ assert.equal(validateXlsxCellsPackage(pkg,file),true);
+});
+
+test('XLSX parser refuses unsupported numeric literals instead of marking them trusted',()=>{
+ for(const value of ['NaN','Infinity','=SUM(1)','+cmd','1,234','abc',' 1','1 ','.','1e','']){
+   const file=xlsx(worksheet(`<row r="1"><c r="A1"><v>${value}</v></c></row>`));
+   assert.throws(()=>extractXlsxCells(file),/invalid numeric cell literal/,value);
+ }
+});
+
+test('XLSX package refuses a tampered numeric text even without source bytes',()=>{
+ const pkg=extractXlsxCells(xlsx(worksheet('<row r="1"><c r="A1"><v>123</v></c></row>')));
+ const cell=pkg.sheets.flatMap(s=>s.rows).flatMap(r=>r.cells).find(c=>c.kind==='number_text');
+ assert.ok(cell,'Fixture must include numeric cells');
+ for(const invalid of ['NaN','=SUM(1)','1,234','Infinity']){
+   const q=structuredClone(pkg);
+   q.sheets.flatMap(s=>s.rows).flatMap(r=>r.cells).find(c=>c.kind==='number_text').value=invalid;
+   assert.throws(()=>validateXlsxCellsPackage(q),/invalid scalar type/,invalid);
+ }
+});
