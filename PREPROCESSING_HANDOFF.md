@@ -71,3 +71,16 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 - GitHub `preprocessing/generic-cli.mjs`의 실제 blob SHA `086e33c884a77c95c5f2512befe80af1815055cd` = Node 환경에서 `git hash-object`로 확인한 로컬 CLI 원문 SHA. `node --check` PASS.
 - 로컬 smoke: 실제 신규 CLI 원문 + **테스트 더블 generic CSV 엔진**으로 명시 맵 파일·BOM/원본 불변·신규 출력·기존 출력 보호·잘못된 JSON 매핑·잘못된 UTF-8·symlink·설정 크기 제한을 포함하는 합성 테스트 7/7 PASS. 이는 **Mock 모듈 기반 CLI 부분 검증**이며 `npm run test:preprocessing` Native 전체 PASS 또는 실제 엔진 정확성 보증이 아니다.
 - 원격 Native 회귀 테스트 파일 0건 신규 저장(생성 2회 도구 차단). 안전 검사·DNS 오류에 같은 방법을 반복하지 말 것. 신규 CLI 제품 코드와 문서는 Private GitHub 커밋 완료, 3개 타 브랜치는 불변.
+
+## 2026-10-27 KST — 검증기/CLI 테스트 최신 인계 (필수 10항)
+
+1. **목표/계약:** 전처리 전용 Private `hibi89/SMAX` `preprocessing`; 재사용 Generic CSV V1 + V0 하위 호환, 0원 로컬 Node. 각 해커톤 어댑터/제출은 타 총괄.
+2. **완료/결정:** 기존 3필드 V0 CLI는 불변. 신규 독립 Generic CSV 파일 CLI(`generic-cli.mjs`)의 체크인 회귀 4건을 기존 `tests/preprocessing-cli.test.mjs`에 추가. V1 패키지 validator가 미매핑 source header의 Unicode 숨김문자를 허용하는 결함 발견·차단. 결과 승인 권한 자동 부여 없음.
+3. **테스트 증거:** GitHub 실제 csv parser+generic engine JS를 V8 isolate에서 묶어 **6/6 PASS**, 재현 전 변조 헤더 검증 FAIL → 패치 후 PASS. SHA/TextEncoder 일부 mock. 새 파일/테스트는 원격 반영했지만 **Node Native `npm run test:preprocessing`/전체 npm test/진짜 디스크 Generic CLI E2E·Windows 테스트 NOT_RUN**. 신규 테스트 성공 건수로 확대하지 말 것.
+4. **상태:** 소스 수정·신규 원격 회귀 등록 완료; Native 통합·출고검증 대기. XLSX/PDF/DOCX/HTML·Local LLM 미구현. Production/판매 미적용.
+5. **장애/원인·피벗:** 기존 신규 테스트 *파일 생성* 도구 안전 검사 2회 차단은 기존 테스트 *파일 수정*으로 우회 가능해 이번 커밋 성공. Private 전체 git checkout DNS 실패는 반복하지 않음. 향후 승인된 Native checkout 환경에서 테스트.
+6. **저장소/브랜치/커밋/경로:** Private `hibi89/SMAX`, `preprocessing`. V1 validator fix `48913dc96280e83bbdeaaa45e5ccbf13213dd783`; Generic schema regression `923cb71a75e72ba57380823c1f42a07cfff1dc13`; CLI regression `c43bc4416e8e77efc321add57e4b52064ca49b74`, correction `301b1ebd9daabc1031b691b1dda2ecccae069fff`. 주요 경로 `preprocessing/generic-csv.mjs`, `preprocessing/generic-cli.mjs`, `tests/preprocessing-cli.test.mjs`, `tests/preprocessing-generic-schema.test.mjs`. 최종 HEAD 문서 커밋 후 재조회.
+7. **실행/배포:** Node >=20; `npm run test:preprocessing`, `npm test`, `node preprocessing/generic-cli.mjs --input file.csv --columns columns.json --output result.json`. Vercel/Cloudflare Production·URL·배포 SHA **미적용**.
+8. **원본/보안:** 외부 실제 고객자료/토큰/영업비밀·LLM API·HTTP 전송 없음. GitHub 이력 백업으로 이전 SHA 복원 가능. 다른 세 브랜치·사용자 파일 수정 금지, force push/임의 merge 금지. 원본 전체 열 포함 JSON 보호.
+9. **다음 우선순위/완료 조건:** 체크인 된 전체 코드 정본 Node/CI 의존성·실시간 SHA 일치 검증 및 전체 테스트 PASS 후에 Generic CLI 입력·출력/파일시스템 E2E/실 Windows 게이트. 이후 문서 플러그인 및 provenance, 앞선 작업 중 검증 누락 시 수정. 외부 계정·지출·공개·소스 이동 승인 별도.
+10. **날짜/증거:** 2026-10-27 KST, 연결된 Private GitHub 코드로 실제 오류 재현·수정·격리 테스트 범위까지만 검증. 기준 문서 갱신 커밋 및 HEAD는 이후 재조회하며 상태를 다음 채팅에 반영.
