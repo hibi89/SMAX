@@ -277,3 +277,12 @@
 - 새 CLI `preprocessing/generic-cli.mjs` 원격 blob SHA `086e33c884a77c95c5f2512befe80af1815055cd`와 로컬 검사용 소스의 `git hash-object`가 **완전 일치**. 해당 최신 소스에 Node 22 `node --check` **PASS**.
 - 해당 **실제 신규 CLI 소스** + **모의 generic-csv 엔진** 조합으로 로컬 파일 I/O 스모크 7/7 PASS: 원본 불변·UTF-8 BOM/바이트 수·새 JSON 생성·기존 결과 덮어쓰기 차단·설정 구조 차단·잘못된 UTF-8 차단·symlink 차단·설정 크기 초과 차단. 7항목 중 일부 묶음 검사이며 정식 GitHub 회귀가 아님.
 - 제한: `preprocessing/generic-csv.mjs`와 `site/csv-transform.mjs`는 해당 Node 시험에서 **mock/미포함**. 전체 원격 최신 Node `npm run test:preprocessing` 및 진짜 Generic 엔진 E2E는 **미검증**. 신규 테스트 파일 원격 반영 차단도 지속.
+
+## 2026-10-27 KST — PREPROCESSING V1 검증기 헤더 안전성 수정 및 Generic CLI 회귀 추가
+
+- **원격 정본:** 작업 기준 Private `hibi89/SMAX` `preprocessing@55003d707f65`; 다른 세 브랜치는 작업 대상 아님.
+- **원인/실제 재현:** 기존 `preprocessing/generic-csv.mjs`의 `validateGenericCsvPackage`는 원본 CSV 파서가 거부하는 숨김 Unicode(예: unmapped header `비\\u200B고`)를 `source.headers`에서 단독 차단하지 않아, 매핑되지 않은 열 이름을 변조한 V1 패키지를 승인 전 검증 단계에서 통과시킬 수 있었다. 원격 실제 소스 V8 재현 테스트 FAIL로 확인.
+- **코드 수정:** 패키지 검증 시 모든 `source.headers`에 대해 비어 있음/앞뒤 공백/Unicode Default Ignorable/C0·C1 제어문자 거부. 신규 `source.headers`에만 최소 수정, 규칙형 필드 변환/원본 행/기존 V0 API/원본 CSV 불변. GitHub 코드 커밋 `48913dc96280e83bbdeaaa45e5ccbf13213dd783`.
+- **회귀 테스트:** 기존 `tests/preprocessing-generic-schema.test.mjs`에 unmapped header 보이지 않는 문자·앞공백·탭 변조 거부 테스트 추가 `923cb71a75e72ba57380823c1f42a07cfff1dc13`. 기존 `tests/preprocessing-cli.test.mjs`에 Generic CLI BOM 포함 바이트 SHA·원본 행·검토, 출력 덮어쓰기 방지, 매핑 초과키, UTF-8·설정 크기·symlink·경로 충돌 회귀 4건 추가 `c43bc4416e8e77efc321add57e4b52064ca49b74`→`301b1ebd9daabc1031b691b1dda2ecccae069fff`. 이번에는 기존 파일에 추가하는 경로로 성공(신규 파일 생성 차단 방식 재시도 안 함).
+- **직접 검증:** 실제 최신 GitHub CSV 파서/Generic 엔진 본문을 JS V8에서 평가한 한정 테스트 **6/6 PASS**, 미매핑 헤더 위·변조 거부 포함; 이전 문제 재현 후 패치 결과 개선 확인. SHA crypto와 TextEncoder는 V8 stub(실 Node 아님). **Native `npm run test:preprocessing`, 전체 `npm test`, 실제 모듈 디스크 CLI E2E, Windows/CI 전부 NOT_RUN**. 새 Node 회귀는 GitHub 체크인됐으나 직접 Native 실행 PASS 주장 불가.
+- **다음 작업:** 정확한 원격 정본으로 Native Node 전체 checkout과 CLI E2E 접근 경로 확보·실행 → 추가 결함 최소 수정/회귀 검수 → 승인된 범용 문서 형식 확장. 프론트/백엔드/메인, 다른 대회 레포, 배포/판매/유료 리소스 무변경.
