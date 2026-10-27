@@ -16,7 +16,7 @@ function makeZip(entries){
     central.writeUInt32LE(0x02014b50,0);central.writeUInt16LE(20,4);central.writeUInt16LE(20,6);
     central.writeUInt16LE(entry.flag??0x800,8);central.writeUInt16LE(entry.method??8,10);
     central.writeUInt32LE(crc32(source),16);central.writeUInt32LE(compressed.length,20);
-    central.writeUInt16LE(source.length,24);central.writeUInt32LE(name.length,28);
+    central.writeUInt32LE(source.length,24);central.writeUInt32LE(name.length,28);
     central.writeUInt32LE((entry.externalAttr??0),38);central.writeUInt32LE(offset,42);
     const localBytes=Buffer.concat([local,name,compressed]);
     locals.push(localBytes);directories.push(Buffer.concat([central,name]));offset+=localBytes.length;
