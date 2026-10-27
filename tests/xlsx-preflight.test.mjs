@@ -230,7 +230,6 @@ test('XLSX strict package matches SHA and exact source type',()=>{
   assert.throws(()=>validateXlsxCellsPackage(pkg,'source.xlsx'),/Uint8Array/);
 });
 
-
 test('XLSX numeric raw text is validated without lossy floating-point coercion',()=>{
  const literals=['-12.50','+.5','1.','1e-13','0','+42','1000000000000000000000000.00001'];
  const cells=literals.map((v,i)=>`<c r="A${i+1}"><v>${v}</v></c>`);
