@@ -79,3 +79,11 @@ node preprocessing/generic-cli.mjs --input input.csv --columns columns.json --ou
 - CSV 원본 최대 2 MiB, JSON 설정 최대 64 KiB. 올바르지 않은 UTF-8과 심볼릭 링크 파일 거부, 출력 경로 기존 파일 덮어쓰기 거부(`wx`).
 - 출력은 `SMAX_PREPROCESS_GENERIC_CSV_V1`, 파일 바이트 SHA-256, 전체 행·열 보존, 오류/검토 목록, `approval=NOT_GRANTED`를 포함한다. 출력 JSON도 기밀 원본과 동일한 보안 등급으로 취급한다.
 - 현재 환경은 Node 22가 설치돼 있으나 Private GitHub 전체 클론 DNS 실패. 전용 CLI 원격 커밋 반영은 확인했지만 **실제 원격 의존 모듈을 포함한 Native 통합/파일 CLI E2E는 아직 미검증**. 테스트 소스의 원격 추가 시도는 안전 검사에서 2회 차단돼 중단했다. 결제·배포·고객 파일 사용 없음.
+
+## 2026-10-27 — XLSX ZIP 사전검사 V0 (Native 단독검증 완료, 표 추출 미구현)
+
+- 파일: `preprocessing/xlsx-preflight.mjs`; `preflightXlsx(Uint8Array)` 로컬 메모리 API. Node.js 20+ 내장 `zlib`만 사용, 추가 NPM/외부 API/업로드 0개.
+- 역할: XLSX를 ZIP으로 검사하고 정상 파일의 압축 메타데이터·무결성·기본 필수 파트 존재만 확인. **XLSX 셀/시트 데이터 파서가 아니며 CSV/Strict JSON 변환을 구현했다는 뜻이 아니다.**
+- 제한: 입력 ZIP ≤2MiB, 압축 해제 총량 ≤8MiB, 파일항목 ≤512. ZIP64/다중디스크/암호화/데이터 디스크립터/임베딩/외부 링크/매크로/심볼릭 링크/중복 경로/경로순회/DTD 및 외부 Relationship을 거부. CRC32·헤더/압축 크기·오프셋 일치 검증. XML 파싱·안전 확정 및 Excel 호환성 전체 보장은 하지 않는다. 제한 밖 유효 XLSX도 거부할 수 있다.
+- 테스트: `node --test tests/xlsx-preflight.test.mjs` — 로컬 실제 Node 22.16.0과 **GitHub 두 파일 blob SHA가 일치하는 소스**로 합성 ZIP 10/10 PASS, 0 FAIL. 실제 고객 XLSX 및 Windows 실행·전체 기존 CSV npm 회귀는 미검증.
+- 기존 `npm run test:preprocessing`에 이 전용 테스트 파일을 포함시켰으나 **전체 npm 명령 Native PASS는 주장하지 않는다**. 다음에는 별도 CSV 정본 Node QA 확보 후 XLSX 시트/셀 파싱 단계 설계를 검토한다.
