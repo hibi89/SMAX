@@ -356,3 +356,6 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 
 ## 2026-10-27 KST — preprocessing XML 1.0 character hardening
 - Private `preprocessing@72aef6f8605befe6a29958fc83b3394b3c40c2a2`에서 XML 1.0 금지 literal/codepoint 수용 재현, XLSX parser fail-closed 최소 변경 + 테스트 1건 추가. 실제 GitHub 원문 기반 V8 isolated 7/7 PASS이며 최신 전체 Native Node/ZIP/Windows/CI/Production NOT_RUN. 정확한 작업·테스트·복구/다음 작업은 `PREPROCESSING_HANDOFF.md` 마지막 10항 참조. 다른 브랜치 및 해커톤 저장소 무변경.
+
+## 2026-10-27 KST — preprocessing CSV V0 local CLI safety
+- Private `preprocessing` V0 CSV CLI TOCTOU 입력 경계 최소 수정 및 regression (`2902f2e37289356eb537c13a1c50c9d7b175e304`). GitHub 실제 코드로 V8 모의 파일 I/O 검사 4/4 PASS, 최신 Native 통합/Windows/CI/Production 미검증. 사용자 데이터/공개/배포/비용 없음, 타 브랜치·해커톤 무변경. 다음 작업과 검증 구분은 `PREPROCESSING_HANDOFF.md` 마지막 10항.

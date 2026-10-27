@@ -377,3 +377,6 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 
 ## 2026-10-27 KST — preprocessing XLSX XML invalid-character gate
 - 기준 `preprocessing@72aef6f8605befe6a29958fc83b3394b3c40c2a2`; 원격 생산 XML parser가 금지 literal U+0000, U+000B, U+FFFF 및 numeric U+FFFF를 수용함을 V8 재현. 파서 최소 fail-closed 및 합성 ZIP 회귀 추가. 패치 parser V8 격리 7/7 PASS. 최신 Native 전수(정적 약 64개), `npm test`, Windows, 고객자료/CI/배포 NOT_RUN. `PREPROCESSING_HANDOFF.md` 최신 10항 참고. 오직 preprocessing 변경, 이전 Git commit 복구 가능.
+
+## 2026-10-27 KST — preprocessing V0 CSV fd-read hardening
+- `preprocessing` 코드·회귀 커밋 `2902f2e37289356eb537c13a1c50c9d7b175e304`. V0 CLI lstat/read pathname TOCTOU를 줄이도록 opened fd fstat/read/finally close + post-read 2MiB check 도입; 신규 >2MiB 테스트 1건. 최신 실제 코드 V8 mock I/O 4/4 PASS. 전체 Native/Windows/CI/고객 데이터/판매 NOT_RUN. 인수인계 `PREPROCESSING_HANDOFF.md` 최종 섹션 참조.

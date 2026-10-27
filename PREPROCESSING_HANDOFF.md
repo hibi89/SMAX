@@ -220,3 +220,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **보안/원본:** 고객 실파일, 키, 유료 API, 외부 공개, 배포, 다른 세 브랜치·해커톤 저장소 변경 없음. ZIP 원본/바이트 SHA·NOT_GRANTED 계약 불변.
 9. **다음 단계:** 인증된 full 17+ 파일 checkout → Git blob 동일성 검증 → `npm run test:preprocessing` 전체 **실행** → 합성 XLSX ZIP·Generic CSV CLI SHA E2E → `npm test` 및 Windows 한 번에 검증. 테스트 미통과 시 수정한 경로만 최소 보강.
 10. **갱신:** 2026-10-27 KST, 기준 `72aef6f8605befe6a29958fc83b3394b3c40c2a2`, Github 원문·V8 isolated만 검증. 전수 PASS/릴리스 승인 주장 금지.
+
+## 2026-10-27 KST — V0 CSV CLI fd-bound read hardening (인수인계 10항)
+1. **목표/요구/기술:** Private `hibi89/SMAX`, `preprocessing` 브랜치, Node 20+ 로컬 CSV V0 CLI의 경로 교체 및 파일 크기 경계를 강화. 자동 승인·유료 API·외부 서버 없음.
+2. **완료 기능/결정:** 기존 `lstat(path)` → `readFileSync(path)`가 재개방되어 TOCTOU 노출. A안 fd open/fstat/read/finally close 및 읽기 후 byte-length 검사(기존 Generic CLI와 같은 접근) 채택. B안 공용 I/O 추상화는 변경 범위/회귀 부담 증가로 보류. Node 플랫폼이 `O_NOFOLLOW`를 미지원하면 open 간 경합 위험 완전 제거 주장 금지.
+3. **테스트/근거:** 새 실제 GitHub `preprocessing/cli.mjs`를 이용한 JS V8 mock I/O 격리 **4/4 PASS**(normal 1, opened-file oversized 1, post-read oversized 1, original symlink 1). 신규 `tests/preprocessing-cli.test.mjs` 2MiB+1 합성 원본/출력 미생성 회귀 케이스 체크인. 전체 최신 Native `npm run test:preprocessing` **NOT_RUN**. 이전 59/59 Native는 과거 정본, 이번 성공으로 혼동 금지.
+4. **완료/진행/대기:** 코드·테스트 GitHub 커밋 `2902f2e37289356eb537c13a1c50c9d7b175e304` 및 V8 격리 완료. 실제 디스크 fd 스왑 테스트, Native 전수 CSV/XLSX, 모든 UI `npm test`, Windows/CI/실고객/Production **미검증**.
+5. **실패 이유/시도/대안/재시도 금지:** 전체 private checkout은 기존 네트워크 DNS/인증 경로 제한. GitHub blob → 컨테이너 전체 전송을 시도했으나 바이너리 원본을 완전 복원해 Native 검증까지 도달하지 못함. 전체 정본을 사칭하거나 실데이터를 제3자에 전송해서 우회 금지. 연결된 Github에서 계속 코드 검증 후 승인된 로컬 checkout 가능한 때 실제 Native QA.
+6. **레포/브랜치/SHA/경로:** `hibi89/SMAX` Private `preprocessing`, code/test SHA `2902f2e37289356eb537c13a1c50c9d7b175e304` (부모 `6fae2900bf992fec589ad0f9b2ddca69c8af6901`); `preprocessing/cli.mjs`, `tests/preprocessing-cli.test.mjs`. 문서 갱신 뒤 새 HEAD 별도 확인.
+7. **배포/환경:** Node v22.16.0 설치된 Linux 검증 환경 있으나 해당 checkout 전수 시험 미실행; Cloudflare/Vercel Production URL/SHA 미적용. Windows QA 미실행.
+8. **데이터·원본·백업·권한:** Git commit 부모가 복구 지점. 비공개 repo만 변경; 타 브랜치/해커톤 무수정. 합성 자료만 사용, 실고객·토큰·유료결제·네트워크 게시 없음. 입력 원본 덮어쓰기·출력 덮어쓰기 금지 유지.
+9. **다음 우선순위:** 원본 Git blob 18+ 파일 SHA 동일한 전체 checkout 확보 → `npm run test:preprocessing` 최신 Native 실행(새 case 포함 정적 약 65건, 실제 수치 우선) → 양 CLI 실파일 SHA/BOM/크기·오류복구 → XLSX ZIP E2E → Windows QA. 실패 시 최소 수정 및 회귀.
+10. **KST/검증 범위:** 2026-10-27 KST, GitHub 최신 코어/테스트/HEAD 확인과 V8 fs mock 4/4까지. 전체 Native·상용 출고 승인 주장 금지.
