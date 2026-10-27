@@ -90,19 +90,19 @@ node preprocessing/generic-cli.mjs --input input.csv --columns columns.json --ou
 
 ## 2026-10-27 — 제한형 XLSX 시트/셀 추출 V0 (사전검사 뒤 실행)
 
-\`preprocessing/xlsx-cells.mjs\`의 \`extractXlsxCells(Uint8Array)\`는 동일 브랜치 \`xlsx-preflight.mjs\`의 ZIP 사전검사를 **먼저 실행**한 뒤, 지원되는 워크시트 XML에서 원본 셀 값을 읽는다. 아래 기능은 직전 '사전검사만 구현' 기록보다 최신이다.
+`preprocessing/xlsx-cells.mjs`의 `extractXlsxCells(Uint8Array)`는 동일 브랜치 `xlsx-preflight.mjs`의 ZIP 사전검사를 **먼저 실행**한 뒤, 지원되는 워크시트 XML에서 원본 셀 값을 읽는다. 아래 기능은 직전 '사전검사만 구현' 기록보다 최신이다.
 
-- **지원:** \`xl/worksheets/sheetN.xml\` 복수 시트(파일 경로/행 번호/셀 주소 보존), inline string, sharedStrings 및 rich-text 결합, 정확한 원문 숫자 문자열, boolean, 공백, 오류 셀, 수식 검토 큐 성격의 \`NEEDS_REVIEW\` 표시.
-- **출력:** \`SMAX_PREPROCESS_XLSX_CELLS_V0\`; \`source.sha256\`/bytes/worksheet_paths, \`sheets[].rows[].cells[]\`, quality(sheets/rows/cells/review_cells), \`processing_mode=DETERMINISTIC_LOCAL\`, \`approval=NOT_GRANTED\`.
-- **수식 미실행:** \`<f>\`를 발견하면 계산하지 않고 \`value:null\`/\`formula:원문\`/\`status:NEEDS_REVIEW\`로 출력한다. 오류 셀·일부 수식형 문자열도 검토 대상. **날짜 서식·Excel 스타일 해석, 수식 결과/캐시 신뢰, 표시 형식/행위 및 사업 의미 추론 없음.** 숫자 타입은 손실 없는 \`number_text\` 문자열.
+- **지원:** `xl/worksheets/sheetN.xml` 복수 시트(파일 경로/행 번호/셀 주소 보존), inline string, sharedStrings 및 rich-text 결합, 정확한 원문 숫자 문자열, boolean, 공백, 오류 셀, 수식 검토 큐 성격의 `NEEDS_REVIEW` 표시.
+- **출력:** `SMAX_PREPROCESS_XLSX_CELLS_V0`; `source.sha256`/bytes/worksheet_paths, `sheets[].rows[].cells[]`, quality(sheets/rows/cells/review_cells), `processing_mode=DETERMINISTIC_LOCAL`, `approval=NOT_GRANTED`.
+- **수식 미실행:** `<f>`를 발견하면 계산하지 않고 `value:null`/`formula:원문`/`status:NEEDS_REVIEW`로 출력한다. 오류 셀·일부 수식형 문자열도 검토 대상. **날짜 서식·Excel 스타일 해석, 수식 결과/캐시 신뢰, 표시 형식/행위 및 사업 의미 추론 없음.** 숫자 타입은 손실 없는 `number_text` 문자열.
 - **제한:** ZIP ≤2MiB, 합계 해제 ≤8MiB, 엔트리 ≤512, 시트 ≤64, 추출 행 ≤10,000, 셀 ≤100,000, XML 노드 ≤300,000(문서별), XML 깊이 ≤64. 제한 초과/불명 형식은 fail-closed. 파일 시스템 쓰기·HTTP·LLM 호출 없음.
-- **현재 계약 범위:** 실제 Excel의 모든 기능 지원이 아니다. 표시용 시트 이름/논리 순서·관계 매핑, 날짜 포맷/수식 계산, 하이퍼링크·그림, 병합 셀의 의미·차트/피벗/매크로는 미구현/비해석. 반환되는 \`source_path\`는 원본 ZIP 내부 경로이며 사용자 표시 시트 이름과 다를 수 있다. 속성/셀 형식 중 미지원 내용이 있을 수 있으므로 실 고객 데이터 처리·납품 승인은 아직 금지.
+- **현재 계약 범위:** 실제 Excel의 모든 기능 지원이 아니다. 표시용 시트 이름/논리 순서·관계 매핑, 날짜 포맷/수식 계산, 하이퍼링크·그림, 병합 셀의 의미·차트/피벗/매크로는 미구현/비해석. 반환되는 `source_path`는 원본 ZIP 내부 경로이며 사용자 표시 시트 이름과 다를 수 있다. 속성/셀 형식 중 미지원 내용이 있을 수 있으므로 실 고객 데이터 처리·납품 승인은 아직 금지.
 
-\`\`\`js
+```js
 import {readFileSync} from 'node:fs';
 import {extractXlsxCells} from './preprocessing/xlsx-cells.mjs';
 const pkg = extractXlsxCells(readFileSync('local.xlsx'));
 console.log(pkg.quality, pkg.sheets[0]?.rows[0]);
-\`\`\`
+```
 
-**증거:** 실제 Node v22.16.0에서 \`node --test tests/xlsx-preflight.test.mjs\` **18/18 PASS**(기존 안전검사 10 + 신규 시트/셀 8). 실제 로컬에서 합성 생성한 \`openpyxl\` 및 \`XlsxWriter\` XLSX 2종에서 셀 추출·수식 검토 분리 성공. 두 생산 파일과 테스트에 고객 정보 없음. 원격 GitHub production 모듈 blob \`ee81d55fbaa64e234d104a6e0a68904e812351f1\`와 로컬 실행 소스 blob 동일, 원격 test blob \`fbbc028188b0e4de16b66b4dcd9b7e330a9c6044\`와 로컬 테스트 원문 동일. 기존 CSV 포함 **전체 Native \`npm run test:preprocessing\`·\`npm test\` 및 Windows는 아직 NOT_RUN**.
+**증거:** 실제 Node v22.16.0에서 `node --test tests/xlsx-preflight.test.mjs` **18/18 PASS**(기존 안전검사 10 + 신규 시트/셀 8). 실제 로컬에서 합성 생성한 `openpyxl` 및 `XlsxWriter` XLSX 2종에서 셀 추출·수식 검토 분리 성공. 두 생산 파일과 테스트에 고객 정보 없음. 원격 GitHub production 모듈 blob `ee81d55fbaa64e234d104a6e0a68904e812351f1`와 로컬 실행 소스 blob 동일, 원격 test blob `fbbc028188b0e4de16b66b4dcd9b7e330a9c6044`와 로컬 테스트 원문 동일. 기존 CSV 포함 **전체 Native `npm run test:preprocessing`·`npm test` 및 Windows는 아직 NOT_RUN**.
