@@ -80,3 +80,10 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - 수정: 코드 `4948640b`, 회귀 `1944256e`; `issues.length`에 따라 허용 상태 정확히 2개만, 검토 누락/위조 실패.
 - 현 시점 실제 체크인 원본 CSV+V1을 사용한 V8 격리 시나리오 20/20 PASS. SHA256·TextEncoder 모의이고 Native npm/CLI E2E/Windows는 미실행.
 - 다음: Native 전용 및 전체 Node 회귀(동일 원격 소스) 확보 → 로컬 파일 SHA/출력 검증 → 독립 문서 파서 provenance 및 한도·오류 복구. 타 브랜치/대회별 연결·배포/비용 변경 없음.
+
+## 2026-10-27 — XLSX ZIP preflight V0 검증 완료, parsing 이후 단계
+
+- 독립 `preprocessing/xlsx-preflight.mjs`·`tests/xlsx-preflight.test.mjs` 체크인. 실제 Node 22 로컬 ZIP 합성 시험 10/10 PASS, 두 파일 Git blob SHA 교차 확인.
+- 압축 한도(2MiB → 최대 8MiB/512 entry), CRC/헤더/경로/매크로/외부링크/DTD 검증·승인 미부여만 구현. 아직 셀 데이터 추출/자동 CSV 변환/실무 호환성 없음.
+- `package.json` 기존 테스트 스크립트에 케이스 등록. 전체 CSV Native 회귀·실제 XLSX/Windows·브라우저/Production QA는 미실행.
+- 개발 순서: 전체 정본 QA 장애 해결 → 제한형 XLSX 시트/셀 parser 설계 및 provenance 연결 → PDF/DOCX plugin 선택/허용 포맷 안전 기준 검증. 해커톤별 연동 책임은 각 해커톤 총괄.
