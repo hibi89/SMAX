@@ -9,6 +9,7 @@ const integer = (v,min,max) => Number.isSafeInteger(v) && v>=min && v<=max;
 const sheetPattern = /^xl\/worksheets\/sheet([1-9]\d*)\.xml$/;
 const cellPattern = /^([A-Z]{1,3})([1-9]\d*)$/;
 const formulaText = /^[\s\u200B\u200E\u200F]*[=+@]/;
+const numberLiteral=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?$/;
 const cellFields = ['ref','kind','value','formula','status','reason'];
 function reference(ref,row){
   const m=cellPattern.exec(ref);
@@ -53,6 +54,7 @@ export function validateXlsxCellsPackage(pkg, originalBytes=null){
         const kinds=['blank','text','number_text','boolean','error'];
         if(!kinds.includes(cell.kind))reject('invalid cell kind');
         if(cell.kind==='blank'&&cell.value!==null || (cell.kind==='text'||cell.kind==='number_text')&&typeof cell.value!=='string' ||
+           cell.kind==='number_text'&&typeof cell.value==='string'&&!numberLiteral.test(cell.value) ||
            cell.kind==='boolean'&&typeof cell.value!=='boolean' || cell.kind==='error'&&cell.value!==null&&typeof cell.value!=='string')reject('invalid scalar type');
         let reason=null;
         if(cell.formula!==null){
