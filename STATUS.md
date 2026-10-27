@@ -330,3 +330,11 @@
 ## 2026-10-27 KST — XLSX numeric-cell hardening
 
 XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in parser (8b76a855), JS validator (9b27cde0), and JSON Schema (39284d48). Repo-identical files tested locally: Node XLSX **29/29 PASS**; optional Python Draft202012 schema unittest **5/5 PASS**; extended local schema cases **21/21 PASS**. Numeric strings retain exact precision; NaN, Infinity and formula-like numeric data are rejected. Source/test/schema blobs matched GitHub. Private full checkout is not locally available: all CSV-inclusive npm suites, Windows, CI and production remain **NOT_RUN**. See PREPROCESSING_HANDOFF.md for exact commits and next steps.
+
+
+## 2026-10-27 KST — XLSX 관계 TargetMode 문자참조 우회 차단
+
+- **결함/원인:** XLSX 원본 ZIP의 `.rels` 관계 문서에서 `TargetMode="Exter&#x6e;al"`처럼 XML 문자참조를 사용하면 이전 사전검사가 `External` 원문에만 매칭하여 통과함. 합성 ZIP과 실제 Node로 실패 재현 후 파서·테스트 최소 수정.
+- **수정:** `preprocessing/xlsx-preflight.mjs`의 대상모드 속성 XML numeric/named entity decode, 유효한 `Internal`만 허용(나머지는 fail-closed), `.rels/.xml` 확장자 대소문자 변형도 검사. 코드 커밋 `9f28e6e1c7c98b5f3d3f83d3ba843d43ce30c57c`, blob `ce0f96ce618c6b868bcf255e1d8b2508f3eb6bb3`; 회귀 커밋 `d1c1d24c0169b7d6b9a81ec817dea4a1a6b9de9b`, blob `d484cea4ef13ad28b650902c164251d1daaf6121`.
+- **재검증:** 이전 29개 + 신규 외부 XML 인코딩·정상 Internal·대소문자 우회 4개 = 실제 Node.js v22.16.0 `node --test tests/xlsx-preflight.test.mjs` **33/33 PASS/0 FAIL**. 선택적 Python `jsonschema` 독립 unittest **5/5 PASS**. 합성 생성 openpyxl/XlsxWriter XLSX 2종 안전검사→셀 추출→원본 바이트 대조 검증 PASS. 신규 두 파일 로컬 Git blob == 원격 blob 일치.
+- **변경 범위·미검증:** 비공개 `hibi89/SMAX` `preprocessing`만 수정. `main/frontend/backend`·제품 Production·공개 코드·비용/유료 API 무변경. CSV V0/V1 전체 Native test, `npm run test:preprocessing`, 전체 `npm test`, Windows·CI·고객자료/실서비스 테스트는 여전히 **NOT_RUN**. 기존 Private 저장소 전체 체크아웃 DNS 문제에 대해 같은 클론 방식의 재시도를 소모하지 않았음. 다음은 인증된 전체 소스 Node QA.
