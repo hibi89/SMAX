@@ -232,3 +232,16 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **데이터·원본·백업·권한:** Git commit 부모가 복구 지점. 비공개 repo만 변경; 타 브랜치/해커톤 무수정. 합성 자료만 사용, 실고객·토큰·유료결제·네트워크 게시 없음. 입력 원본 덮어쓰기·출력 덮어쓰기 금지 유지.
 9. **다음 우선순위:** 원본 Git blob 18+ 파일 SHA 동일한 전체 checkout 확보 → `npm run test:preprocessing` 최신 Native 실행(새 case 포함 정적 약 65건, 실제 수치 우선) → 양 CLI 실파일 SHA/BOM/크기·오류복구 → XLSX ZIP E2E → Windows QA. 실패 시 최소 수정 및 회귀.
 10. **KST/검증 범위:** 2026-10-27 KST, GitHub 최신 코어/테스트/HEAD 확인과 V8 fs mock 4/4까지. 전체 Native·상용 출고 승인 주장 금지.
+
+## 2026-10-27 KST — MVP XLSX local CLI added (10-field handoff)
+
+1. **목표·기술:** SMAX Private `preprocessing` 범용 CSV/XLSX Strict JSON 오프라인 Node 20+ MVP. 사용자 지시의 순서: MVP → 최초 설계 미구현 기능 → 보안·안정·호환 검수.
+2. **구현·대안:** A 기존 보수적 XLSX extractor+validator를 별도 CLI `xlsx-cli.mjs`에서 사용(선택: 최소 변경·의존성 0·재사용); B 신규 범용 모든 포맷 CLI 통합(범위·검증 부담 증가). 양 CSV CLI 보존. 새 XLSX는 2MiB 파일+non-symlink+opened-fd 크기 검사, JSON `wx` 출력, 원본 SHA·재추출 parity 및 formula review.
+3. **테스트:** `tests/xlsx-preflight.test.mjs`에 CLI 실파일 합성 검증 3건 추가: SHA/원본·수식 검토, 덮어쓰기·손상, 2MiB·symlink. JS syntax/isolated 경로 검사와 실제 Native 종합 결과를 구분한다. `npm run test:preprocessing` 최신 전체 Native/Windows/CI 아직 NOT_RUN.
+4. **완료/진행/미검증:** CSV V0/V1 및 제한형 XLSX V0의 로컬 JSON 출력 진입점을 코드로 갖춤. 실 Node 전체 검증과 실제 일반 Excel 호환 및 출시 승인은 보류. MVP 사용 흐름과 전체 상품 출시는 다른 상태.
+5. **안전/실패/대안:** 개인 파일·LLM·API·네트워크·자동승인·실고객 업로드 금지. GitHub 클론 네트워크 경로 제약이 있으면 같은 방식 무의미한 반복 금지; SHA 보존 가능한 환경에서 전체 native 회귀를 수행.
+6. **저장소/브랜치/변경 경로:** `hibi89/SMAX`, Private `preprocessing`, 작업 부모 `293a348cf48e8f2241e4770e30c9c436057809e8`; `preprocessing/xlsx-cli.mjs`, `tests/xlsx-preflight.test.mjs`, `preprocessing/README.md`, `STATUS.md`, `HANDOFF.md`, 본 문서. 최종 SHA는 원격 HEAD 재조회 우선.
+7. **운영/배포:** `node preprocessing/xlsx-cli.mjs --input source.xlsx --output cells.json`; Cloudflare/Vercel Production 미적용, ZIP 완전 Excel 호환 아님.
+8. **원본/보안/복구:** 변경 전 부모 SHA에서 복구 가능; Private repo만 변경, 다른 3개 브랜치/해커톤 repo 미변경. 출력 `source.sha256`/provenance/NOT_GRANTED 보존.
+9. **다음 실행:** 최신 소스 정확한 SHA 기준 Node Native 테스트, 실제 로컬 XLSX ZIP E2E → 설계 누락 포맷 중 HTML 또는 DOCX 독립 입력 계약 우선 → 이후 검수. 타 대회 복사·Adapter는 각 총괄.
+10. **KST/검증 범위:** 2026-10-27 KST. 체크인 소스·샘플 테스트와 실제 실행을 엄격 구분하여 추후 수정.

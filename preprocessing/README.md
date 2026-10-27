@@ -149,3 +149,17 @@ const json=serializeXlsxCellsPackage(pkg,original); // 사람이 승인한 파�
 - 변경 SHA: core `3b6cedae4869b7d8d5ae587f8d565812b6d9e193`, schema `ae5d2e8cbc40bc08ed586b7826c1bec5f5cead0d`, regression `3f99b78f416a36c08f299f6511a5f7f16c1215f3`, commit `ecf6cba8d22660180250cad3d5afb6b7014843d5`.
 - V8 격리 실행 9/9 PASS (hash stub), 최신 전체 Native 63건·실파일/Windows·CI/출고 **NOT_RUN**.
 
+## 2026-10-27 — CSV/XLSX 로컬 전처리 MVP 실행 경로
+
+동일한 Private `preprocessing` 브랜치에서 CSV V0/V1 및 XLSX V0 모두 새 JSON 파일로 직접 출력한다.
+
+```bash
+node preprocessing/cli.mjs --input preprocessing/examples/synthetic-orders.csv --output v0.json --date 거래날짜 --item 품목 --amount 결제금액
+node preprocessing/generic-cli.mjs --input input.csv --columns columns.json --output v1.json
+node preprocessing/xlsx-cli.mjs --input source.xlsx --output cells.json
+npm run test:preprocessing
+```
+
+XLSX 경로는 ZIP preflight → 보수적인 시트/셀 추출 → 원본 바이트 SHA 검증/재추출 parity → `SMAX_PREPROCESS_XLSX_CELLS_V0` Strict JSON 생성 순서이며 원본을 수정하지 않는다. 새 결과 경로를 요구하며 이미 파일이 있으면 중단한다. 시트 구조를 거부할 수 있는 **제한형 MVP**이고 서식·날짜 의미 추론, 모든 Excel 포맷 호환, 공식 배포 또는 사용자의 승인 없이 외부 전송하는 기능은 없다. 모든 결과의 `approval=NOT_GRANTED`; 검토는 사용자 책임이다.
+
+**검증 상태:** XLSX CLI의 정상 파일·수식·해시, 오류 파일, 기존 출력 보호, 크기 제한·symlink 거부 합성 회귀 테스트 3개 등록. 이 항목들은 Native Node에서 실행 후 실제 통과 여부를 확정해야 한다. 전체 Native/Windows QA 및 판매/릴리스는 미검증. Private 코드의 타 저장소 전송·Public 공개는 별도 승인.

@@ -1,3 +1,8 @@
+import {mkdtempSync,readFileSync,writeFileSync,rmSync,existsSync,symlinkSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {createHash} from 'node:crypto';
+import {runXlsxCli} from '../preprocessing/xlsx-cli.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {deflateRawSync} from 'node:zlib';
@@ -350,4 +355,57 @@ test('XLSX XML 1.0 rejects forbidden literal and numeric characters without losi
   const pkg=extractXlsxCells(good);
   assert.equal(pkg.sheets[0].rows[0].cells[0].value,legitimate);
   assert.equal(validateXlsxCellsPackage(pkg,good),true);
+});
+
+
+test('XLSX CLI writes exact-file-hash Strict JSON with formula review and intact source',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'smax-xlsx-cli-'));
+  try{
+    const input=join(dir,'source.xlsx'),output=join(dir,'out.json');
+    const original=xlsx(worksheet('<row r="1"><c r="A1" t="inlineStr"><is><t>local</t></is></c><c r="B1"><f>SUM(C1)</f><v>1</v></c></row>'));
+    writeFileSync(input,original);
+    const result=runXlsxCli(['--input',input,'--output',output]);
+    const pkg=JSON.parse(readFileSync(output,'utf8'));
+    assert.equal(result.status,'LOCAL_FILE_CREATED');
+    assert.equal(result.schema_version,'SMAX_PREPROCESS_XLSX_CELLS_V0');
+    assert.equal(pkg.source.sha256,createHash('sha256').update(original).digest('hex'));
+    assert.equal(result.source_sha256,pkg.source.sha256);
+    assert.equal(pkg.approval,'NOT_GRANTED');
+    assert.equal(pkg.sheets[0].rows[0].cells[0].value,'local');
+    assert.equal(pkg.sheets[0].rows[0].cells[1].reason,'FORMULA_UNEVALUATED');
+    assert.equal(result.review_cells,1);
+    assert.equal(validateXlsxCellsPackage(pkg,original),true);
+    assert.deepEqual(readFileSync(input),original);
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('XLSX CLI refuses overwrite and corrupt input without creating output',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'smax-xlsx-cli-'));
+  try{
+    const input=join(dir,'source.xlsx'),output=join(dir,'out.json');
+    writeFileSync(input,xlsx(worksheet('<row r="1"><c r="A1"><v>2</v></c></row>')));
+    writeFileSync(output,'previous');
+    assert.throws(()=>runXlsxCli(['--input',input,'--output',output]),/EEXIST/);
+    assert.equal(readFileSync(output,'utf8'),'previous');
+    rmSync(output);
+    writeFileSync(input,Buffer.from('not an XLSX'));
+    assert.throws(()=>runXlsxCli(['--input',input,'--output',output]),/XLSX_PRECHECK|ZIP|directory|MiB/);
+    assert.equal(existsSync(output),false);
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('XLSX CLI refuses oversized and symlink input',t=>{
+  const dir=mkdtempSync(join(tmpdir(),'smax-xlsx-cli-'));
+  try{
+    const input=join(dir,'source.xlsx'),output=join(dir,'out.json');
+    writeFileSync(input,Buffer.alloc(2*1024*1024+1,0x61));
+    assert.throws(()=>runXlsxCli(['--input',input,'--output',output]),/at most 2 MiB/);
+    writeFileSync(input,xlsx(worksheet('<row r="1"><c r="A1"><v>2</v></c></row>')));
+    const link=join(dir,'link.xlsx');
+    try{symlinkSync(input,link);}catch(e){
+      if(['EPERM','EACCES','ENOSYS'].includes(e.code)){t.diagnostic('symlinks unavailable');return;}throw e;
+    }
+    assert.throws(()=>runXlsxCli(['--input',link,'--output',output]),/non-symlink/);
+    assert.equal(existsSync(output),false);
+  }finally{rmSync(dir,{recursive:true,force:true});}
 });

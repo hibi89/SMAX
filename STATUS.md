@@ -380,3 +380,6 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 
 ## 2026-10-27 KST — preprocessing V0 CSV fd-read hardening
 - `preprocessing` 코드·회귀 커밋 `2902f2e37289356eb537c13a1c50c9d7b175e304`. V0 CLI lstat/read pathname TOCTOU를 줄이도록 opened fd fstat/read/finally close + post-read 2MiB check 도입; 신규 >2MiB 테스트 1건. 최신 실제 코드 V8 mock I/O 4/4 PASS. 전체 Native/Windows/CI/고객 데이터/판매 NOT_RUN. 인수인계 `PREPROCESSING_HANDOFF.md` 최종 섹션 참조.
+
+## 2026-10-27 KST — preprocessing MVP Excel CLI
+- CSV V0/V1 기존 로컬 CLI 보존 + 제한형 XLSX V0 로컬 CLI `preprocessing/xlsx-cli.mjs` 신규 도입, 합성 파일 E2E 회귀 3건 등록. 기존 preflight/extractor/validator 재사용; SHA parity, review, NO_APPROVAL, 입력보호 및 exclusive output. 최신 Native 전체·Windows·시판 Excel 호환성 NOT_RUN. 사용자 지시: MVP→설계 대비 보강→검수. 별도 배포/비용/타브랜치 변경 없음.
