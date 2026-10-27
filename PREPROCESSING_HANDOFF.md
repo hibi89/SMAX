@@ -113,13 +113,13 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 
 ## 2026-10-27 KST — XLSX cells V0 최신 인계 (10항)
 
-1. **목표/요구/스택:** Private SMAX \`preprocessing\`만 관리, 전처리 공통 엔진·정확한 provenance·Human review, Node >=20/내장 \`zlib\`·\`crypto\`, 지출 0원. 해커톤별 어댑터/공개/제출 금지.
-2. **완료·결정:** ① 패키지 라이브러리 추가(광범위 지원 but 의존성/비용/공급망 점검) vs ② 이미 검증한 preflight를 재사용해 제한형 XLSX sheet/cell 파서 직접 구현(0 의존성·경계 명확). 이번은 ②. \`xlsx-cells.mjs\`에서 \`extractXlsxCells\` 제공. inline string, shared string(rich run), numeric raw string, boolean, blank, formula flagged, multi-worksheet source path, SHA/quality/NOT_GRANTED.
-3. **테스트와 실제 증거:** 실제 Node v22.16.0에서 \`node --test tests/xlsx-preflight.test.mjs\` **18/18 PASS, 0 FAIL**, 원격 코드 blob \`ee81d55fbaa64e234d104a6e0a68904e812351f1\`/테스트 blob \`fbbc028188b0e4de16b66b4dcd9b7e330a9c6044\` 로컬 \`git hash-object\`와 정확히 일치. 추가로 합성 openpyxl/ XlsxWriter 생성 XLSX 각 1파일 호환검증. **전체 CSV 포함 Native npm test/Windows NOT_RUN.**
+1. **목표/요구/스택:** Private SMAX `preprocessing`만 관리, 전처리 공통 엔진·정확한 provenance·Human review, Node >=20/내장 `zlib`·`crypto`, 지출 0원. 해커톤별 어댑터/공개/제출 금지.
+2. **완료·결정:** ① 패키지 라이브러리 추가(광범위 지원 but 의존성/비용/공급망 점검) vs ② 이미 검증한 preflight를 재사용해 제한형 XLSX sheet/cell 파서 직접 구현(0 의존성·경계 명확). 이번은 ②. `xlsx-cells.mjs`에서 `extractXlsxCells` 제공. inline string, shared string(rich run), numeric raw string, boolean, blank, formula flagged, multi-worksheet source path, SHA/quality/NOT_GRANTED.
+3. **테스트와 실제 증거:** 실제 Node v22.16.0에서 `node --test tests/xlsx-preflight.test.mjs` **18/18 PASS, 0 FAIL**, 원격 코드 blob `ee81d55fbaa64e234d104a6e0a68904e812351f1`/테스트 blob `fbbc028188b0e4de16b66b4dcd9b7e330a9c6044` 로컬 `git hash-object`와 정확히 일치. 추가로 합성 openpyxl/ XlsxWriter 생성 XLSX 각 1파일 호환검증. **전체 CSV 포함 Native npm test/Windows NOT_RUN.**
 4. **진행 상태:** 신규 XLSX 기능/테스트 비공개 GitHub 커밋 완료. 데이터 타입은 정형 원문 단위이며 날짜/서식/수식 계산, full Excel 호환성·비즈니스 표준화/DB/vector는 미구현. 출고·판매/Production 승인은 여전히 없음.
-5. **오류·복구·재시도:** 최초 XML 엔티티 decode 단계에서 \`&amp;\`가 \`&\`로 변환된 뒤 재검증되어 정상 입력 2건 실패. 문자 엔티티 사전 검증 → 단일 decode 순서로 수정. 이후 18/18 PASS. 기존 Private git clone DNS 실패 반복 회피; 신규 모듈과 테스트 원격 정확한 SHA 비교로 Node 검증.
-6. **repo/branch/SHA/files:** \`hibi89/SMAX\` Private \`preprocessing\`; 시작 \`73ff80a7646d611823be623ea7ed6f35dd18b09f\`, 코드 commit \`4e6b5f4f25cbb2c9a95115c8ee37099b5998454c\`, 테스트 최종 commit \`128f98638b39c00c31b617a7b406318d0144fab4\`; paths \`preprocessing/xlsx-cells.mjs\`, \`tests/xlsx-preflight.test.mjs\`, \`preprocessing/xlsx-preflight.mjs\`, docs/status/handoff. 최종 HEAD는 갱신 후 재조회.
-7. **배포/환경:** \`node --test tests/xlsx-preflight.test.mjs\` 실제 PASS. \`npm run test:preprocessing\`은 전용 스크립트가 xlsx-preflight를 포함하지만 전체 커맨드 실행은 NOT_RUN. Vercel/Cloudflare Production URL·SHA 없음.
+5. **오류·복구·재시도:** 최초 XML 엔티티 decode 단계에서 `&amp;`가 `&`로 변환된 뒤 재검증되어 정상 입력 2건 실패. 문자 엔티티 사전 검증 → 단일 decode 순서로 수정. 이후 18/18 PASS. 기존 Private git clone DNS 실패 반복 회피; 신규 모듈과 테스트 원격 정확한 SHA 비교로 Node 검증.
+6. **repo/branch/SHA/files:** `hibi89/SMAX` Private `preprocessing`; 시작 `73ff80a7646d611823be623ea7ed6f35dd18b09f`, 코드 commit `4e6b5f4f25cbb2c9a95115c8ee37099b5998454c`, 테스트 최종 commit `128f98638b39c00c31b617a7b406318d0144fab4`; paths `preprocessing/xlsx-cells.mjs`, `tests/xlsx-preflight.test.mjs`, `preprocessing/xlsx-preflight.mjs`, docs/status/handoff. 최종 HEAD는 갱신 후 재조회.
+7. **배포/환경:** `node --test tests/xlsx-preflight.test.mjs` 실제 PASS. `npm run test:preprocessing`은 전용 스크립트가 xlsx-preflight를 포함하지만 전체 커맨드 실행은 NOT_RUN. Vercel/Cloudflare Production URL·SHA 없음.
 8. **원본/보안/백업:** 입력 파일 읽기 전용, 테스트 합성 XLSX만, 실제 고객 데이터/개인정보·토큰/LLM API·외부 요청·비용 0. 신규 XLSX JSON에 원본 모든 셀/수식이 있을 수 있으므로 원본 동일 기밀 취급. GitHub 기존 commit들이 복구점, force push/합병 없음.
 9. **다음 우선·완료 기준·사용자 승인:** 전체 Native repo QA와 명시적 release gate → XLSX Schema/검증기·시트 논리명/날짜 스타일 등 지원 범위 선별 및 원본 행 검토 강화 → 다른 문서 플러그인. 공개 코드 반출·사용자 실데이터·유료 API·배포·판매는 사용자 별도 승인.
 10. **시점:** 2026-10-27 KST. 현재 검증은 새 XLSX 코드/테스트와 두 합성 워크북의 로컬 Node에 한정, 전체 SMAX 제품이나 100% 완료 주장이 아님. 이후 문서 commit/최종 HEAD 확인.
