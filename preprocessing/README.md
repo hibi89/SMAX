@@ -125,3 +125,12 @@ validateXlsxCellsPackage(pkg,original);
 const json=serializeXlsxCellsPackage(pkg,original); // 사람이 승인한 파일이 아님
 ```
 - **검증 출처:** 이전 XLSX 실제 코드 및 이번 검증기/회귀가 GitHub 원격 blob SHA와 로컬 실행 파일 일치; Node 22.16.0 `node --test tests/xlsx-preflight.test.mjs` **26/26 PASS** (이전 18 + 신규 보안/원본 동등성 8). 스키마 JSON 자체는 원격 파싱/필드·`$defs`/승인 const 확인. 독립 Native schema 엔진(Ajv 등)을 사용한 JSON Schema 적합성 테스트 및 **CSV 포함 전체 npm test/Windows는 미실행**.
+
+
+## 2026-10-27 — XLSX 숫자형 위장 데이터 거부 및 독립 스키마 QA
+
+- **결함:** 앞선 제한형 `xlsx-cells.mjs`는 Excel의 `t=n` 숫자 셀 안에 `NaN`, `Infinity`, `=SUM(1)`, 임의 문자열이 들어와도 `number_text`로 신뢰하는 문제가 있었다. `xlsx-package.mjs`도 타입이 문자열인지 여부만 확인했다.
+- **수정:** 파서, JS 패키지 검증기, JSON Schema 3곳에 동일한 숫자 문자열 lexical grammar를 강제한다. 유효한 `-12.50`, `+.5`, `1.`, `1e-13`, 긴 정밀도 숫자는 **문자열로 보존**; `NaN`·`Infinity`·`=SUM(1)`·`+cmd`·`1,234`·공백만 있는 값은 fail-closed. Excel 날짜 스타일을 숫자에서 추론하거나 `Number()`로 반올림하지 않는다.
+- **검증:** Native Node v22.16.0 `node --test tests/xlsx-preflight.test.mjs` **29/29 PASS**(이전 26 + 숫자형 3). 외부 오픈소스 `jsonschema` Draft202012Validator로 원격 Schema 동일 blob `ff25c696a64ebb1e71439f163e748b7a9857bbf1`를 독립 검사한 로컬 케이스 **21/21 PASS**(정상 원본 2, 변조/문법 19). 재실행 가능한 새 `tests/test_xlsx_schema_contract.py`를 추가했으며 `python -m unittest discover -s tests -p 'test_xlsx_schema_contract.py'` **5/5 PASS**. Python jsonschema는 개발자 선택 검사 도구이며 SMAX 사용자 런타임 설치 필수 아님(없으면 unittest skip).
+- **정본 증거:** 변경된 XLSX 코드/검증기/Schema/Node 테스트/Python 테스트 5개 파일 각각의 `git hash-object`가 Private GitHub blob SHA와 동일. `preprocessing`만 수정.
+- **미검증:** 기존 CSV V0/V1 전체 `npm run test:preprocessing`, 전체 `npm test`, Windows 및 실고객 XLSX 파일은 **NOT_RUN**. 이번의 29/29와 5/5는 신규 XLSX 테스트 범위만이다. CSV와 XLSX가 통합된 전처리 시스템 출시 승인 아님.
