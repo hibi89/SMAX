@@ -65,3 +65,9 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **원본/백업/비밀:** 원본 CSV와 3개 타 브랜치 모두 수정 금지, 새로운 출력만 생성. 기존 Git 이력/블롭 복구 가능, `force push`/병합 금지. 실고객·비밀·토큰 파일 업로드 금지. Generic JSON은 미매핑 원본 열도 포함하므로 접근 보호 필수.
 9. **다음 우선순위/완료 기준/승인:** 정본 Node 전체 회귀 및 생성 JSON SHA/행/권한 검증 → CLI 결함 수정·회귀 테스트 GitHub 반영 → XLSX/DOCX/PDF 등 선택적 범용 파서 설계. Public 소스 복사, 외부 데이터 전송, 배포·상품 판매, 지출은 별도 승인.
 10. **갱신/검증 시점:** 2026-10-27 KST, private GitHub 원격 소스·브랜치/문서 접근 확인, 로컬 Node/DNS 진단. 증빙은 코드 커밋과 정적 검토이며 신규 CLI의 실 E2E 성공 증거 없음. 본 문서 최종 커밋 이후 정확한 branch HEAD를 재조회해 다음 채팅에 사용.
+
+### 최신 로컬 검증 보충 (2026-10-27 KST)
+
+- GitHub `preprocessing/generic-cli.mjs`의 실제 blob SHA `086e33c884a77c95c5f2512befe80af1815055cd` = Node 환경에서 `git hash-object`로 확인한 로컬 CLI 원문 SHA. `node --check` PASS.
+- 로컬 smoke: 실제 신규 CLI 원문 + **테스트 더블 generic CSV 엔진**으로 명시 맵 파일·BOM/원본 불변·신규 출력·기존 출력 보호·잘못된 JSON 매핑·잘못된 UTF-8·symlink·설정 크기 제한을 포함하는 합성 테스트 7/7 PASS. 이는 **Mock 모듈 기반 CLI 부분 검증**이며 `npm run test:preprocessing` Native 전체 PASS 또는 실제 엔진 정확성 보증이 아니다.
+- 원격 Native 회귀 테스트 파일 0건 신규 저장(생성 2회 도구 차단). 안전 검사·DNS 오류에 같은 방법을 반복하지 말 것. 신규 CLI 제품 코드와 문서는 Private GitHub 커밋 완료, 3개 타 브랜치는 불변.
