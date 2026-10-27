@@ -58,3 +58,24 @@ const result=preprocessGenericCsv(csv,{columns:[
 현 도구에서 V8로 기존 CSV 파서+실제 체크인된 Generic 테스트 콜백 **8/8 PASS**, 변조된 필드값 검사 1건 별도 PASS. SHA는 해당 런에서 **모의 구현**. *전체 Native Node, JSON Schema의 독립 검증 라이브러리 구동, 실제 브라우저·Windows는 미실행*.
 
 **역할:** 전처리 총괄은 공통 전처리 엔진만 완성한다. 해커톤별 코드 가져오기·변형·연동·제출 및 각 레포의 공개/비공개 판단은 해커톤 총괄/해총이 담당한다.
+
+## 2026-10-27 — Generic CSV V1 파일 CLI (신규 코드, 출고 검증 대기)
+
+기존 3필드 `cli.mjs`는 그대로 보존하고, 별도로 `generic-cli.mjs`를 추가했다. 1~64개 필드가 들어 있는 JSON 설정 파일을 명시적으로 제공하며, 자동 열 추론/업로드/자동 승인 기능은 없다.
+
+```json
+{"columns":[
+  {"key":"order_id","source":"주문번호","type":"text","required":true},
+  {"key":"price","source":"가격","type":"decimal","required":true}
+]}
+```
+
+위 내용을 로컬 `columns.json`으로 저장하고 컬럼명이 일치하는 UTF-8 CSV에 대해 실행한다.
+
+```bash
+node preprocessing/generic-cli.mjs --input input.csv --columns columns.json --output new-result.json
+```
+
+- CSV 원본 최대 2 MiB, JSON 설정 최대 64 KiB. 올바르지 않은 UTF-8과 심볼릭 링크 파일 거부, 출력 경로 기존 파일 덮어쓰기 거부(`wx`).
+- 출력은 `SMAX_PREPROCESS_GENERIC_CSV_V1`, 파일 바이트 SHA-256, 전체 행·열 보존, 오류/검토 목록, `approval=NOT_GRANTED`를 포함한다. 출력 JSON도 기밀 원본과 동일한 보안 등급으로 취급한다.
+- 현재 환경은 Node 22가 설치돼 있으나 Private GitHub 전체 클론 DNS 실패. 전용 CLI 원격 커밋 반영은 확인했지만 **실제 원격 의존 모듈을 포함한 Native 통합/파일 CLI E2E는 아직 미검증**. 테스트 소스의 원격 추가 시도는 안전 검사에서 2회 차단돼 중단했다. 결제·배포·고객 파일 사용 없음.
