@@ -271,3 +271,9 @@
 - **검증/장애:** 이 환경 Node v22.16.0/npm 10.9.2 확인. `git ls-remote https://github.com/hibi89/SMAX.git`는 DNS `Could not resolve host: github.com` 실패. 원격 테스트 파일 작성 2회는 도구 안전 검사 차단; 해당 테스트는 **미반영**. 원격 전체 의존성의 `npm run test:preprocessing`/실 파일 CLI E2E/Windows 검증은 **NOT_RUN**; PASS 주장 금지.
 - **보존:** 외부 고객 데이터·API·DB·LLM·유료 지출·Cloudflare/Vercel 공개 배포·제품 출고 없음. 기초 `preprocessing` HEAD `b6a71829`; 새 코드 커밋 `9eb19dbe`; 최종 HEAD는 전체 문서 갱신 후 재조회.
 - **다음 안전 작업:** 회귀 테스트 등록 경로 복구 후 최신 checkout에서 Node 전체 테스트·합성 CSV 실제 쓰기/해시/UTF-8·파일 권한/오류복구 E2E. 이어 CSV 고급 타입/대용량 한도와 문서 파싱 플러그인. 신규 출력이 민감 원문 전체를 포함한다는 보안 경계 유지.
+
+### 2026-10-27 — 신규 CLI 실제 원격 블롭 일치 로컬 스모크 확인
+
+- 새 CLI `preprocessing/generic-cli.mjs` 원격 blob SHA `086e33c884a77c95c5f2512befe80af1815055cd`와 로컬 검사용 소스의 `git hash-object`가 **완전 일치**. 해당 최신 소스에 Node 22 `node --check` **PASS**.
+- 해당 **실제 신규 CLI 소스** + **모의 generic-csv 엔진** 조합으로 로컬 파일 I/O 스모크 7/7 PASS: 원본 불변·UTF-8 BOM/바이트 수·새 JSON 생성·기존 결과 덮어쓰기 차단·설정 구조 차단·잘못된 UTF-8 차단·symlink 차단·설정 크기 초과 차단. 7항목 중 일부 묶음 검사이며 정식 GitHub 회귀가 아님.
+- 제한: `preprocessing/generic-csv.mjs`와 `site/csv-transform.mjs`는 해당 Node 시험에서 **mock/미포함**. 전체 원격 최신 Node `npm run test:preprocessing` 및 진짜 Generic 엔진 E2E는 **미검증**. 신규 테스트 파일 원격 반영 차단도 지속.
