@@ -109,3 +109,10 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - Verified repository-identical sources: Node XLSX regression **29/29 PASS**, optional Python `jsonschema` conformance unit tests **5/5 PASS**, expanded independent schema compatibility cases **21/21 PASS**.
 - Added `tests/test_xlsx_schema_contract.py` for repeatability; optional dev-only Python dependency, no SMAX runtime package added.
 - Blocked: complete private-repo native `npm run test:preprocessing` / `npm test`, Windows and CI remain unrun. Next gate is full CSV+XLSX checkout and native execution, then provenance-preserving adapter development.
+
+## 2026-10-27 — XLSX relationship XML-entity encoding fail-closed gate
+
+- Actual Node reproducer: `TargetMode="Exter&#x6e;al"` in `xl/_rels/workbook.xml.rels` bypassed old raw-text `External` check. New test failed before fix.
+- Code `9f28e6e1`: decode numeric hex/decimal and standard named XML entities for relationship `TargetMode`, permit only `Internal`, fail closed for malformed modes; XML/.rels path extensions also inspected case-insensitively.
+- Tests `d1c1d24c`: 4 additional regression cases; verified Native Node **33/33 PASS**, optional Python Schema **5/5 PASS**, two locally synthesized workbook readers PASS. Exact remote Git blob hashes matched tested local files.
+- Scope: preprocessing private branch only. Full CSV-inclusive npm tests / Windows / CI still unrun; avoid describing XLSX-only evidence as complete SMAX QA. Prioritize full private-checkout QA when available.
