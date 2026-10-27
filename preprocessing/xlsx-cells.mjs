@@ -6,6 +6,9 @@ import {preflightXlsx} from './xlsx-preflight.mjs';
 export const XLSX_CELLS_VERSION='SMAX_PREPROCESS_XLSX_CELLS_V0';
 const maxRows=10000, maxCells=100000, maxXmlNodes=300000;
 const numberLiteral=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?$/;
+// Mirror CSV export safety: hidden Unicode prefixes must not bypass human review.
+const formulaLikeText=/^[\s\u0000-\u001F\u007F-\u009F\p{Default_Ignorable_Code_Point}]*[=+@-]/u;
+const plainSignedNumber=/^-?\d+(?:\.\d+)?$/;
 const decoder=new TextDecoder('utf-8',{fatal:true});
 const fail=(s)=>{throw new TypeError('XLSX_CELLS: '+s)};
 const localName=n=>n.substring(n.lastIndexOf(':')+1);
@@ -152,7 +155,7 @@ function parseSheet(bytes,path,shared,quality){
       }else if(type==='e'){
         value=v[0]?.text??null;kind='error';review='ERROR_CELL';quality.review_cells++;
       }else fail('unsupported cell type');
-      if(!formula&&typeof value==='string'&&kind==='text'&&/^[\s\u200B\u200E\u200F]*[=+@]/.test(value)){
+      if(!formula&&typeof value==='string'&&kind==='text'&&formulaLikeText.test(value)&&!plainSignedNumber.test(value)){
         review='FORMULA_LIKE_TEXT';quality.review_cells++;
       }
       cells.push({ref,kind,value,formula:formula?f[0].text:null,
