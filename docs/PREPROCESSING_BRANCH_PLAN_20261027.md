@@ -94,3 +94,11 @@ P5: 공개 가능한 별도 추출물의 라이선스/권리 검증, 해커톤�
 - Node 22 Native 테스트 `tests/xlsx-preflight.test.mjs` **18/18 PASS**, 원격/로컬 blob SHA 2개 완전 일치. 합성 openpyxl/XlsxWriter XLSX 2종 해석 통과. 전체 Private CSV 회귀는 환경 제약으로 미실행.
 - 제한형 파서 계약 우선. XML 깊이/노드 및 행·셀 상한, 원본 파일 2MiB/8MiB 압축해제, unsupported structures는 거부하거나 아직 의미 해석 불가. 표시 시트 이름, 날짜/서식·스타일, 전체 워크북 관계, formula evaluation, schema/validator는 차기 별도 단계.
 - 이번 개발 이후 우선순위: 정본 전체 Node/npm 검증 통로 → XLSX 구조 Schema·오류 검토 계약 → CSV와 공통 provenance 도출 → 다음 형식(DOCX/HTML/PDF) 선택. 각 해커톤 연동·복사/변형/제출은 별도 총괄.
+
+
+## 2026-10-27 — XLSX strict package contract and source parity
+
+- `preprocessing/xlsx-package.mjs` validator/serializer와 `SMAX_PREPROCESS_XLSX_CELLS_V0.schema.json` 공개 없이 비공개 repo의 `preprocessing` 브랜치에 추가.
+- JSON Schema: `additionalProperties:false`, 구조·타입·버전·수식 검토·절대 NOT_GRANTED·표준 크기 제한. JS validator 추가 제약: 참조 좌표, 중복 검사, 시트/품질 카운터, 조건부 리뷰 상태.
+- Native Node 실제 소스+회귀 테스트 26/26 PASS, 원격 Git blob SHA 2개 동일. 원본이 없으면 구조 검증만, 원본 제공 시 SHA256/재추출 전체 결과 동일성 확인. 신규 의존성 0, API 비용 0.
+- 다음: 비공개 원본 전체 Node/npm 검증 경로 → 독립 JSON Schema validator 계약 시험 → CSV/XLSX 공통 전처리 연결 및 XLSX 복잡 구조 지원 여부. 다른 브랜치/해커톤·배포 책임 없음.
