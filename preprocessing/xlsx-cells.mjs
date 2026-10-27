@@ -18,12 +18,14 @@ function unescapeXml(s){
     if(Object.hasOwn(literals,e))return literals[e];
     if(!e.startsWith('#'))fail('unsupported XML named entity');
     const n=e[1]==='x'?parseInt(e.slice(2),16):parseInt(e.slice(1),10);
-    if(!n||n>0x10ffff||(n>=0xd800&&n<=0xdfff)||(n<32&&![9,10,13].includes(n)))fail('invalid XML codepoint');
+    if(!n||n>0x10ffff||(n>=0xd800&&n<=0xdfff)||(n<32&&![9,10,13].includes(n))||n===0xfffe||n===0xffff)fail('invalid XML codepoint');
     return String.fromCodePoint(n);
   });
 }
 function parseXml(bytes){
   const xml=decoder.decode(bytes);
+  // Fail closed on literal characters forbidden by XML 1.0 Char.
+  if(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/u.test(xml))fail('invalid XML character');
   if(xml.length>8*1024*1024)fail('XML too large');
   let i=0,depth=0,count=0,root=null,stack=[];
   while(i<xml.length){

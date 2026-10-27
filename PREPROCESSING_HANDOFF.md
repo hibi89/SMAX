@@ -209,3 +209,14 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 9. **다음 단계/완료 기준:** 인증 17+ 정본 파일 모든 blob SHA 비교 → `npm run test:preprocessing` 최신 63/63 (실행 결과 우선) → 합성 CSV CLI/원본 SHA256 실파일 E2E → XLSX 실제 ZIP E2E/Windows 경계 → 변경된 신규 issue enum을 읽는 소비자와 RAG 구조 호환·릴리스 검토. 무단 배포/판매/실자료/지출 금지.
 10. **갱신/근거:** 2026-10-27 KST, GitHub 코드/test/schema 커밋 확인, V8 분리 실행 근거. 63은 체크인 정적 개수이며 Native PASS 표기가 아님.
 
+## 2026-10-27 KST — XLSX XML 1.0 invalid-character fail-closed guard (10항 인계)
+1. **목표·확정 요구·기술:** Private `hibi89/SMAX` `preprocessing` 범용 로컬 CSV/XLSX 엔진. 불신 XML에서 원본 문자 무음 오염을 방지하고 인간 검토/자동 승인 금지 정책 보존.
+2. **변경·근거:** 실제 원격 `parseXml`이 XML 1.0에서 금지된 literal U+0000/U+000B/U+FFFF와 numeric `&#xFFFF;`를 받아들임. A: 기존 UTF-8/XML parser에 금지 문자 검문소 추가(채택, 의존성 0/최소 변경), B: 범용 XML 라이브러리 교체(호환성·공격면·유지비 증가).
+3. **실행 검증:** 변경 전 실제 GitHub 원문 V8 재현; 변경 후 정확한 원문 V8 isolated parser cases **7/7 PASS**(정상 3/금지 4). 신규 합성 XLSX ZIP 회귀를 `tests/xlsx-preflight.test.mjs`에 등록. 최신 전체 Native `npm run test:preprocessing` **NOT_RUN**(기존 baseline 59/59은 과거 정본). 추가 테스트로 정적 약 **64개**, 실제 수는 Node 실행 우선.
+4. **상태:** 금지문자 검사·테스트 GitHub 반영. Native CSV/XLSX 전수, ZIP E2E, `npm test`, Windows·CI·실고객 파일·배포 **미검증**.
+5. **오류·복구·대안:** `TextDecoder(fatal:true)`는 UTF-8 인코딩만 검사하고 XML Char 적법성을 강제하지 않음. 금지 scalar는 파싱 전에 reject; XML numeric ref U+FFFE/U+FFFF 역시 reject. 기존 정상 tab/LF/CR과 named entity는 유지. GitHub 이전 커밋은 복구 지점; 강제 push 금지.
+6. **저장소/브랜치/SHA/경로:** 작업 기준 HEAD `72aef6f8605befe6a29958fc83b3394b3c40c2a2`; `preprocessing/xlsx-cells.mjs`, `tests/xlsx-preflight.test.mjs`. 정확한 작업 결과 SHA는 GitHub commit/ref로 확인.
+7. **Production·환경:** V8 격리 실행(가상 TextDecoder stub), 로컬 Node v22 설치 확인. 최신 정본 Full Native/실브라우저/Windows/Production URL 및 Production SHA 없음.
+8. **보안/원본:** 고객 실파일, 키, 유료 API, 외부 공개, 배포, 다른 세 브랜치·해커톤 저장소 변경 없음. ZIP 원본/바이트 SHA·NOT_GRANTED 계약 불변.
+9. **다음 단계:** 인증된 full 17+ 파일 checkout → Git blob 동일성 검증 → `npm run test:preprocessing` 전체 **실행** → 합성 XLSX ZIP·Generic CSV CLI SHA E2E → `npm test` 및 Windows 한 번에 검증. 테스트 미통과 시 수정한 경로만 최소 보강.
+10. **갱신:** 2026-10-27 KST, 기준 `72aef6f8605befe6a29958fc83b3394b3c40c2a2`, Github 원문·V8 isolated만 검증. 전수 PASS/릴리스 승인 주장 금지.

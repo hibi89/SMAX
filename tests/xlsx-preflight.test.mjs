@@ -335,3 +335,19 @@ test('XLSX phonetic annotations do not contaminate visible string values',()=>{
  assert.equal(pkg.quality.review_cells,0);
  assert.equal(validateXlsxCellsPackage(pkg,source),true);
 });
+
+
+test('XLSX XML 1.0 rejects forbidden literal and numeric characters without losing valid text',()=>{
+  const inline=value=>xlsx(worksheet('<row r="1"><c r="A1" t="inlineStr"><is><t>'+value+'</t></is></c></row>'));
+  for(const bad of ['\u0000','\u000B','\u000C','\uFFFE','\uFFFF','&#xFFFE;','&#65535;','&#xB;']){
+    assert.throws(()=>extractXlsxCells(inline('a'+bad+'b')),/invalid XML character|invalid XML codepoint/,JSON.stringify(bad));
+  }
+  const shared=xlsx(worksheet('<row r="1"><c r="A1" t="s"><v>0</v></c></row>'),
+    [{name:'xl/sharedStrings.xml',content:'<sst><si><t>a\u0000b</t></si></sst>'}]);
+  assert.throws(()=>extractXlsxCells(shared),/invalid XML character/);
+  const legitimate='한글\tTab\nLine\rReturn';
+  const good=inline(legitimate);
+  const pkg=extractXlsxCells(good);
+  assert.equal(pkg.sheets[0].rows[0].cells[0].value,legitimate);
+  assert.equal(validateXlsxCellsPackage(pkg,good),true);
+});

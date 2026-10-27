@@ -375,3 +375,5 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 - **범위 및 남은 리스크:** 오직 Private `preprocessing`, 타 브랜치·해커톤·고객 데이터·지출·배포 무변경. 모든 `source_cells`는 여전히 신뢰할 수 없는 원본이므로, 이 검토 사유만으로 안전한 CSV/Excel 출력이 보장되지는 않음; 실제 exporter는 재검증·적절한 수식 이스케이프 필수.
 - **다음 게이트:** SHA 동일 인증 checkout에서 Node `npm run test:preprocessing` 전체 63건 (실제 개수 우선), Generic CLI 파일 E2E/실해시와 ZIP XLSX synthetic parity, Windows QA → 별도 소비자 호환성 점검/출고 승인.
 
+## 2026-10-27 KST — preprocessing XLSX XML invalid-character gate
+- 기준 `preprocessing@72aef6f8605befe6a29958fc83b3394b3c40c2a2`; 원격 생산 XML parser가 금지 literal U+0000, U+000B, U+FFFF 및 numeric U+FFFF를 수용함을 V8 재현. 파서 최소 fail-closed 및 합성 ZIP 회귀 추가. 패치 parser V8 격리 7/7 PASS. 최신 Native 전수(정적 약 64개), `npm test`, Windows, 고객자료/CI/배포 NOT_RUN. `PREPROCESSING_HANDOFF.md` 최신 10항 참고. 오직 preprocessing 변경, 이전 Git commit 복구 가능.

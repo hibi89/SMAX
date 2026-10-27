@@ -354,3 +354,5 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 - 이 신규 issue code 추가는 V1 enum 확장이므로 downstream 코드의 허용 enum 연동 호환성 확인 필요. source_cells 원문 자체는 수식 이스케이프되지 않은 불신 데이터; exporter에서 별도 처리할 것.
 - 다음 `ㄱ`: PREPROCESSING_HANDOFF.md 마지막 10항목, STATUS.md 마지막 기록 → 최신 SHA 확인 → 17+파일 인증 checkout 정본 Node 전체 63건/실파일 CLI·XLSX ZIP E2E → 소비자 호환성/Windows QA. 타 branch/해커톤 수정·비용/배포 금지.
 
+## 2026-10-27 KST — preprocessing XML 1.0 character hardening
+- Private `preprocessing@72aef6f8605befe6a29958fc83b3394b3c40c2a2`에서 XML 1.0 금지 literal/codepoint 수용 재현, XLSX parser fail-closed 최소 변경 + 테스트 1건 추가. 실제 GitHub 원문 기반 V8 isolated 7/7 PASS이며 최신 전체 Native Node/ZIP/Windows/CI/Production NOT_RUN. 정확한 작업·테스트·복구/다음 작업은 `PREPROCESSING_HANDOFF.md` 마지막 10항 참조. 다른 브랜치 및 해커톤 저장소 무변경.
