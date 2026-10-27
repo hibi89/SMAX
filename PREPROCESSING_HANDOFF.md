@@ -262,3 +262,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **보안/데이터/운영:** 완전 오프라인, 신규 런타임 의존성 없음, 고객 실제 데이터 없음, 출력 `raw_text`는 원문 기밀 포함 가능. 원본 경로 덮어쓰기·출력 재생성 덮어쓰기 금지. 타 브랜치/해커톤/Production/라이선스/비용 변경 없음.
 9. **다음:** TXT schema 정식 JSON Schema를 작성·검증 → HTML 정적 콘텐츠 parser 또는 DOCX 범위 비교 → CSV/XLSX 및 전체 repo Native 인증 checkout과 Windows QA. MVP 전체 완료는 최신 Native E2E 전 검증 대기.
 10. **검증 시점/범위:** 2026-10-27 KST, 실제 Node v22.16.0 isolated TXT/MD 5개. 출시·상용 QA 주장 금지.
+
+## 2026-10-27 KST — P2 HTML importer and document schemas (10-part handoff)
+1. **목표·요구/기술:** 사용자 개발 순서 MVP → 최초 설계 누락 기능 → 보안/안정/호환. Private `hibi89/SMAX` `preprocessing`만 수정; Node20+ 오프라인 zero-dependency 문서 입력 범위 확대.
+2. **설계 비교:** A 제한형 HTML allowlist tokenizer + TXT/HTML Strict JSON Schemas(채택: 외부 의존성·코어 변경 0), B 외부 HTML5 DOM 파서(호환성 넓지만 패키지·보안 심사·비용 증가). 지원 태그 이외는 명시적 오류.
+3. **실제 구현:** HTML bytes→원문/sha256+한글/영문 문단/UTF-16 offset/lineage/검토 큐 정보·NOT_GRANTED; HTML 로컬 CLI exclusive output. TXT와 HTML 두 JSON Schema Draft202012 및 신규 HTML/schema 테스트 등록.
+4. **검증 근거:** 실제 Linux Node 22.16 `node --test tests/html.test.mjs tests/document-schemas.test.mjs` **9/9 PASS**, 테스트한 local Git SHA와 connector-created Git blob **6/6 동일**(HTML core/CLI/test, two schemas, schema tests). Python `jsonschema` 정상 및 변조 3종씩 총 2형식 PASS. **기존 CSV/XLSX/TXT를 포함한 전체 최신 npm test는 미실행**.
+5. **완료·미완:** 기본 HTML 제한형 데이터 추출 기능과 CLI, 문서 스키마 계약 체크인 완료. HTML5 임의 복구/JS/CSS/문서 파일 PDF/DOCX/LLM/Vector 미구현. Windows/CI/실무 HTML/프로덕션/판매 미검증.
+6. **실패·원인·재시도:** 이전 Private GitHub clone DNS 실패로 전체 원본 Native 통합 환경 접근 불가; GitHub 공개 우회·무단 CI 실행 금지. HTML 파서는 불신 입력 fail-closed를 우선하고 추가 포맷 지원 시 contract 유지.
+7. **Repo/branch/SHA:** Private `hibi89/SMAX` `preprocessing`, 부모 `7ca26ac131ef834c86a06acba26a572724e42472`; 새 HTML 4파일(코어·CLI·schema·test), TXT schema, 공통 schema test + README/package/status/handoff. 최종 SHA 원격 재확인.
+8. **Production/backup/privacy:** Cloudflare/Vercel Production 없음, 코드 GitHub commit parent가 복구점. 고객자료·토큰·네트워크·유료 API·타 브랜치/해커톤 변경 없음. 출력은 기밀 원문 포함 가능.
+9. **다음 검증·개발 우선순위:** 최신 전체 `npm run test:preprocessing` Native 기준선과 실제 CLI E2E → DOCX 안전 파서(기존 XLSX ZIP preflight 정책과 비교) → PDF 범위 판단; 제품 출시 전 Windows/CI/보안/규모 검수.
+10. **시각·범위:** 2026-10-27 KST, 신규 문서 모듈/스키마 Native 9/9 + schema 2형식 독립 시험. 전체 제품 완료 아님.

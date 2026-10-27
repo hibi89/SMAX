@@ -171,3 +171,11 @@ XLSX 경로는 ZIP preflight → 보수적인 시트/셀 추출 → 원본 바�
 - 출력 `SMAX_PREPROCESS_TEXT_V0`: `source.raw_text`, SHA256, 1-based 첫 행, UTF-16 오프셋, 문단/수식형 검토, `approval=NOT_GRANTED`; 빈 줄 구분 문단이므로 원본 표시는 raw_text를 사용. 소스 JSON에도 실고객 원문 전체가 포함되므로 동일하게 보호.
 - 최대 2MiB/10,000 segments, UTF-8 fatal decode; 새 JSON exclusive 생성, input 손상 금지. 외부 NPM/LLM/HTTP 사용 안함.
 - 실제 원격 commit 대상 3파일과 `git hash-object` 일치하는 Linux Node 22 로컬 Native `node --test tests/plain-text.test.mjs` **5/5 PASS**. 전체 CSV/XLSX 통합 `npm run test:preprocessing`, Windows/CI/실고객 문서/Production 미검증.
+
+## 2026-10-27 — Strict TXT/HTML JSON Schema + limited HTML importer
+
+- `preprocessing/SMAX_PREPROCESS_TEXT_V0.schema.json`, `preprocessing/SMAX_PREPROCESS_HTML_V0.schema.json`: Draft 2020-12 strict structural wire contracts. Approval always `NOT_GRANTED`. JSON Schema does **not** verify cross-field provenance; use JS validators and original bytes for source SHA parity.
+- `preprocessing/html.mjs`: `preprocessHtml(bytes)`, `validateHtmlPackage(pkg,originalBytes?)`, `serializeHtmlPackage(pkg,originalBytes?)`. Read-only UTF-8 HTML subset, visible paragraphs with line/UTF-16 offset, exact original HTML + SHA256, review flags. Rejects scripts, iframes, style/unknown tags, event handlers, malformed entities and unbalanced tags. **Not a general browser-grade HTML parser; no CSS semantics/DOM/HTML5 error recovery**. Only selected common markup; unsupported HTML is rejected.
+- `preprocessing/html-cli.mjs`: `node preprocessing/html-cli.mjs --input local.html --output new.json`. Supports .html/.htm; input ≤2MiB, no symlink, new output exclusive write, local only.
+- Tests: `tests/html.test.mjs` and `tests/document-schemas.test.mjs`, included in `npm run test:preprocessing`. The **newly added HTML + schema files only** were checked as exact Git blob SHA against local Node 22 files; `node --test tests/html.test.mjs tests/document-schemas.test.mjs` **9/9 PASS**. Independent Python `jsonschema` Draft 2020-12 compared valid and 3 tampering cases for each new schema. Latest **whole-repo** Native regression, Windows, CI, actual customer HTML and release are still NOT_RUN.
+- Document source and outputs may contain customer text/HTML. Do not render raw HTML or export formula-like text to spreadsheets without separate encoding; no remote sharing, publish, billing or auto approval.

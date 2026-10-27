@@ -370,3 +370,6 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 
 ## 2026-10-27 KST — preprocessing initial unstructured TXT/MD
 - 사용자 순서 MVP→최초설계 보강→마지막 보안/호환 검수. Private preprocessing에 TXT/MD → Strict JSON 문단/원문 SHA/lineage CLI 추가, `tests/plain-text.test.mjs` **Native Node 22 5/5 PASS** (3개 파일 Git blob parity). 기존 CSV/XLSX 전체 Native·Windows/CI·고객 파일 검증은 미실행. Markdown 문법 렌더링 없음, 승인 `NOT_GRANTED`; 업로드/비용/배포/타 브랜치 수정 없음. 상세 최신 `PREPROCESSING_HANDOFF.md`.
+
+## 2026-10-27 KST — preprocessing limited HTML importer and schemas
+- MVP 원설계 보강: TXT/HTML Draft202012 Strict JSON Schemas + `preprocessing/html.mjs`, `html-cli.mjs`, `tests/html.test.mjs`, `tests/document-schemas.test.mjs`. New modules only Node 22 Native **9/9 PASS**, independent Python Schema checks passed. All 6 new Git blobs match local tested files. Whole existing preprocessing test suite/Windows/CI/Production NOT_RUN. HTML subset, not full HTML5. See latest `PREPROCESSING_HANDOFF.md` 10-part handoff.

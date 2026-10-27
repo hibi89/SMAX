@@ -391,3 +391,6 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 
 ## 2026-10-27 KST — preprocessing P2 TXT/MD Native feature
 - 신규 `preprocessing/plain-text.mjs`, `preprocessing/text-cli.mjs`, `tests/plain-text.test.mjs` 도입; core·CLI·test actual Node v22 test **5/5 PASS**, Git blob SHA 모두 local matched. 원문 SHA/줄·offset·paragraph review 및 exclusive output. 기존 CSV/XLSX 변경 없음. Markdown 의미분석과 PDF/DOCX/HTML 미구현. 전체 Native preprocessing 및 Windows/CI/Production NOT_RUN. 자세한 10항은 `PREPROCESSING_HANDOFF.md` 최신 참조.
+
+## 2026-10-27 KST — preprocessing P2 HTML/TXT schema
+- Code added: HTML UTF8 subset parser, local HTML CLI, strict TXT/HTML Draft 2020-12 JSON Schema, 9 newly checked Node tests. Local Native **9/9 PASS**, Git blob parity **6/6**; Python jsonschema normal/tamper checks pass. No external NPM/LLM/API or runtime cost. Whole latest `npm run test:preprocessing`/Windows/CI/real customer documents/Production NOT_RUN. User's MVP→design gap→security order maintained; no other branch touched.
