@@ -122,3 +122,12 @@ test('generic CLI disallows mapping symlink and identical paths',t=>{
     assert.equal(existsSync(f.output),false);
   }finally{f.close();}
 });
+
+
+test('V0 CLI rejects over-limit CSV without writing an output',()=>{
+  const f=fixture();try{
+    writeFileSync(f.input,Buffer.alloc(2*1024*1024+1,0x61));
+    assert.throws(()=>runPreprocessCli(args(f)),/up to 2 MiB/);
+    assert.equal(existsSync(f.output),false);
+  }finally{f.close();}
+});

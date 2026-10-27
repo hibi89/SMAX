@@ -1,5 +1,5 @@
 // Local CLI for controlled hackathon pilots. No network or automatic source overwrite.
-import {lstatSync,readFileSync,writeFileSync} from 'node:fs';
+import {constants,closeSync,fstatSync,lstatSync,openSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve,extname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {preprocessMappedCsv,serializePreprocessPackage} from './index.mjs';
@@ -24,7 +24,16 @@ export function runPreprocessCli(argv=process.argv.slice(2)) {
   if(!stat.isFile()||stat.isSymbolicLink()||stat.size>2*1024*1024) {
     throw new Error('Input must be a regular local CSV file, no symlink, up to 2 MiB');
   }
-  const bytes=readFileSync(input);
+  const fd=openSync(input,constants.O_RDONLY|(constants.O_NOFOLLOW??0));
+  let bytes;
+  try {
+    const current=fstatSync(fd);
+    if(!current.isFile()||current.size>2*1024*1024){
+      throw new Error('Opened CSV must be a regular file up to 2 MiB');
+    }
+    bytes=readFileSync(fd);
+  } finally {closeSync(fd);}
+  if(bytes.length>2*1024*1024)throw new Error('CSV read exceeds 2 MiB');
   // Preserve a leading BOM so source.sha256 matches the original on-disk UTF-8 bytes.
   const source=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
   const result=preprocessMappedCsv(source,{
