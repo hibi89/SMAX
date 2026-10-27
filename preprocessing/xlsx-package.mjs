@@ -8,8 +8,11 @@ const keys = (x,names) => object(x) && Object.keys(x).length===names.length && n
 const integer = (v,min,max) => Number.isSafeInteger(v) && v>=min && v<=max;
 const sheetPattern = /^xl\/worksheets\/sheet([1-9]\d*)\.xml$/;
 const cellPattern = /^([A-Z]{1,3})([1-9]\d*)$/;
-const formulaText = /^[\s\u200B\u200E\u200F]*[=+@]/;
+
 const numberLiteral=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?$/;
+// Must stay aligned with xlsx-cells.mjs so review states cannot be forged.
+const formulaText=/^[\s\u0000-\u001F\u007F-\u009F\p{Default_Ignorable_Code_Point}]*[=+@-]/u;
+const plainSignedNumber=/^-?\d+(?:\.\d+)?$/;
 const cellFields = ['ref','kind','value','formula','status','reason'];
 function reference(ref,row){
   const m=cellPattern.exec(ref);
@@ -61,7 +64,7 @@ export function validateXlsxCellsPackage(pkg, originalBytes=null){
           if(cell.kind!=='blank'||cell.value!==null)reject('formula result trusted');
           reason='FORMULA_UNEVALUATED';
         }else if(cell.kind==='error')reason='ERROR_CELL';
-        else if(cell.kind==='text'&&formulaText.test(cell.value))reason='FORMULA_LIKE_TEXT';
+        else if(cell.kind==='text'&&formulaText.test(cell.value)&&!plainSignedNumber.test(cell.value))reason='FORMULA_LIKE_TEXT';
         if(cell.reason!==reason||cell.status!==(reason?'NEEDS_REVIEW':'READY_FOR_HUMAN_REVIEW'))reject('review state mismatch');
         if(reason)reviewCount++;
       }
