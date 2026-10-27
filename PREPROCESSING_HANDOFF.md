@@ -185,3 +185,15 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 9. **다음 단계/완료 게이트:** 현재 HEAD의 원본 17파일+추가 회귀 SHA 동일한 로컬 체크아웃에서 `npm run test:preprocessing` 약 61개(실제 수치 테스트로 결정) 전수 PASS → 합성 ZIP 원본 parity + CSV CLI E2E → 전체 `npm test`·Windows QA → 공통 CSV/XLSX provenance/strict adapter 설계 및 테스트. 출시·복사·실자료/유료 API·과금은 사용자 별도 승인.
 10. **갱신/근거:** 2026-10-27 KST, GitHub branch ref/commit diff 직접 검증 및 체크인 소스 V8 합성 실행 증거. 과거 59/59과 최신 미검증을 혼용하지 않음.
 
+## 2026-10-27 KST — phonetic string fix handoff (10 items)
+1. **목표/기술/요구:** `hibi89/SMAX` Private `preprocessing`만 담당하는 0원 로컬 결정론적 CSV/XLSX Strict JSON/검토 게이트. 타 브랜치/해커톤별 사용 작업은 독립 담당.
+2. **작업/선택 근거:** 실제 OOXML `<rPh><t>発音</t></rPh>`를 셀 문자열 일부로 취급하는 `descendants`의 silent data contamination 확인. 선택 A: 발음 주석/phoneticPr만 건너뛰고 가시 `t`는 이전 순서 유지(호환성 우위). B: 전체 XML 스키마 파서를 도입(무겁고 새 의존성). A 선택.
+3. **실행 테스트·성공/실패:** 원격 최신 코드+validator V8 격리 JS 실제 본문 `parseSharedStrings/parseSheet` synthetic XML 7/7 PASS, JS 파일 syntax 3/3 PASS; Unicode standalone Node v22 16/16 PASS는 **선행 수행 기록**. 최신 `npm run test:preprocessing` 62건 Native 통합, ZIP E2E, `npm test`, Windows/CI **NOT_RUN**. 기존 전체 Native 59/59은 과거 코드 `d2f6f627` 기준선.
+4. **상태:** parser + 신규 regression GitHub commit **완료**, 전수 Native·실 XLSX ZIP·Windows와 상용 출고 승인 대기.
+5. **오류/시도/금지/대안:** GitHub 인증 read와 Git data tree/commit/ref write 성공; 런타임에서 private github.com DNS 해석이 안 되어 전체 checkout 불가. 이전 기능 구현과 Native 테스트 결과를 혼용 금지. Private 소스를 Public URL/외부 서비스에 업로드해 우회하거나 무단 유료 GitHub Actions 실행 금지. 대안은 승인된 인증 로컬 17-file SHA checkout 및 `npm run test:preprocessing` 실행.
+6. **repo/branch/SHA/경로:** `hibi89/SMAX` Private, `preprocessing` HEAD `8cf9e0d897a20e1ad1c0601bbc3b64506cbe6e8e` (본 문서 commit 시 HEAD 갱신 확인). `preprocessing/xlsx-cells.mjs` blob `e888772c0d2429b38e9ea2d4563a77441be32b29`, `tests/xlsx-preflight.test.mjs` blob `bd48d5c26a943a10585a86e0a0a5b9fa8748237c`, `preprocessing/xlsx-package.mjs` 기존 blob `b113bd64c2dde496d688fbb0272c55df94d30501`.
+7. **배포/환경:** Node v22.16.0 이전 독립 Unicode QA PASS. GitHub 정본 전체 Native 이번 턴 미실행, Production/Cloudflare/Vercel URL 및 SHA 없음.
+8. **백업/권한/데이터:** GitHub Private SHA 이전 HEAD 복구점. 테스트 데이터 가상 OOXML (`東京`, `とうきょう`)만, 실고객/토큰/실문서/유료 API 없음. 타 3 branches·해커톤 repo 무변경, force push/merge/서비스 배포 없음.
+9. **다음 순서 및 완료 기준:** 17+ 파일 Git blob 정본 복원 → `npm run test:preprocessing` **62/62 실제 PASS** 판정(실제 실행값 우선) → synthetic XLSX ZIP CR C/Formula/sharedStrings parity → 전체 `npm test`·Windows 경계 → generic provenance importer. 추가 비용·배포·고객 데이터는 별도 승인.
+10. **갱신 시점/범위:** 2026-10-27 KST, 원격 GitHub parser/validator/test 실제 원본 조회 및 V8 부분 실행 근거. 전체 Native/최종 출시 상태 미확정.
+

@@ -343,3 +343,8 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 - Native 전체 preprocessing 59/59은 이전 `d2f6f627` 기준선 이력. Unicode 신규 회귀와 이번 혼합 입력 회귀를 포함한 최신 약 61개 `npm run test:preprocessing`는 **NOT_RUN**. 전체 Windows/CI/Production·상용 출고 미검증, URL 해당 없음.
 - 다음 `ㄱ`: `STATUS.md`/전용 `PREPROCESSING_HANDOFF.md`의 마지막 기록 → 최신 preprocessing SHA 확인 → 원격 정본 17파일 완전 복구 후 Native 전체·CSV/XLSX 합성 E2E 검증 → 공통 데이터 provenance 계층. Private 소스 Public 반출/유료 API/실고객 자료/배포·판매 무단 작업 금지.
 
+## 2026-10-27 KST — preprocessing XLSX ruby phonetic correction
+- Private `hibi89/SMAX` `preprocessing`에서 후리가나 `rPh/phoneticPr`가 raw visible text에 합쳐지던 정확성 결함을 수정. 원격 코드 commit `8cf9e0d897a20e1ad1c0601bbc3b64506cbe6e8e`; `preprocessing/xlsx-cells.mjs` + `tests/xlsx-preflight.test.mjs` 수정. 화면 표시 `東京` 추출 시 종전 `東京とうきょう` 오염 재현 후 새 가시 텍스트 helper로 해결.
+- 원격 체크인 파일을 V8로 실제 실행해 synthetic XML 7/7 PASS, 코드/parser/test syntax 3/3 PASS. 전체 `npm run test:preprocessing` 현재 정적 62건 **NOT_RUN**, 과거 Native 59/59는 이전 commit 기준선만. ZIP E2E/Windows/CI/Production 미검증.
+- 재개: `PREPROCESSING_HANDOFF.md` 최신 10항 인계 및 `STATUS.md` 최신 마지막 기록 확인, 정확한 preprocessing HEAD/SHA→ 인증 정본 전체 17파일 복원 → Node 22 Native 62건 → CSV/XLSX real ZIP synthetic parity QA. Private 코드 Public 반출, 타 브랜치 자동 merge, 대회별 코드 변형, 지출·배포 금지.
+

@@ -357,3 +357,12 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 - **미검증:** 선행 `d2f6f627` 코드 기준 Native `npm run test:preprocessing` 59/59 PASS는 기존 기록 그대로. 그 이후 Unicode 회귀 + 이번 혼합 payload 회귀가 추가되어 현재 약 61건 Native 통합 테스트는 **NOT_RUN**. ZIP 바이너리 E2E/전체 `npm test`/Windows/CI/Production 미실행. 비공개 저장소 전체를 현재 컨테이너로 복원하는 GitHub DNS/다운로드 경로 제한 지속; GitHub Actions 유료 가능성 때문에 무단 실행 없음.
 - **안전/범위:** 오직 Private preprocessing 2개 코드/테스트와 본 문서만 변경; `main/frontend/backend`, 해커톤별 저장소, 고객 데이터·외부 API·판매·배포 무변경. 다음은 안전한 full source SHA-verified checkout → 전수 Native QA → 공통 provenance adapter 설계.
 
+## 2026-10-27 KST — XLSX phonetic annotation visible-text fix
+- **시작 HEAD**: `39c38d47919016ba4bcfca9146a12c4b71955e49`. `preprocessing/xlsx-cells.mjs`의 기존 `descendants(si,'t')` / inline descendant `t` 결합은 후리가나 `<rPh><t>...` 텍스트까지 셀 원문 값으로 오염시켰음. 실제 생산 파서 V8 재현: `東京` → 잘못된 `東京とうきょう`.
+- **수정**: `visibleStringText` helper에서 OOXML 발음 주석 `rPh`, `phoneticPr`의 하위 노드를 제외하고 표시 텍스트 `t`만 순서대로 결합. Rich text, shared string, inline string 처리와 formula-like review 규칙을 유지. 고객 원문 수정·자동승인·외부 API 호출 없음.
+- **코드 GitHub 커밋**: `8cf9e0d897a20e1ad1c0601bbc3b64506cbe6e8e`; parser blob `e888772c0d2429b38e9ea2d4563a77441be32b29`, 회귀 test blob `bd48d5c26a943a10585a86e0a0a5b9fa8748237c`. `tests/xlsx-preflight.test.mjs`에 shared/inline rich text+phonetic 원본 parity 검증 1개 등록.
+- **재검증**: 커밋된 parser 및 validator GitHub 실제 원문으로 V8 합성 XML 케이스 **7/7 PASS**, 모듈 3개 구문검사 **3/3 PASS**. 정상 rich/single/inline, 발음 주석 속 수식형 문자열에 따른 거짓 검토 방지, 눈에 보이는 수식형 문자열의 `NEEDS_REVIEW` 유지를 확인함. source byte hash 및 ZIP 압축해제는 이 격리 검사 미포함.
+- **Native 통합 현황**: 기존 `d2f6f627`의 `npm run test:preprocessing` **59/59 PASS** (기준선). 이후 Unicode 검토+XLSX 혼합값+phonetic 총 3개 회귀가 추가되어 현재 체크인 테스트는 **62개(정적 선언 개수 기준)**. 최신 `npm run test:preprocessing` **NOT_RUN**, 독립 Node Unicode predicate는 이전 16/16 PASS. 압축된 실제 XLSX E2E/전체 `npm test`/Windows/CI/Production 역시 NOT_RUN. 현 런타임에는 비공개 저장소 17파일 정본 체크아웃이 없고 GitHub DNS 접근 불가, GitHub Actions 자동 실행은 하지 않음.
+- **범위/비용**: Private preprocessing 내 code+test 및 본 인계 파일만 수정. `main/frontend/backend`, 해커톤 레포, 고객·개인정보, 결제, 배포·공개 변경 없음.
+- **다음**: 정본 SHA별 17파일 복원 가능한 인증 Node 실행 환경에서 `npm run test:preprocessing` 62건 실제 실행 및 synthetic XLSX ZIP parity E2E → 실무 Excel 파일의 지원/한계 점검 → 범용 텍스트/셀 provenance 보강.
+
