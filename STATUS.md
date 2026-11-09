@@ -1,3 +1,5 @@
+> **2026-11-10 KST — SMAX² PREP→SELF 로컬 미리보기 구현(완성률 45% 유지):** `preprocessing/self-preview-gate.mjs` 및 `tests/self-preview-gate.test.mjs` 신규. `SMAX_PREPROCESS_GENERIC_CSV_V1` 원본을 다시 읽어 전체 영수증 대조·명시 date/channel/amount 열 매핑/타입/기간 확인; PREP·SELF 검토 항목은 `REVIEW_HOLD`, 검토 없을 때에만 집계 초안을 `READY_FOR_OWNER_REVIEW`로 반환. 승인/쓰기/결제/외부연결/고객 행·원본 CSV 반환 없음. 전처리 자체 Native 전체 `npm run test:preprocessing`는 **미실행**; GitHub 실제 기존 모듈과 신규 소스·테스트의 **격리 V8 14/14 PASS (SHA256·UTF8 test double 사용, Native Node CI가 아님)**, 별도 작성한 동형 파일 Node22 `--check` 통과. 정확 기능코드 GitHub SHA `037576e74359e2961838dc8891b7f196c47ece03`. private 브랜치 `preprocessing`에만 코드·테스트·문서 추가; `main`, `frontend`, `backend`, 고객 원본, 권한/배포/과금 수정 없음. 완성률 **45% 잠정 유지**, Native Node 전체 회귀·Windows·브랜치간 SELF 통합/실고객 검증 미완, RELEASE HOLD. [기능 계약](docs/PREP_SELF_PREVIEW_GATE_20261110.md).
+
 # STATUS — 2026-10-25 KST
 
 | 항목 | 판정 | 비고 |

@@ -1,3 +1,18 @@
+# SMAX² PREP → SELF P3 verified-scope handoff — 2026-11-10 KST
+
+1. **목표·요구·기술:** SMAX² 최종상품 SELF+PREP 기능을 안전하게 연결. Python/AI 대신 Node20+ 표준 JS, `hibi89/SMAX` 비공개 `preprocessing` 브랜치에서만 로컬 CSV 미리보기. 기존 PREP Generic V1 package/SELF `buildSalesReport` 그대로 재사용. 소유자 승인 없는 자동 처리 금지.
+2. **완료 기능·결정 근거:** A 직접 브랜치 병합/자동 매출 집계 vs B 제한적 adapter. A는 frontend/prep/Main drift·상태승인·데이터유출 위험이 크고 권한 변경을 수반; **B** 선택. `buildSelfPreviewFromPrep(csv, package, {mapping,period})`는 원본부터 PREP V1 재계산하여 패키지 위조/변경 검출, 명시 정확 3열 검증, 2MiB/20k행 제한, PREP 검토 미완이면 `REVIEW_HOLD`, SELF 집계에서 제외 행 있어도 HOLD. 정상에도 `READY_FOR_OWNER_REVIEW`, `NOT_GRANTED`·`NOT_PERFORMED`. 집계 초안 요약만 반환, 원본행/고객 채널/파일 저장·외부전송 없음.
+3. **테스트 명령·PASS/FAIL·검증 한계:** `node --test tests/self-preview-gate.test.mjs`, `npm run test:preprocessing`, `node --check preprocessing/self-preview-gate.mjs`. **격리 V8에서 실제 GitHub 기존 `site/csv-transform.mjs`, `preprocessing/generic-csv.mjs`, `site/sales-report.mjs` + 신규 모듈/14개 테스트 실행 결과 14 PASS/0 FAIL**. 해시와 UTF8 API는 test double이며 native Node 전체 검증이 아님. 별도 동형 작성 파일 Node22 `--check` 2개 PASS, 실제 GitHub 바이트 동일성 Node --check **미검증**. `preprocessing` GitHub Actions 조회 결과 이 시점 0건; Windows/고객 원본/로컬 네이티브 통합 미검증.
+4. **완료/진행/차단:** 새 안전 접점 구현·격리 검증, GitHub 기능/테스트 반영. 두 브랜치 실제 UI 통합 E2E/전체 NPM/Windows/배포/상용권 대기. 최종상품 완성률 **45%(잠정, 미상향)**. 기술 제한을 누락해 46% 이상 인정 금지.
+5. **오류·시도·재시도 금지·대안:** Private repo DNS 접근 불가 `git ls-remote`(Could not resolve host github.com)로 컨테이너 전체 native checkout 불가; GitHub 커넥터를 통해 원본 소스 조회·비공개 브랜치 안전 커밋으로 전환. GitHub native CI 0회 및 테스트 mock 범위 정직하게 표기. 동일 무증거 네트워크 반복·새 유료 CI/권한 변경 금지. 사용자 로컬 Windows Node 또는 접근 승인된 GitHub runner에서 추후 온전한 repo 테스트.
+6. **저장소/브랜치/SHA/경로:** `hibi89/SMAX@preprocessing`, 기능 코드 검증범위 SHA `037576e74359e2961838dc8891b7f196c47ece03`; 원 이전 SHA `ff94d0cd971ab143eb4b8b7665f308f85fb6df97`로 복구 가능. `preprocessing/self-preview-gate.mjs`, `tests/self-preview-gate.test.mjs`, `package.json`, `preprocessing/README.md`, `docs/PREP_SELF_PREVIEW_GATE_20261110.md`.
+7. **Production/Vercel·명령·실행환경:** 로컬 Node CLI 미리보기 함수만 추가; Vercel/Cloudflare Production 변경 **미적용**. 검증된 V8 임시 실행과 Node22 소스 구문, 실제 고객 Windows Node22 실기기 미실행. `npm run test:preprocessing` 아직 실행 증거 없음.
+8. **원본/백업·인증/수정금지:** Private SMAX 원본 소스·실 고객파일/비밀·토큰·모델 사용하지 않음. 버전 복구는 이전 GitHub SHA. `main`, `frontend`, `backend`, RAG_STUDIO와 public 도구 수정 없음. 고객자료 GitHub·로그·무료 LLM 업로드 금지. 승인/결제/배포 정책 불변.
+9. **다음 작업·완료 기준·승인:** 우선 전체 원본 checkout에서 `npm run test:preprocessing`와 실제 Node20+ 테스트, Native SHA 확인, 합성 CSV 원본 불변+개인정보 유출 없는 통합 E2E. 이후 명시 승인형 UI 연결·Windows 실기기/패키지 시험, 고객자료/공개 배포/비용/권한은 사전 소유자 승인. 사용자가 직접 해야 하는 Windows 검증은 마지막에 한 번에 모은다.
+10. **갱신 KST·확인 범위·기준 커밋:** 2026-11-10 KST, GitHub 실제 Source/HEAD(기능 `037576e74359e2961838dc8891b7f196c47ece03`) 및 격리 테스트 14 PASS/0 FAIL만 확인. 후속 문서 커밋은 Push 후 HEAD 재조회. 45% 잠정, RELEASE HOLD.
+
+---
+
 # HANDOFF — 2026-10-25 KST
 
 ## 결정
