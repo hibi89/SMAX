@@ -1,0 +1,28 @@
+{
+  "columns": [
+    {
+      "key": "date",
+      "source": "일자",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "channel",
+      "source": "판매처",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "amount",
+      "source": "금액",
+      "type": "decimal",
+      "required": true
+    }
+  ],
+  "mapping": {
+    "date": "일자",
+    "channel": "판매처",
+    "amount": "금액"
+  },
+  "period": "monthly"
+}
