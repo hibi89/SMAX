@@ -1,3 +1,5 @@
+> **P4 추가 Native CLI 검증(2026-11-10 KST):** 정확 SHA `8a59c0877655ff734251e131c162e6dbceb05fed` 일치하는 새 CLI 소스를 Node22.16 실제 자식 프로세스로 호출해 **3/3 PASS**: 정상 입력 exit0/JSON stdout, 미허용 `--approve` exit1/정적 stderr·stdout 없음, 미존재 입력 경로 exit1/경로 비노출. 기존 Node Native fd/UTF8/symlink smoke **11/11 PASS**와 합계 **Native 독립 14/14 합성 확인**. **중요:** 두 검사 모두 PREP Generic CSV와 SELF report는 **시험용 mock 모듈**을 사용, 실제 repo 전체 `npm run test:preprocessing` 및 신규 Native 통합 테스트 16개 **미실행**. SMAX² 45% 그대로, 최종상품률·판매 승인 미상향.
+
 # SMAX² P4 handoff — Local PREP→SELF CLI, 2026-11-10 KST
 
 1. **목표·용도·확정 요구·기술:** Private `hibi89/SMAX@preprocessing`에서 PREP Generic V1 → SELF 매출 초안의 소유자 입력형 로컬 실행을 제공. Node20+ 표준 내장 파일 I/O·UTF-8·CPU만 사용; 네트워크/모델/유료 API/고객 원본 변경 없음. 16종 크몽 상품에서 SMAX² 완성률 **45%** 잠정, 독립 상품 유지.

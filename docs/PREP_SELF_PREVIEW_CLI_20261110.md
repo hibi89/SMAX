@@ -36,3 +36,6 @@ The JSON config has *exactly* `columns`, `mapping` and `period` fields. Columns 
 5. Current GitHub private `preprocessing` branch had 0 historical Actions runs; do not enable paid private runner or modify workflow permissions without owner approval.
 
 **SMAX² final product completion remains provisional 45%; commercial RELEASE HOLD.** Separate 16-product command center average is simple arithmetic, not a sales-ready or weighted product completion assessment.
+
+> **P4 추가 Native CLI 검증(2026-11-10 KST):** 정확 SHA `8a59c0877655ff734251e131c162e6dbceb05fed` 일치하는 새 CLI 소스를 Node22.16 실제 자식 프로세스로 호출해 **3/3 PASS**: 정상 입력 exit0/JSON stdout, 미허용 `--approve` exit1/정적 stderr·stdout 없음, 미존재 입력 경로 exit1/경로 비노출. 기존 Node Native fd/UTF8/symlink smoke **11/11 PASS**와 합계 **Native 독립 14/14 합성 확인**. **중요:** 두 검사 모두 PREP Generic CSV와 SELF report는 **시험용 mock 모듈**을 사용, 실제 repo 전체 `npm run test:preprocessing` 및 신규 Native 통합 테스트 16개 **미실행**. SMAX² 45% 그대로, 최종상품률·판매 승인 미상향.
+
