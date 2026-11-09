@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "source_a",
+      "input": "synthetic-self-preview.csv",
+      "config": "synthetic-self-preview.config.json"
+    },
+    {
+      "id": "source_b",
+      "input": "synthetic-self-preview-b.csv",
+      "config": "synthetic-self-preview.config.json"
+    }
+  ]
+}

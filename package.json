@@ -6,8 +6,9 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "serve": "python -m http.server 8788 --directory site",
-    "test:preprocessing": "node --test tests/preprocessing-package.test.mjs tests/preprocessing-cli.test.mjs tests/preprocessing-schema.test.mjs tests/preprocessing-generic.test.mjs tests/preprocessing-generic-schema.test.mjs tests/xlsx-preflight.test.mjs tests/plain-text.test.mjs tests/html.test.mjs tests/document-schemas.test.mjs tests/docx.test.mjs tests/self-preview-gate.test.mjs tests/self-preview-cli.test.mjs",
-    "preview:self": "node preprocessing/self-preview-cli.mjs"
+    "test:preprocessing": "node --test tests/preprocessing-package.test.mjs tests/preprocessing-cli.test.mjs tests/preprocessing-schema.test.mjs tests/preprocessing-generic.test.mjs tests/preprocessing-generic-schema.test.mjs tests/xlsx-preflight.test.mjs tests/plain-text.test.mjs tests/html.test.mjs tests/document-schemas.test.mjs tests/docx.test.mjs tests/self-preview-gate.test.mjs tests/self-preview-cli.test.mjs tests/self-preview-batch.test.mjs",
+    "preview:self": "node preprocessing/self-preview-cli.mjs",
+    "preview:batch": "node preprocessing/self-preview-batch.mjs"
   },
   "engines": {
     "node": ">=20"
