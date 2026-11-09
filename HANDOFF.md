@@ -1,3 +1,18 @@
+# SMAX² P4 handoff — Local PREP→SELF CLI, 2026-11-10 KST
+
+1. **목표·용도·확정 요구·기술:** Private `hibi89/SMAX@preprocessing`에서 PREP Generic V1 → SELF 매출 초안의 소유자 입력형 로컬 실행을 제공. Node20+ 표준 내장 파일 I/O·UTF-8·CPU만 사용; 네트워크/모델/유료 API/고객 원본 변경 없음. 16종 크몽 상품에서 SMAX² 완성률 **45%** 잠정, 독립 상품 유지.
+2. **기능·결정 근거:** A UI 브랜치 즉시 병합/자동 실행 vs B PREP 브랜치 메모리 소비형 CLI. 안전·성능·비용·회귀 위험으로 **B** 선택. `node preprocessing/self-preview-cli.mjs --input <local.csv> --config <local.json>`, 엄격 인수, config는 `{columns,mapping,period}`, 2MiB CSV/64KiB config/strict UTF8, 기존 경로 일반 파일 확인 및 원본 변경 확인, symlink/신규 출력/파일 쓰기·비허가 API 전부 거부. P3 gate는 PREP/SELF 검토 대상 HOLD/집계 초안만 반환. 원본 및 customer columns/rows 무출력. 종료 0 READY(승인 아님), 2 HOLD, 1 INVALID.
+3. **테스트 명령·결과·미검증:** 실제 exact CLI SHA `8a59c0877655ff734251e131c162e6dbceb05fed` 로컬 git hash-object 일치, Node22.16 `node --check` **PASS**, 동일 파일+가짜 PREP/SELF 모듈 Native 파일 I/O smoke **11/11 PASS/0 FAIL**(UTF8 오류, 2MiB 제한, symlink, 파일 불변, parser flag, strict config 포함). `tests/self-preview-cli.test.mjs`에 **16 Native child-process 통합 테스트 작성/저장**했으나 실제 원본 PREP/SELF가 함께 있는 전체 Node `npm run test:preprocessing` **NOT_RUN**, 16/16 PASS 아님. 기존 P3 격리 V8 14/14 (SHA/UTF8 test doubles) 별개. 현재 GitHub Actions on `preprocessing` **0건**, 유료 runner 무단 변경 금지.
+4. **완료/진행/대기·차단:** P3 메모리 계약과 P4 Native CLI 파일 게이트/README/docs/합성 fixture/테스트 16개 추가 GitHub 반영. 기존 45%에서 수치 상향 없음 — 통합 Node Native 소스 전체 tests 미검증, Windows Native·실 UI 간 병합/실고객 E2E/라이선스·상용판매 HOLD.
+5. **실패 근거·원인·시도·대안:** Private GitHub 컨테이너 직접 네트워크 클론이 이전 세션에서 DNS 실패했고, 동일 무효 방식 반복 안 함. GitHub 앱으로 원본 정확 소스/Blob CRUD, Node Native 파일 I/O는 정확 새 CLI 자체만 로컬 구동. PREP/SELF 도메인 mock 대신 실제 소스 전체 통합 환경이 필요하다는 한계. 다음은 사용자 승인된 local checkout (또는 정책/비용 검토된 Actions)에서 전체 `npm run test:preprocessing` 수행; CI 0건이 장애/실패를 뜻하지는 않음.
+6. **저장소·브랜치·SHA·경로:** `hibi89/SMAX@preprocessing` 기능+테스트 커밋 `9358eb0a383b2d89b2bb574a8ac88577542bf334`. 이전 P3 docs-only HEAD `101a9d3f9f82e1a285b2d1b2ea8cac1605ee9bea`로 복구. 신규 `preprocessing/self-preview-cli.mjs`, `tests/self-preview-cli.test.mjs`, `preprocessing/examples/synthetic-self-preview.{csv,config.json}`, `docs/PREP_SELF_PREVIEW_CLI_20261110.md`; `package.json` 추가 scripts. P3 기능 SHA `037576e74359e2961838dc8891b7f196c47ece03` 그대로.
+7. **Production URL/Vercel·실행/환경:** 개인 로컬 Node CLI만; Vercel/Cloudflare Production URL **미적용**, 브라우저 프론트 UI 수정 없음. Native Node22.16 CLI 정확 파일 static + Stub IO smoke / 실제 GitHub repo Native suites 미검증.
+8. **원본·백업·비밀·수정 금지:** 기존 branch SHA로 복구. 모듈은 source/config를 읽기만 하며 실고객자료·비밀·키/토큰/원본 Excel/CSV·브랜치(main/frontend/backend)·RAG/해커톤 다른 저장소 무수정. 고객 데이터는 GitHub/로그/외부 모델에 올리지 않음.
+9. **다음 작업·완료 기준·승인:** 정확 repo checkout에서 `npm run test:preprocessing`와 `node --test tests/self-preview-cli.test.mjs` 실행, 예상 16건 원본 소스 통합 테스트; 오류 수정 후 검증 통과하면 **최종상품 완성률 재평가(45→?)**. 이어서 SELF UI 연결(브랜치 자동 merge 없이 계약 기반), Windows PC/실고객 설치/보안·가격 검증 일괄. CI runner 비용/권한/상용배포는 별도 사전 승인.
+10. **갱신시점·범위·문서 SHA:** 2026-11-10 KST, GitHub 기능 SHA `9358eb0a383b2d89b2bb574a8ac88577542bf334` 및 new CLI blob sha + Native Node22 standalone tests만 증거. 문서-only SHA는 후속 push 후 실제 재조회할 것. CURRENT: 45% / 100%, Native full NOT_RUN, RELEASE HOLD.
+
+---
+
 # SMAX² PREP → SELF P3 verified-scope handoff — 2026-11-10 KST
 
 1. **목표·요구·기술:** SMAX² 최종상품 SELF+PREP 기능을 안전하게 연결. Python/AI 대신 Node20+ 표준 JS, `hibi89/SMAX` 비공개 `preprocessing` 브랜치에서만 로컬 CSV 미리보기. 기존 PREP Generic V1 package/SELF `buildSalesReport` 그대로 재사용. 소유자 승인 없는 자동 처리 금지.

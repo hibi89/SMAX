@@ -1,3 +1,5 @@
+> **PREPROCESSING P4 신규 인수인계(2026-11-10 KST):** `preprocessing/self-preview-cli.mjs` 및 합성 data/config + native integration test 16개 신규 저장. 단독 Node22 새 CLI SHA一致 `8a59c0877655ff734251e131c162e6dbceb05fed` 확인, Native bounded-file-I/O mock smoke 11/11 PASS. 실제 원본 Generic CSV/SELF와 native 전체 Node NPM 실행은 미검증, 자동 승인/쓰기/외부 호출 없음. 개발 `preprocessing` 커밋 `9358eb0a383b2d89b2bb574a8ac88577542bf334`; 전 단계 P3 gate만 이어 사용, 다른 branch/해커톤/고객/상용 변경 없음. 다음은 `npm run test:preprocessing` 전체 Native. SMAX² 최종상품 45% 유지. [P4 기술 문서](docs/PREP_SELF_PREVIEW_CLI_20261110.md).
+
 > **최신 사용자 지시(2026-10-27):** `preprocessing` 총괄은 범용 전처리 엔진 자체 완성·검증만 맡는다. 각 해커톤 총괄/해총이 필요한 코드를 가져가 변형·연결한다. 전처리 총괄은 해커톤별 어댑터/타 레포 수정/대회 제출·통합 테스트를 담당하지 않는다. 기존 인수인계의 '대회별 adapter 작성'은 이 지시로 폐기한다.
 
 # SMAX PREPROCESSING 총괄 인수인계 — 2026-10-27 KST
