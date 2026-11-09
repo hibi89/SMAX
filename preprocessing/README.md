@@ -1,3 +1,5 @@
+> **2026-11-10 P3 PREP → SELF 로컬 집계 미리보기 게이트:** `preprocessing/self-preview-gate.mjs` / `tests/self-preview-gate.test.mjs` 추가. PREP `SMAX_PREPROCESS_GENERIC_CSV_V1`를 원본 CSV에서 다시 계산하고, 명시 매핑·필수 타입/승인상태 검증 후에만 기존 SELF 매출 엔진의 **집계 초안**을 읽기 전용으로 제공. PREP/SELF 검토 사유가 있으면 `REVIEW_HOLD`하고 자동 승인·고객 원본/파일 변경·외부 전송을 금지. [계약과 검증 제한](../docs/PREP_SELF_PREVIEW_GATE_20261110.md). 격리 V8 합성 14/14 PASS(crypto·UTF8 test double) 기록이며 **Native Node 전체 `npm run test:preprocessing` 및 Windows/정확 SHA GitHub Actions 미검증, 상용 HOLD**. frontend/main 자동 병합 없음.
+
 # SMAX² PREPROCESSING — Private reusable data layer 
 
 ## 최신 작업 분담 (2026-10-27)
