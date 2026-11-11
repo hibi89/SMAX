@@ -83,7 +83,7 @@ export function renderOwnerMappingHtml(headers, sha256){
   return '<!doctype html>\n<html lang="ko"><head><meta charset="utf-8">'+
     `<meta http-equiv="Content-Security-Policy" content="${escapeHtml(csp)}">`+
     '<meta name="viewport" content="width=device-width,initial-scale=1">'+
-    '<title>SMAX² SELF 로컬 열 매핑</title><style>'+
+    '<title>SMAX² SELF 로컬 열 매핑</title><style>'+ 
     'body{max-width:660px;margin:2rem auto;padding:0 1rem;font:16px system-ui;color:#172554}'+
     'label,select{display:block;margin:.7rem 0}select,button{padding:.6rem;font:inherit}'+
     'button{background:#172554;color:white;border:0;border-radius:6px}'+
