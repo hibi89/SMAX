@@ -62,7 +62,9 @@ export function readBoundedRegularFile(path, maxBytes) {
         !sameFile(after, onPath) || length > maxBytes) {
       throw new TypeError('Local source changed or exceeded size limit during read');
     }
-    return new TextDecoder('utf-8', {fatal: true}).decode(bytes.subarray(0, length));
+    // Retain a UTF-8 BOM in the decoded text. CSV parsing discards it for headers,
+    // but SHA-256 provenance must cover the *original on-disk bytes*.
+    return new TextDecoder('utf-8', {fatal: true, ignoreBOM: true}).decode(bytes.subarray(0, length));
   } finally {
     closeSync(fd);
   }
