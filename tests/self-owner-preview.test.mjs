@@ -11,10 +11,10 @@ const services=(modify=()=>{})=>({
  parseCsvRecords:()=>({headers:['날짜','채널','금액','메모'],records:[['2026-11-01','온라인','100','PRIVATE_938']]}),
  preprocessGenericCsv:(source,{columns})=>({source_sha256:sha,columns}),
  buildSelfPreviewFromPrep:(source,pkg,options)=>{
-  const r={source_sha256:sha,source_rows:1,status:'READY_FOR_OWNER_REVIEW',
+  const r={version:'SMAX_PREP_SELF_SALES_PREVIEW_V1',source_sha256:sha,source_rows:1,status:'READY_FOR_OWNER_REVIEW',reason:'LOCAL_DRAFT_ONLY',review_rows:0,eligible_rows:1,
    preprocessing_approval:'NOT_GRANTED',owner_approval:'NOT_GRANTED',
    execution:'NOT_PERFORMED',outbound_transfer:false,source_modified:false,
-   summary:{period:'daily',net_amount:'100.00'}};
+   summary:{period:'daily',group_count:1,included_rows:1,positive_amount:'100.00',negative_adjustment:'0.00',net_amount:'100.00'}};
   modify(r);return r;
  }
 });
@@ -41,11 +41,24 @@ test('P9 stale source, wrong owner mapping or forged approval rejects before out
  }
 });
 test('P9 preserves explicit HOLD without monetary values',()=>{
- const r=buildOwnerSelfPreview(csv,draft(),services(out=>{out.status='REVIEW_HOLD';out.summary=null;}));
+ const r=buildOwnerSelfPreview(csv,draft(),services(out=>{out.status='REVIEW_HOLD';out.reason='PREP_REVIEW_QUEUE_NOT_EMPTY';out.review_rows=1;out.eligible_rows=0;out.summary=null;}));
  assert.equal(r.status,'REVIEW_HOLD');assert.equal(r.summary,null);
  assert.equal(r.owner_authorization,false);
 });
 test('P9 refuses missing actual services and unbounded source',()=>{
  assert.throws(()=>buildOwnerSelfPreview(csv,draft(),{}),TypeError);
  assert.throws(()=>buildOwnerSelfPreview('x'.repeat(2*1024*1024+1),draft(),services()),TypeError);
+});
+
+test('P9 extra rows, forged monetary totals and invalid period are blocked',()=>{
+ for(const change of [
+  r=>{r.raw_rows=['PRIVATE_938'];},
+  r=>{r.summary.raw_rows=['PRIVATE_938'];},
+  r=>{r.summary.net_amount='101.00';},
+  r=>{r.summary.positive_amount='-100.00';},
+  r=>{r.summary.group_count=2;},
+  r=>{r.summary.period='monthly';},
+  r=>{r.eligible_rows=0;},
+  r=>{r.reason='OWNER_APPROVED';}
+ ])assert.throws(()=>buildOwnerSelfPreview(csv,draft(),services(change)),TypeError);
 });
