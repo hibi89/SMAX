@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;sha256-qtyUTvRCKxUMYVrdIz1ZXpeF4S/1sgm9ZrwNexXt6/8=&#39;; style-src &#39;unsafe-inline&#39;; connect-src &#39;none&#39;; img-src &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;"><title>SMAX² SELF · 로컬 CSV 시작</title><style>:root{color-scheme:light}body{font:16px system-ui,sans-serif;color:#11233c;background:#f3f6fc;margin:0}main{max-width:720px;background:white;margin:5vh auto;padding:2rem;border-radius:18px;box-shadow:0 9px 32px #132e5022}h1{margin-top:0}p{line-height:1.6}label{display:block;margin:1.1rem 0 .4rem;font-weight:600}select,input,button{font:inherit;padding:.7rem;max-width:100%;box-sizing:border-box}select{width:100%}button{background:#113a78;color:white;border:0;border-radius:8px;margin-top:1.2rem}button:disabled{opacity:.5}#status{background:#eaf0fa;padding:1rem;border-radius:8px;min-height:1.4rem}small{color:#465971}</style></head><body><main><h1>SMAX² SELF · CSV 시작</h1><p>원본 CSV를 이 브라우저에서 직접 선택하세요. <strong>파일 내용과 파일명은 외부로 전송하지 않습니다.</strong> 원본 해시와 선택한 열 이름만 매핑 JSON에 기록됩니다.</p><label for="csv">① UTF-8 CSV 선택 (2MiB 이하)</label><input type="file" id="csv" accept=".csv,text/csv"><label for="date">② 거래일 열</label><select id="date"></select><label for="channel">③ 판매채널 열</label><select id="channel"></select><label for="amount">④ 금액 열</label><select id="amount"></select><label for="period">⑤ 집계 기간</label><select id="period"><option value="monthly">월별</option><option value="daily">일별</option></select><button id="save" type="button" disabled>매핑 검토용 JSON 저장</button><p id="status" role="status">CSV 선택 후 열을 직접 지정하세요.</p><small>이 HTML은 열 매핑 초안만 만듭니다. 완전한 CSV 검토·실제 매출 집계는 별도의 PREP/SELF 로컬 검증기를 거쳐야 하며 자동 승인하지 않습니다.</small></main><script>(() => {
+'use strict';
+const byId=id=>document.getElementById(id);
+const status=byId('status');
+const save=byId('save');
+const chooser=byId('csv');
+const fields=['date','channel','amount'];
+const bad=/[\u0000-\u001f\u007f-\u009f\p{Default_Ignorable_Code_Point}]/u;
+let current=null;
+function fail(message){current=null;save.disabled=true;fields.forEach(k=>byId(k).replaceChildren());status.textContent=message;}
+function readHeader(text){
+ const raw=text.charCodeAt(0)===0xfeff?text.slice(1):text;
+ if(!raw.length)throw Error('CSV가 비어 있습니다.');
+ let fieldsOut=[],cell='',quoted=false,closed=false,i=0,finished=false;
+ while(i<raw.length){
+  const c=raw[i++];
+  if(quoted){if(c==='"'&&raw[i]==='"'){cell+='"';i++;}else if(c==='"'){quoted=false;closed=true;}else cell+=c;continue;}
+  if(c===','){fieldsOut.push(cell.trim());cell='';closed=false;continue;}
+  if(c==='\n'||c==='\r'){fieldsOut.push(cell.trim());finished=true;break;}
+  if(c==='"'){if(cell||closed)throw Error('CSV 따옴표 형식이 올바르지 않습니다.');quoted=true;continue;}
+  if(closed)throw Error('CSV 따옴표 형식이 올바르지 않습니다.');
+  cell+=c;
+ }
+ if(quoted)throw Error('CSV 따옴표가 닫히지 않았습니다.');
+ if(!finished)fieldsOut.push(cell.trim());
+ if(fieldsOut.length<3||fieldsOut.length>64)throw Error('열은 3~64개여야 합니다.');
+ const seen=new Set();
+ for(const h of fieldsOut){
+  if(!h||h.length>80||bad.test(h)||/^[=+@]/u.test(h))throw Error('안전하지 않은 열 이름입니다.');
+  const n=h.normalize('NFKC').toLocaleLowerCase('ko-KR').replace(/[\s_-]/gu,'');
+  if(!n||seen.has(n))throw Error('중복되거나 모호한 열 이름입니다.');
+  seen.add(n);
+ }
+ return fieldsOut;
+}
+// Pure synchronous SHA-256 over original bytes, compatible with untrusted file:// origins.
+// Avoids WebCrypto secure-context dependence; customer data stays in this tab.
+function sha256(bytes){
+ const k=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+  0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+  0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+  0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+  0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+  0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+  0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+  0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+ const h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+ const total=Math.ceil((bytes.length+9)/64)*64;
+ const pad=new Uint8Array(total);pad.set(bytes);pad[bytes.length]=128;
+ const bits=BigInt(bytes.length)*8n;
+ for(let i=0;i<8;i++)pad[total-1-i]=Number((bits>>BigInt(i*8))&255n);
+ const rotr=(x,n)=>(x>>>n)|(x<<(32-n));
+ const w=new Uint32Array(64);
+ for(let off=0;off<total;off+=64){
+  for(let i=0;i<16;i++){const p=off+i*4;w[i]=((pad[p]<<24)|(pad[p+1]<<16)|(pad[p+2]<<8)|pad[p+3])>>>0;}
+  for(let i=16;i<64;i++){
+   const a=w[i-15],b=w[i-2];
+   const s0=rotr(a,7)^rotr(a,18)^(a>>>3),s1=rotr(b,17)^rotr(b,19)^(b>>>10);
+   w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0;
+  }
+  let [a,b,c,d,e,f,g,j]=h;
+  for(let i=0;i<64;i++){
+   const t1=(j+(rotr(e,6)^rotr(e,11)^rotr(e,25))+((e&f)^((~e)&g))+k[i]+w[i])>>>0;
+   const t2=((rotr(a,2)^rotr(a,13)^rotr(a,22))+((a&b)^(a&c)^(b&c)))>>>0;
+   j=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a=(t1+t2)>>>0;
+  }
+  const r=[a,b,c,d,e,f,g,j];for(let i=0;i<8;i++)h[i]=(h[i]+r[i])>>>0;
+ }
+ return h.map(x=>x.toString(16).padStart(8,'0')).join('');
+}
+async function inspect(){
+ fail('CSV를 검사하는 중입니다.');
+ const file=chooser.files&&chooser.files[0];
+ if(!file||!/\.csv$/iu.test(file.name)||file.size<1||file.size>2*1024*1024){fail('2MiB 이하의 UTF-8 CSV 한 개를 선택하세요.');return;}
+ try{
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  if(bytes.byteLength!==file.size)throw Error('파일 크기가 검사 중 달라졌습니다.');
+  const text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
+  const headers=readHeader(text);
+  const sha=sha256(bytes);
+  if(chooser.files[0]!==file)throw Error('검사 중 파일 선택이 달라졌습니다.');
+  current={headers,sha};
+  for(const id of fields){
+   const s=byId(id);s.replaceChildren();
+   const choose=document.createElement('option');choose.value='';choose.textContent='직접 선택';s.appendChild(choose);
+   for(const h of headers){const option=document.createElement('option');option.value=h;option.textContent=h;s.appendChild(option);}
+  }
+  save.disabled=false;status.textContent=headers.length+'개 열을 확인했습니다. 열 3개를 직접 지정하세요. 원본 행은 표시하지 않습니다.';
+ }catch(error){fail('검토 중단: '+(error instanceof Error?error.message:'CSV 오류'));}
+}
+chooser.addEventListener('change',inspect);
+save.addEventListener('click',()=>{
+ if(!current){fail('먼저 CSV를 선택하세요.');return;}
+ const mapping=Object.fromEntries(fields.map(k=>[k,byId(k).value]));
+ const selected=Object.values(mapping);
+ if(selected.some(x=>!x||!current.headers.includes(x))||new Set(selected).size!==3){status.textContent='서로 다른 날짜·판매처·금액 열을 선택하세요.';return;}
+ const period=byId('period').value;
+ if(!['daily','monthly'].includes(period)){status.textContent='집계 기간을 확인하세요.';return;}
+ const draft={version:'SMAX_SELF_OWNER_MAPPING_DRAFT_V1',source_sha256:current.sha,mapping,period};
+ const bytes=new Blob([JSON.stringify(draft,null,2)+'\n'],{type:'application/json'});
+ const url=URL.createObjectURL(bytes);
+ const a=document.createElement('a');a.href=url;a.download='smax-owner-mapping.json';document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ status.textContent='매핑 검토 초안만 저장했습니다. 승인·원본 변경·집계 실행은 하지 않았습니다.';
+});
+})();</script></body></html>
