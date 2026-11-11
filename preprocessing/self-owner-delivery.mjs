@@ -57,15 +57,32 @@ function assertLocalDir(dirname){
  if(parent===abs||fs.realpathSync(parent)!==parent)fail();
  return abs;
 }
+// Read only the opened regular file, not a path re-resolved after preflight.
+const sameFile=(a,b)=>a.dev===b.dev&&a.ino===b.ino&&a.size===b.size&&
+ a.mtimeNs===b.mtimeNs&&a.ctimeNs===b.ctimeNs;
 function readBounded(p){
- const st=fs.lstatSync(p);
- if(!st.isFile()||st.isSymbolicLink()||st.size<1||st.size>MAX_BYTES)fail();
- const bytes=fs.readFileSync(p);
- const after=fs.lstatSync(p);
- if(!after.isFile()||after.isSymbolicLink()||after.size!==st.size||
-   after.mtimeMs!==st.mtimeMs||after.ino!==st.ino||after.dev!==st.dev||
-   bytes.length!==st.size)fail();
- return bytes;
+ const before=fs.lstatSync(p,{bigint:true});
+ if(!before.isFile()||before.isSymbolicLink()||before.size<1n||
+    before.size>BigInt(MAX_BYTES))fail();
+ const flags=fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW??0) |
+  (fs.constants.O_NONBLOCK??0);
+ const fd=fs.openSync(p,flags);
+ try{
+  const opened=fs.fstatSync(fd,{bigint:true});
+  if(!opened.isFile()||!sameFile(before,opened))fail();
+  const bytes=Buffer.alloc(Number(opened.size)+1);
+  let length=0;
+  while(length<bytes.length){
+   const n=fs.readSync(fd,bytes,length,bytes.length-length,null);
+   if(n===0)break;
+   length+=n;
+  }
+  const after=fs.fstatSync(fd,{bigint:true});
+  const onPath=fs.lstatSync(p,{bigint:true});
+  if(length!==Number(opened.size)||length>MAX_BYTES||!sameFile(opened,after)||
+     !onPath.isFile()||onPath.isSymbolicLink()||!sameFile(after,onPath))fail();
+  return bytes.subarray(0,length);
+ }finally{fs.closeSync(fd);}
 }
 export function writeOwnerDelivery(preview,outputDir,renderHtml){
  if(typeof renderHtml!=='function')fail();
