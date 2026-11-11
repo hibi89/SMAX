@@ -41,3 +41,10 @@ P17까지의 P8 사용 흐름은 소유자가 CLI에서 CSV를 먼저 지정하�
 - GitHub 이전 기능 SHA로 복구 가능, 원본 CSV 무변경, 인증/환경변수/민감정보/배포/결제·지출 없음.
 
 **Updated 2026-11-11 KST.** Latest feature branch docs commit and central hub sync SHA must be checked after writing.
+
+## P18 SHA256 53-length boundary regression — 2026-11-11 KST
+- Tested the **exact inline SHA256 function from the checked-in `site/owner.html` Git blob `b32e0a01c6e30bd8a73a6c468fdc0825a925bff4`** against Node native `createHash('sha256')`.
+- Actual Linux Node v22.16.0 source-derived test: **53 vectors PASS / 0 FAIL**, deterministic byte patterns, sizes **0 through 2,097,152 bytes**, block edges around 55/56/63/64/65/127/128 bytes, 4KiB, 64KiB, 1MiB, and exact 2MiB. This verifies the digest implementation over the entire accepted upper byte range; it does **not** mean that 2MiB CSV semantic processing passed.
+- New exact-source test file `tests/self-owner-portal-hash.test.mjs`, verified blob `faaa836ec7b745cb27e2675a13a7addfcab311c3`, feature commit `bdefbee8ef8794f5f926544666eda5df79c31caa`; added to `npm run test:preprocessing` in feature commit `74074304f3f2a32886337c7badccde5a62e46d72`.
+- A browser multi-download stress experiment was **inconclusive**: repeated downloads with an identical name were eventually blocked/throttled by the Chromium test profile (no SHA mismatch observed). After two attempts at that stress method, switched to direct Native digest extraction rather than treating a browser automation policy as a product defect. The separately verified **Chromium14/14** customer journey remains the valid browser evidence.
+- Product **76% provisional unchanged**; 85% not achieved, RELEASE HOLD. Full real repo/native suite and physical Windows/file:// still NOT_RUN.

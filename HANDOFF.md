@@ -497,3 +497,15 @@ E. 자연어→후보업무모델 추론, 부족한 규칙 재질문, 승인·�
 8. **원본 위치·백업/보안:** Only synthetic source CSV; client file not uploaded, row values not rendered, validation after download requires P8 source SHA, strict CSP no connect, no paid services, tokens/credentials/permission or billing. Stable `preprocessing` HEAD `3830cb276f560d58e8181ba384d9cbe64815737c`, main/frontend/backend unchanged. Git prior commit rollback.
 9. **다음 우선순위·완료 기준:** Acquire trusted authorized full private checkout for actual `npm run test:preprocessing`/`npm test`, authentic P18 browser JSON→P9→P12→P16 genuine CSV, Windows10/11 + Edge Chrome `file://` QA, SELF actual customer integration/installer/security/license. Confirm no secrets or unsupported automation. Escalate scope/paid/Production/perms only on approval.
 10. **KST 갱신 및 근거:** 2026-11-11, product exact blobs/native isolated P18 module + real Chromium; non-verified full repo/windows explicitly retained. Documentation anchor `docs/SMAX_P18_BROWSER_SELF_OWNER_PORTAL_20261111.md`. Hub KMONG 16-product roster must reflect 76% after final SHA confirmation.
+
+## 2026-11-11 KST P18 SHA-vector validation addendum
+1. Goal: validate the browser's own SHA-256 matches physical customer CSV bytes at all padding and size boundaries, without relying on network/WebCrypto.
+2. Implementation: `tests/self-owner-portal-hash.test.mjs` isolates exact embedded SHA function from checked-in static HTML and runs deterministic binary vectors against Node crypto. No production HTML edit, user original edit or behavior change.
+3. Test: Linux Node v22.16.0 **53 PASS / 0 FAIL** across 0..2MiB, including SHA pad boundaries. Earlier P18 Node 5 PASS and Chromium14 PASS retain own scope; full `npm run test:preprocessing`/`npm test` NOT_RUN.
+4. State: product 76% provisional unchanged, goal 85%, RELEASE HOLD, real Windows/customer not tested.
+5. Failure/pivot: repeated same-name Chromium Blob downloads eventually throttled by automation/browser policy; do not call this a product defect. Native algorithm extraction passed.
+6. Repo `hibi89/SMAX@feature/prep-self-owner-mapping-p8`, exact new test blob `faaa836ec7b745cb27e2675a13a7addfcab311c3`, test commit `bdefbee8ef8794f5f926544666eda5df79c31caa`, npm registration `74074304f3f2a32886337c7badccde5a62e46d72`.
+7. Runtime: Node >=20 developer tests; Vercel/Cloudflare Production N/A.
+8. Originals/security: only synthetic deterministic byte vectors; no business data, changes to perms, deploy, billing or secrets.
+9. Next: full real Node repo suite and P18 JSON→P9→P12→P16 E2E plus Windows Edge file:// acceptance.
+10. Checked 2026-11-11 KST: exact source blob + Node22 targeted vectors, no entire product/Windows/full CI validation.

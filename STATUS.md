@@ -443,3 +443,7 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 - **실제로 실행한 범위:** GitHub에 반영된 정확 blob과 로컬 실행 파일 일치, Node22 Linux **5 PASS / 0 FAIL**, Chromium144.0.7559.96 **14 PASS / 0 FAIL**, 실제 P8 Node `validateOwnerDraft`가 브라우저 JSON 수용. BOM physical hash, 중복/hidden/formula 헤더, invalid UTF8/2MiB 경계, 악성 HTML header inert, 요청 0/JS 오류 0/원본 row 비표시.
 - **미검증:** 이 테스트 프로필은 직접 `file://`/localhost URL 탐색을 `ERR_BLOCKED_BY_ADMINISTRATOR`로 막았으므로 실제 브라우저 검증은 `page.set_content` 방식. Windows10/11 Edge에서 현장 HTML 파일 더블클릭과 전체 `npm run test:preprocessing`/`npm test`, P8→P9→P12→P16 실제 전체 CLI, SELF 설치/고객 검수/배포 NOT_RUN.
 - 제품 최종상품 완성률 **72% → 76% 잠정**(+4%p 실제 비개발자용 진입/고객 매핑 검증), 85%까지 9%p. **RELEASE HOLD**, 배포 미적용, 원본/기존 기능/안정 브랜치 보존. [P18 전체 근거](docs/SMAX_P18_BROWSER_SELF_OWNER_PORTAL_20261111.md).
+
+## 2026-11-11 KST — P18 물리 원본 SHA256 경계 회귀 53/53 PASS
+- GitHub 정적 HTML 원본 SHA `b32e0a01c6e30bd8a73a6c468fdc0825a925bff4`의 내장 SHA256 함수 그대로 추출해 Native Node22 `createHash`와 **53개 실제 바이트 길이(0B~2MiB) 전부 일치**. 추가 회귀 테스트 `tests/self-owner-portal-hash.test.mjs` blob `faaa836ec7b745cb27e2675a13a7addfcab311c3`, `npm run test:preprocessing` 등록.
+- Chromium 다중 동일 파일명 다운로드 스트레스는 테스트 브라우저 제한으로 미완료(코드 SHA 오류로 단정 금지). 앞선 브라우저 고객 흐름 14/14 + Node 원본 5/5 성공과 별개. **완성률 76% 잠정 유지** 및 RELEASE HOLD, 전체 Native/Windows/고객/실배포 미검증.
