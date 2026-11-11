@@ -421,3 +421,7 @@ XLSX numeric cells previously accepted arbitrary text as number_text. Fixed in p
 - Completion: **70% provisional unchanged → 70%**. 85% goal pending substantive native/full integration/customer readiness evidence, RELEASE HOLD. No stable branch merge, customer original data, external transfers, public source, paid API, accounts, GitHub Actions, production/Cloudflare changes.
 - New scope evidence: [P13/P14 verification notes](docs/SMAX_OWNER_PREVIEW_REVERIFY_P13_P14_20261111.md). Next task: exact-SHA full native `npm run test:preprocessing` and `npm test`, fix observed failures, Windows and authentic SELF entry flow, then reassess. Hub `kmong-productization` sync is a separate required action.
 
+## 2026-11-11 KST — P15 BOM 원본 바이트 SHA 무결성 결함 수정
+- 실제 제품 코드 `preprocessing/self-preview-cli.mjs`에서 UTF8 BOM 제거로 원본 파일 SHA256과 P8/P9 매핑 초안 SHA가 불일치할 수 있던 결함을 수정. `new TextDecoder('utf-8',{fatal:true,ignoreBOM:true})`로 읽기 결과에 BOM 유지, CSV 헤더 파서는 기존처럼 논리 헤더에서만 BOM 제거. 기능 커밋 `e0b765b38d318bd888744b2899c97b5fa6dbc078`, 테스트 커밋 `f105004da9b3fe887178af72bc3b58e9b95cfc3d` 및 `ba95856172bd8d62f88ef08ccbeaad7b7298b450`.
+- Node 22.16 Linux에서 **원격 GitHub 소스에서 추출한 실제 파일 읽기 함수**를 Native 별도 테스트하였으며 BOM 포함/미포함 원본 SHA, 원본 불변성, 잘못된 UTF8/크기 초과/symlink 차단 **7 PASS/0 FAIL**. 전체 import graph 또는 전체 Native `npm run test:preprocessing` 실행 증거 아님. 체크인 P15/P14 E2E·전체 npm test·Windows Edge·고객/SELF UI **NOT_RUN**.
+- 최종완성률 **70% 잠정 유지**, 목표 85%; RELEASE HOLD. `preprocessing` 안정/다른 제품 브랜치 원본 미변경. [P15 상세](docs/SMAX_P15_BOM_SOURCE_SHA_20261111.md).
