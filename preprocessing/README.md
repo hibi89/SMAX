@@ -231,3 +231,10 @@ P17 evidence: 6/6 isolated exact-source Native Node + 9/9 real Chromium-to-Node 
 `site/owner.html`은 CSV 선택 시 SHA를 저장한 뒤, **매핑 JSON 다운로드 및 저장된 JSON 재검증을 실행할 때 파일 바이트를 다시 읽어 해시를 일치 검사**한다. 파일 내용이 달라지거나 열/집계 기간을 비동기 검증 중 변경한 경우 초안을 저장·승인하지 않고 재선택을 안내한다.
 - Native: `node --test tests/self-owner-refresh.test.mjs` 정확 소스 4/4 PASS. Chromium: `SMAX_CHROMIUM_PATH=/usr/bin/chromium python tests/browser/self-owner-refresh-e2e.py` 25/25 PASS, JSON→기존 P8 Node validator 통과. Test mutation was simulated through the File API; not physical Windows disk races. Full private repo/npm/E2E/Windows file:// NOT_RUN.
 - 상세 [P20 보고서](../docs/SMAX_P20_SOURCE_REFRESH_GUARD_20261112.md). 상품 최종범위 **80% 잠정**, 목표85%, **RELEASE HOLD**.
+## P21 — Browser CSV → real Native PREP/SELF → three-file owner package acceptance (2026-11-12 KST)
+This acceptance now exercises actual saved browser JSON against real synthetic CSV disk files and original Node PREP/SELF modules (no virtual FS test doubles). `tests/browser/self-owner-browser-to-native-e2e.py` uses Chromium/Playwright and a complete checkout; it is **developer QA**, not a customer runtime dependency.
+```sh
+node --test tests/self-owner-mapping.test.mjs tests/self-owner-preview.test.mjs tests/self-owner-delivery.test.mjs tests/self-owner-fd-race.test.mjs tests/self-owner-e2e.test.mjs tests/self-owner-refresh.test.mjs
+SMAX_CHROMIUM_PATH=/usr/bin/chromium python tests/browser/self-owner-browser-to-native-e2e.py
+```
+**Measured:** exact-source Linux Node22 **34/34 PASS**, Chromium→real Node disk package **27/27 PASS**, original source/test file SHA **20/20 exact**. P20 prior Chromium UI **25/25 PASS**. Normal net90.00; HOLD summary=null; original files preserved; P16 tamper, symlink, extra-file and source mismatch checks passed. Direct `file://` and Windows not validated; full `npm run test:preprocessing` / `npm test` NOT_RUN. Whole product **85% provisional**, RELEASE HOLD. [P21 report](../docs/SMAX_P21_NATIVE_OWNER_CUSTOMER_E2E_20261112.md).
