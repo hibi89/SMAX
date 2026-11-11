@@ -204,3 +204,12 @@ npm run test:preprocessing
 ```
 
 The `--verify` command reads the existing exclusive `manifest.json`, `receipt.json`, and `report.html`, verifies SHA-256 and deterministic report integrity, and returns a review-only JSON status. It does **not** read the original customer CSV, grant approval, execute a workflow, repair files, or transmit data. This proves the saved package is internally consistent, not that its source was independently authenticated by a third party. Native real-file P8→P12 coverage is checked into `tests/self-owner-e2e.test.mjs`, but has **not yet been run or passed** on a full checkout. Product status stays 70% provisional, RELEASE HOLD. [Evidence](../docs/SMAX_OWNER_PREVIEW_REVERIFY_P13_P14_20261111.md).
+
+## P17 — optional live Chromium P8 owner mapping acceptance (2026-11-11)
+The customer-facing P8 header mapping HTML can be tested end-to-end through an **actual Chromium browser** (CSP, JS, dropdowns, download) and the **actual Node `validateOwnerDraft`** module, with strictly synthetic CSV, no external network or customer source rows:
+```sh
+node --test tests/self-owner-mapping.test.mjs
+# Only if Python Playwright + Chromium are already installed:
+SMAX_CHROMIUM_PATH=/usr/bin/chromium python tests/browser/owner-form-e2e.py
+```
+P17 evidence: 6/6 isolated exact-source Native Node + 9/9 real Chromium-to-Node cross-validation. The test uses Playwright `page.set_content`; **not** a Windows/Edge or `file://` acceptance, which this sandbox browser profile blocks. Optional QA dependencies do not ship with product and are not installed automatically. The full `npm run test:preprocessing`, entire CSV→P9→P12→P16 run, Windows usage and actual SELF app remain NOT_RUN. Whole final product **72% provisional**, RELEASE HOLD. [P17 report](../docs/SMAX_P17_CHROMIUM_OWNER_FORM_ACCEPTANCE_20261111.md).
