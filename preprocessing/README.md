@@ -227,3 +227,7 @@ P17 evidence: 6/6 isolated exact-source Native Node + 9/9 real Chromium-to-Node 
 - P19 HTML blob `cf56242d40dc748ab42ec17bb1bc674d5ce03327`. 포털 CLI는 유효한 HTML·CSP를 신규 파일 열기 전에 완전히 검사하므로 잘못된 자산이면 대상 생성하지 않는다. 이미 있는 경로는 독점 잠금으로 덮어쓰기 거부.
 - 검증: Node22 `node --test tests/self-owner-portal.test.mjs tests/self-owner-portal-hash.test.mjs tests/self-owner-portal-csp-failclosed.test.mjs` **8/8 PASS** (기존 hash 경계 53입력 포함). `SMAX_CHROMIUM_PATH=/usr/bin/chromium python tests/browser/self-owner-draft-reverify.py` **18/18 PASS**, Playwright/Chromium은 개발 QA에만 필요, 제품 구동 의존성 아님. P9 소스 알고리즘 V8 17/17은 **Native 전체 검증이 아님**.
 - `npm run test:preprocessing` 전체, PREP→SELF→P12 패키지 실제 디스크 통합, Windows `file://`/Edge/고객·설치는 아직 미검증. **최종 79% 잠정/85% 미달/RELEASE HOLD**. [P19 보고서](../docs/SMAX_P19_DRAFT_REVERIFY_AND_FAILCLOSED_20261111.md).
+## P20 — 저장 시점 CSV 원본 SHA 최신 확인 (2026-11-12)
+`site/owner.html`은 CSV 선택 시 SHA를 저장한 뒤, **매핑 JSON 다운로드 및 저장된 JSON 재검증을 실행할 때 파일 바이트를 다시 읽어 해시를 일치 검사**한다. 파일 내용이 달라지거나 열/집계 기간을 비동기 검증 중 변경한 경우 초안을 저장·승인하지 않고 재선택을 안내한다.
+- Native: `node --test tests/self-owner-refresh.test.mjs` 정확 소스 4/4 PASS. Chromium: `SMAX_CHROMIUM_PATH=/usr/bin/chromium python tests/browser/self-owner-refresh-e2e.py` 25/25 PASS, JSON→기존 P8 Node validator 통과. Test mutation was simulated through the File API; not physical Windows disk races. Full private repo/npm/E2E/Windows file:// NOT_RUN.
+- 상세 [P20 보고서](../docs/SMAX_P20_SOURCE_REFRESH_GUARD_20261112.md). 상품 최종범위 **80% 잠정**, 목표85%, **RELEASE HOLD**.
