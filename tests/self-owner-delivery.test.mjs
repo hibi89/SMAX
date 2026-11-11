@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {buildSingleOwnerBatch,writeOwnerDelivery,verifyOwnerDelivery} from '../preprocessing/self-owner-delivery.mjs';
+import * as cli from '../preprocessing/self-owner-delivery-cli.mjs';
 const sha='a'.repeat(64);
 const preview=()=>({version:'SMAX_PREP_SELF_SALES_PREVIEW_V1',source_sha256:sha,
  owner_mapping_sha256:sha,mapping_reviewed_for_preview:true,owner_authorization:false,
@@ -54,4 +55,26 @@ test('P11 symlinked report file is refused',t=>{
  const file=path.join(dir,'report.html'),target=path.join(path.dirname(dir),'external.html');
  fs.renameSync(file,target);try{fs.symlinkSync(target,file);}catch{return t.skip('symlink unavailable');}
  assert.throws(()=>verifyOwnerDelivery(dir,renderer),TypeError);
+});
+
+test('P13 standalone bundle recheck never reopens source or grants approval',t=>{
+ const dir=local(t),p=preview();
+ const {executeOwnerBundle,parseOwnerVerifyArgs}=cli;
+ const dependencies={executePreview:()=>p,write:writeOwnerDelivery,
+  verify:verifyOwnerDelivery,render:renderer};
+ const csv=path.join(path.dirname(dir),'source.csv');
+ const map=path.join(path.dirname(dir),'draft.json');
+ const out=executeOwnerBundle(['--package',csv,map,dir],dependencies);
+ assert.equal(out.status,'OFFLINE_OWNER_REVIEW_BUNDLE_VERIFIED');
+ const verified=executeOwnerBundle(['--verify',dir],dependencies);
+ assert.equal(verified.status,'OFFLINE_OWNER_REVIEW_BUNDLE_REVERIFIED');
+ assert.equal(verified.customer_package_approved,false);
+ assert.equal(verified.owner_approval,'NOT_GRANTED');
+ assert.equal(verified.source_sha256,sha);
+ assert.equal(parseOwnerVerifyArgs(['--verify',dir]),dir);
+ for(const a of [['--verify','relative'],['--verify',dir,'extra'],
+  ['--verify',dir+'\nunsafe']])
+  assert.throws(()=>executeOwnerBundle(a,dependencies),TypeError);
+ fs.appendFileSync(path.join(dir,'receipt.json'),'tamper');
+ assert.throws(()=>executeOwnerBundle(['--verify',dir],dependencies),TypeError);
 });
