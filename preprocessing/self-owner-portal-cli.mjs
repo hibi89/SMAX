@@ -15,8 +15,10 @@ export function parsePortalArgs(argv){
 }
 export function createPortalFile(argv){
  const filename=parsePortalArgs(argv);
+ // Finish offline HTML/CSP validation before touching the destination path.
+ const html=renderOwnerPortalHtml();
  const fd=fs.openSync(filename,fs.constants.O_WRONLY|fs.constants.O_CREAT|fs.constants.O_EXCL,0o600);
- try{fs.writeFileSync(fd,renderOwnerPortalHtml(),'utf8');}
+ try{fs.writeFileSync(fd,html,'utf8');}
  finally{fs.closeSync(fd);}
  return Object.freeze({status:'OFFLINE_OWNER_PORTAL_CREATED',approval:'NOT_GRANTED',
    customer_data_read:false,outbound_transfer:false});
