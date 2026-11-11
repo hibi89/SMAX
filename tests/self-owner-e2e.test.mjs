@@ -95,3 +95,31 @@ test('P14 PREP review HOLD hides monetary data, even in packaged report',t=>{
   /100\.00|PRIVATE_CUSTOMER_42/);
  assert.equal(run(bundleCli,['--verify',output]).status,0);
 });
+
+test('P15 BOM-inclusive source bytes bind owner mapping, preview and bundle',t=>{
+ const dir=tmp(t),input=path.join(dir,'bom-source.csv'),json=path.join(dir,'draft.json');
+ const form=path.join(dir,'form.html'),out=path.join(dir,'bundle');
+ const bomSource='\uFEFF'+source;
+ const raw=Buffer.from(bomSource,'utf8');
+ fs.writeFileSync(input,raw);
+ fs.writeFileSync(json,JSON.stringify(draft(bomSource)));
+ const expectHash=sha256(raw);
+ const created=run(ownerCli,['--form',input,form]);
+ assert.equal(created.status,0,created.stderr);
+ assert.equal(JSON.parse(created.stdout).source_sha256,expectHash);
+ const preview=run(ownerCli,['--preview',input,json]);
+ assert.equal(preview.status,0,preview.stderr);
+ assert.equal(JSON.parse(preview.stdout).source_sha256,expectHash);
+ const packaged=run(bundleCli,['--package',input,json,out]);
+ assert.equal(packaged.status,0,packaged.stderr);
+ assert.equal(JSON.parse(packaged.stdout).source_sha256,expectHash);
+ assert.equal(JSON.parse(run(bundleCli,['--verify',out]).stdout).source_sha256,expectHash);
+ assert.deepEqual(fs.readFileSync(input),raw);
+ // A draft for BOM-stripped text must not authenticate an original BOM file.
+ const forged=path.join(dir,'stripped-draft.json'),rejected=path.join(dir,'reject-package');
+ fs.writeFileSync(forged,JSON.stringify(draft(source)));
+ const blocked=run(bundleCli,['--package',input,forged,rejected]);
+ assert.equal(blocked.status,1);
+ assert.equal(blocked.stdout,'');
+ assert.equal(fs.existsSync(rejected),false);
+});
