@@ -63,7 +63,7 @@ function sha256(bytes){
   for(let i=0;i<64;i++){
    const t1=(j+(rotr(e,6)^rotr(e,11)^rotr(e,25))+((e&f)^((~e)&g))+k[i]+w[i])>>>0;
    const t2=((rotr(a,2)^rotr(a,13)^rotr(a,22))+((a&b)^(a&c)^(b&c)))>>>0;
-   j=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a=(t1+t2)>>>0;
+   j=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
   }
   const r=[a,b,c,d,e,f,g,j];for(let i=0;i<8;i++)h[i]=(h[i]+r[i])>>>0;
  }
