@@ -14,10 +14,30 @@ export function parseOwnerBundleArgs(argv){
     new Set(argv.slice(1).map(s=>resolve(s).toLowerCase())).size!==3)bad();
  return {input:argv[1],draft:argv[2],output:argv[3]};
 }
+/** Revalidate an existing package without its original CSV, writes, or approval. */
+export function parseOwnerVerifyArgs(argv){
+ if(!Array.isArray(argv)||argv.length!==2||argv[0]!=='--verify'||
+    typeof argv[1]!=='string'||!isAbsolute(argv[1])||argv[1].length>1024||
+    /[\u0000-\u001f\u007f]/u.test(argv[1]))bad();
+ return argv[1];
+}
 export function executeOwnerBundle(argv,services={
  executePreview:executeOwnerPreviewCli,write:writeOwnerDelivery,verify:verifyOwnerDelivery,
  render:renderSelfBatchHtml
 }){
+ if(Array.isArray(argv)&&argv[0]==='--verify'){
+  const dir=parseOwnerVerifyArgs(argv);
+  const verified=services.verify(dir,services.render);
+  if(!verified||verified.customer_package_approved!==false||
+     typeof verified.source_sha256!=='string'||
+     !/^[a-f0-9]{64}$/u.test(verified.source_sha256))bad();
+  return Object.freeze({
+   status:'OFFLINE_OWNER_REVIEW_BUNDLE_REVERIFIED',
+   source_sha256:verified.source_sha256,
+   owner_approval:'NOT_GRANTED',source_modified:false,
+   customer_package_approved:false,outbound_transfer:false
+  });
+ }
  const a=parseOwnerBundleArgs(argv);
  const preview=services.executePreview(['--preview',a.input,a.draft]);
  if(!preview||!['READY_FOR_OWNER_REVIEW','REVIEW_HOLD'].includes(preview.status))bad();
