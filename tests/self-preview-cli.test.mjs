@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync, writeFileSync, readFileSync, readdirSync, rmSync, symlinkSync} from 'node:fs';
@@ -209,6 +210,8 @@ test('source with UTF8 BOM is processed without silent data deletion',()=>{
     writeFileSync(input,'\uFEFF'+cleanCsv);
     const result=run(input,cfg);
     assert.equal(result.status,0,result.stderr);
-    assert.equal(JSON.parse(result.stdout).source_rows,2);
+    const body=JSON.parse(result.stdout);
+    assert.equal(body.source_rows,2);
+    assert.equal(body.source_sha256,createHash('sha256').update(readFileSync(input)).digest('hex'));
   });
 });
