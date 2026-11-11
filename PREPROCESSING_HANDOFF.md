@@ -292,3 +292,9 @@ schema_version SMAX_PREPROCESS_CSV_V0, source SHA256/bytes/source_rows, human ma
 8. **데이터/권한:** 비용 0원·Private 소스·합성 파일만; 실제 고객/신원/토큰 사용 없음; main/frontend/backend 및 타 해커톤 레포, CI/배포/Public publish, force push 변경 없음. JSON에 고객 텍스트가 복제될 수 있어 로컬 접근통제 요구.
 9. **다음:** authenticated 전체 checkout에서 정확한 Git blob 집합으로 `npm run test:preprocessing`, 전체 `npm test` 실행 → 실제 MS Word DOCX 호환성 범위 확대 또는 PDF 1차 importer 우선순위 결정 → Windows 및 보안/릴리스 QA. 임의 외부 모델 호출/공개 금지.
 10. **기준 시각/검증 범위:** 2026-10-27 KST, 실제 DOCX Native 단독 10 PASS + 합성 실파일 CLI + independent JSON Schema 검증만 성공. 다른 포맷 전체 Native 검수와 상용 완료는 주장하지 않음.
+
+
+## 2026-11-11 KST — P8–P12 owner-mapping PREP/SELF sales preview feature
+- Feature-only private hibi89/SMAX@feature/prep-self-owner-mapping-p8 from preprocessing parent 3830cb276f560d58e8181ba384d9cbe64815737c. Owner selects explicit date/channel/amount in offline CSP HTML; JSON source SHA rechecked; existing Generic PREP+SELF/P5/P6 review path consumed, new SHA-verified local output directory and verification-only CLI. No approval or external transfer. Details docs/SMAX_PREP_SELF_P8_P12_70_20261111.md.
+- New exact Git SHA local source/test 17/17 PASS on Node22.16 Linux (test doubles for P9 downstream, P11 HTML renderer); actual existing GitHub PREP/SELF+P6 module V8 isolated compatibility passed with fake crypto, Native full/real nonstub CLI and Windows NOT RUN. Browser file:// administrative policy blocked, document injection/download PASS with outbound0/pageerrors0.
+- SMAX final engineering scope estimate 50→70% provisional (P8+5/P9+5/P10+5/P11+5), not READY for sale. No stable preprocessing/main/frontend/backend or customer artifacts changed, no CI spend; keep feature separate pending full source regression and ownership rights. Next validate native exact source pipeline on Windows, then compare/guarded FF only if proven safe.
