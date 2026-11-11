@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;sha256-7mNx3F0yuhGmmJgP+6SHwMgg++8x8Sf1sWYjoSUCC0U=&#39;; style-src &#39;unsafe-inline&#39;; connect-src &#39;none&#39;; img-src &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;"><title>SMAX² SELF · 로컬 CSV 시작</title><style>:root{color-scheme:light}body{font:16px system-ui,sans-serif;color:#11233c;background:#f3f6fc;margin:0}main{max-width:720px;background:white;margin:5vh auto;padding:2rem;border-radius:18px;box-shadow:0 9px 32px #132e5022}h1{margin-top:0}p{line-height:1.6}label{display:block;margin:1.1rem 0 .4rem;font-weight:600}select,input,button{font:inherit;padding:.7rem;max-width:100%;box-sizing:border-box}select{width:100%}button{background:#113a78;color:white;border:0;border-radius:8px;margin-top:1.2rem}button:disabled{opacity:.5}#status{background:#eaf0fa;padding:1rem;border-radius:8px;min-height:1.4rem}small{color:#465971}</style></head><body><main><h1>SMAX² SELF · CSV 시작</h1><p>원본 CSV를 이 브라우저에서 직접 선택하세요. <strong>파일 내용과 파일명은 외부로 전송하지 않습니다.</strong> 원본 해시와 선택한 열 이름만 매핑 JSON에 기록됩니다.</p><label for="csv">① UTF-8 CSV 선택 (2MiB 이하)</label><input type="file" id="csv" accept=".csv,text/csv"><label for="date">② 거래일 열</label><select id="date"></select><label for="channel">③ 판매채널 열</label><select id="channel"></select><label for="amount">④ 금액 열</label><select id="amount"></select><label for="period">⑤ 집계 기간</label><select id="period"><option value="monthly">월별</option><option value="daily">일별</option></select><button id="save" type="button" disabled>매핑 검토용 JSON 저장</button><p id="status" role="status">CSV 선택 후 열을 직접 지정하세요.</p><hr><label for="draft-verify">⑥ 저장된 매핑 JSON 다시 확인 (선택)</label><input type="file" id="draft-verify" accept=".json,application/json"><p id="draft-status" role="status">선택한 CSV와 저장된 매핑 JSON이 같은 원본인지 확인할 수 있습니다.</p><small>이 HTML은 열 매핑·원본 일치 여부만 검사합니다. CSV 전체 행·금액·매출 집계는 별도의 PREP/SELF 로컬 검증기를 거쳐야 하며, 어떤 결과도 자동 승인하지 않습니다.</small></main><script>(() => {
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; script-src &#39;sha256-UYuS1L/OVG9FoEuiRppx2hmnCEFs/uGViqjUNBiHc5Q=&#39;; style-src &#39;unsafe-inline&#39;; connect-src &#39;none&#39;; img-src &#39;none&#39;; object-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;"><title>SMAX² SELF · 로컬 CSV 시작</title><style>:root{color-scheme:light}body{font:16px system-ui,sans-serif;color:#11233c;background:#f3f6fc;margin:0}main{max-width:720px;background:white;margin:5vh auto;padding:2rem;border-radius:18px;box-shadow:0 9px 32px #132e5022}h1{margin-top:0}p{line-height:1.6}label{display:block;margin:1.1rem 0 .4rem;font-weight:600}select,input,button{font:inherit;padding:.7rem;max-width:100%;box-sizing:border-box}select{width:100%}button{background:#113a78;color:white;border:0;border-radius:8px;margin-top:1.2rem}button:disabled{opacity:.5}#status{background:#eaf0fa;padding:1rem;border-radius:8px;min-height:1.4rem}small{color:#465971}</style></head><body><main><h1>SMAX² SELF · CSV 시작</h1><p>원본 CSV를 이 브라우저에서 직접 선택하세요. <strong>파일 내용과 파일명은 외부로 전송하지 않습니다.</strong> 원본 해시와 선택한 열 이름만 매핑 JSON에 기록됩니다.</p><label for="csv">① UTF-8 CSV 선택 (2MiB 이하)</label><input type="file" id="csv" accept=".csv,text/csv"><label for="date">② 거래일 열</label><select id="date"></select><label for="channel">③ 판매채널 열</label><select id="channel"></select><label for="amount">④ 금액 열</label><select id="amount"></select><label for="period">⑤ 집계 기간</label><select id="period"><option value="monthly">월별</option><option value="daily">일별</option></select><button id="save" type="button" disabled>매핑 검토용 JSON 저장</button><p id="status" role="status">CSV 선택 후 열을 직접 지정하세요.</p><hr><label for="draft-verify">⑥ 저장된 매핑 JSON 다시 확인 (선택)</label><input type="file" id="draft-verify" accept=".json,application/json"><p id="draft-status" role="status">선택한 CSV와 저장된 매핑 JSON이 같은 원본인지 확인할 수 있습니다.</p><small>이 HTML은 열 매핑·원본 일치 여부만 검사합니다. CSV 전체 행·금액·매출 집계는 별도의 PREP/SELF 로컬 검증기를 거쳐야 하며, 어떤 결과도 자동 승인하지 않습니다.</small></main><script>(() => {
 'use strict';
 const byId=id=>document.getElementById(id);
 const status=byId('status');
@@ -82,7 +82,7 @@ async function inspect(){
   const headers=readHeader(text);
   const sha=sha256(bytes);
   if(chooser.files[0]!==file)throw Error('검사 중 파일 선택이 달라졌습니다.');
-  current={headers,sha};
+  current={headers,sha,file};
   for(const id of fields){
    const s=byId(id);s.replaceChildren();
    const choose=document.createElement('option');choose.value='';choose.textContent='직접 선택';s.appendChild(choose);
@@ -101,6 +101,11 @@ async function verifyDraft(){
  try{
   const bytes=new Uint8Array(await f.arrayBuffer());
   if(bytes.byteLength!==f.size||current!==expected||draftChooser.files[0]!==f)throw Error();
+  const source=chooser.files&&chooser.files[0];
+  if(!source||expected.file!==source)throw Error();
+  const sourceBytes=new Uint8Array(await source.arrayBuffer());
+  if(sourceBytes.length!==source.size||sha256(sourceBytes)!==expected.sha||
+     current!==expected||chooser.files[0]!==source||draftChooser.files[0]!==f)throw Error();
   const obj=JSON.parse(new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes));
   if(!sameKeys(obj,['version','source_sha256','mapping','period'])||
      obj.version!=='SMAX_SELF_OWNER_MAPPING_DRAFT_V1'||obj.source_sha256!==expected.sha||
@@ -112,14 +117,25 @@ async function verifyDraft(){
  }catch{draftStatus.textContent='검토 보류: JSON이 현재 CSV와 일치하지 않거나 승인/추가 필드가 포함되어 있습니다.';}
 }
 draftChooser.addEventListener('change',verifyDraft);
-save.addEventListener('click',()=>{
- if(!current){fail('먼저 CSV를 선택하세요.');return;}
+save.addEventListener('click',async()=>{
+ const expected=current;
+ if(!expected){fail('먼저 CSV를 선택하세요.');return;}
+ const source=chooser.files&&chooser.files[0];
+ if(!source||source!==expected.file){fail('원본 CSV를 다시 선택하세요.');return;}
  const mapping=Object.fromEntries(fields.map(k=>[k,byId(k).value]));
  const selected=Object.values(mapping);
  if(selected.some(x=>!x||!current.headers.includes(x))||new Set(selected).size!==3){status.textContent='서로 다른 날짜·판매처·금액 열을 선택하세요.';return;}
  const period=byId('period').value;
  if(!['daily','monthly'].includes(period)){status.textContent='집계 기간을 확인하세요.';return;}
- const draft={version:'SMAX_SELF_OWNER_MAPPING_DRAFT_V1',source_sha256:current.sha,mapping,period};
+ save.disabled=true;
+ try{
+  const sourceBytes=new Uint8Array(await source.arrayBuffer());
+  if(sourceBytes.length!==source.size||sha256(sourceBytes)!==expected.sha||
+     current!==expected||chooser.files[0]!==source||
+     fields.some(k=>byId(k).value!==mapping[k])||byId('period').value!==period)throw Error();
+ }catch{fail('원본 CSV가 검사 후 달라졌거나 읽을 수 없습니다. 다시 선택하세요.');return;}
+ save.disabled=false;
+ const draft={version:'SMAX_SELF_OWNER_MAPPING_DRAFT_V1',source_sha256:expected.sha,mapping,period};
  const bytes=new Blob([JSON.stringify(draft,null,2)+'\n'],{type:'application/json'});
  const url=URL.createObjectURL(bytes);
  const a=document.createElement('a');a.href=url;a.download='smax-owner-mapping.json';document.body.appendChild(a);a.click();a.remove();
